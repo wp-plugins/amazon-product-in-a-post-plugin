@@ -1,7 +1,7 @@
 === Plugin Name ===
 Contributors: Don Fischer
 Donate link: http://fischercreativemedia.com/donate/
-Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com
+Tags: amazon, affiliate, product, post, page, auick, associate, monetize, ASIN, amazon.com, money, posts, pages, plugin, API
 Requires at least: 2.5
 Tested up to: 2.8.4
 Stable tag: 1.4
