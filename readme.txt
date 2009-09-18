@@ -1,10 +1,10 @@
 === Plugin Name ===
 Contributors: Don Fischer
 Donate link: http://fischercreativemedia.com/donate/
-Tags: amazon, affiliate, product, post, page, auick, associate, monetize, ASIN, amazon.com, money, posts, pages, plugin, API
+Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com
 Requires at least: 2.5
 Tested up to: 2.8.4
-Stable tag: 1.4
+Stable tag: 1.5
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
@@ -13,18 +13,18 @@ Amazon Product In a Post Plugin is used to to quickly add a formatted Amazon Pro
 What can you use it for? With this plugin you can:
 
 * Add any Amazon product or item to an existing Post (or Page).
-* Monetize your blog posts with custom Amazon Product and add your own Reviews, descriptions or any other thing you would normally want to add to a post - and still have the Amazon product there.
+* Monetize your blog posts with custom Amazon Product and add your own Reviews, descriptions or any other thing you would normally want to add to a post – and still have the Amazon product there.
 * Easily add only the items that are right for your site.
 * Add the product to the TOP of the post content, the BOTTOM of the post content, or make the post content become part of the product layout (see screenshots for examples)
 
-If you have an Amazon Affiliate account and you don't think the available Amazon widgets are that great or are what you need, then this plugin might be for you.
+If you have an Amazon Affiliate account and you don’t think the available Amazon widgets are that great or are what you need, then this plugin might be for you.
 
 **How it Works:**
 The plugin uses the newly revised (and re-named) Amazon Product Advertising API. Older plugins that use Old API calls will no longer work as of 8/2009 because Amazon implemented a new security call procedure that makes many of them obsolete.
 
-To use the plugin, you must have an Amazon Affiliate Account. You can sign up [here](http://amazon.com "amazon") if you do not have one - it is free and pretty easy to do. Once you have an account, install the plugin, then enter your Amazon Associate ID in the plugin options page. You are now ready to start adding products to your post!
+To use the plugin, you must have an Amazon Affiliate Account. You can sign up here if you do not have one – it is free and pretty easy to do. Once you have an account, install the plugin, then enter your Amazon Associate ID in the plugin options page. You are now ready to start adding products to your post!
 
-*PLEASE NOTE:* If you DO NOT add your own custom Associate ID, you WILL NOT get credit for any purchases made from your product posts - so don't set up products on a live site unless you enter that first - or you may lose out on some referral $$. You have been warned!
+*PLEASE NOTE:* If you DO NOT add your own custom Associate ID, you WILL NOT get credit for any purchases made from your product posts – so don’t set up products on a live site unless you enter that first – or you may lose out on some referral $$. You have been warned!
 
 
 == Installation ==
@@ -63,7 +63,10 @@ A more detailed FAQ will come as questions arise.
 5. Plugin Menu.
 
 == Changelog ==
-
+= 1.5 = 
+* Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
+= 1.4 =
+* Added menthod to restore default CSS if needed - by deleting all CSS in options panel and saving - default css will re-appear in box. (9/16/2009)
 = 1.3 =	
 * Added new feature to be able to adjust or add your own styles. (9/16/2009)
 = 1.2 =
