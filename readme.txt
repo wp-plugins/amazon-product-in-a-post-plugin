@@ -4,7 +4,7 @@ Donate link: http://fischercreativemedia.com/donate/
 Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com
 Requires at least: 2.5
 Tested up to: 2.8.4
-Stable tag: 1.4
+Stable tag: 1.5
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
@@ -63,7 +63,10 @@ A more detailed FAQ will come as questions arise.
 5. Plugin Menu.
 
 == Changelog ==
-
+= 1.5 = 
+* Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
+= 1.4 =
+* Added menthod to restore default CSS if needed - by deleting all CSS in options panel and saving - default css will re-appear in box. (9/16/2009)
 = 1.3 =	
 * Added new feature to be able to adjust or add your own styles. (9/16/2009)
 = 1.2 =
