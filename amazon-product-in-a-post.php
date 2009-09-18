@@ -5,9 +5,11 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or all sales credit will go to the plugin creator by default.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 1.4
+Version: 1.5
 
 Version info:
+1.5 - Remove the hook for the_excerpt function - themes that use that may have a problem ( Thanks Michael Aulia at http://www.michaelaulia.com/blogs/ for pointing that out). (9/17/2009)
+1.4 - Correct Default CSS Style so it can be resotored if desired.(9/16/2009)
 1.3	- Added new feature to be able to adjust or add your own styles. (9/16/2009)
 1.2	- Fix to image call procedure to help with "no image available" issue. (9/15/2009)
 1.1	- Minor Fixes/Spelling Error corrections & code cleanup to prep for WordPress hosting of Plugin. (9/14/2009)
@@ -91,7 +93,7 @@ Version info:
 
 // Filters & Hooks
 	add_filter('the_content', 'aws_prodinpost_filter', 10);
-	add_filter('the_excerpt', 'aws_prodinpost_filter', 10);
+	//add_filter('the_excerpt', 'aws_prodinpost_filter', 10);
 	add_action('wp_head','aws_prodinpost_addhead',10);
 	//add_action('wp','aws_prodinpost_cartsetup', 1, 2); //Future Item
 	add_action('admin_head','aws_prodinpost_addadminhead',10);

@@ -4,7 +4,7 @@ Donate link: http://fischercreativemedia.com/donate/
 Tags: amazon, affiliate, product, post, page, auick, associate, monetize, ASIN, amazon.com, money, posts, pages, plugin, API
 Requires at least: 2.5
 Tested up to: 2.8.4
-Stable tag: 1.4
+Stable tag: 1.5
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
@@ -63,7 +63,10 @@ A more detailed FAQ will come as questions arise.
 5. Plugin Menu.
 
 == Changelog ==
-
+= 1.5 =
+* Remove the hook for the_excerpt function - themes that use that may have a problem ( Thanks Michael Aulia at http://www.michaelaulia.com/blogs/ for pointing that out). (9/17/2009)
+= 1.4 =
+* Correct Default CSS Style so it can be resotored if desired by removing all styles from the options panel (default CSS will re-populate the field after save is made).(9/16/2009)
 = 1.3 =	
 * Added new feature to be able to adjust or add your own styles. (9/16/2009)
 = 1.2 =
