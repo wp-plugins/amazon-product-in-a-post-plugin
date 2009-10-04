@@ -1,10 +1,10 @@
 === Plugin Name ===
 Contributors: Don Fischer
 Donate link: http://fischercreativemedia.com/donate/
-Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com
+Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode
 Requires at least: 2.5
 Tested up to: 2.8.4
-Stable tag: 1.5
+Stable tag: 1.6
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
@@ -13,18 +13,19 @@ Amazon Product In a Post Plugin is used to to quickly add a formatted Amazon Pro
 What can you use it for? With this plugin you can:
 
 * Add any Amazon product or item to an existing Post (or Page).
-* Monetize your blog posts with custom Amazon Product and add your own Reviews, descriptions or any other thing you would normally want to add to a post – and still have the Amazon product there.
+* Monetize your blog posts with custom Amazon Product and add your own Reviews, descriptions or any other thing you would normally want to add to a post - and still have the Amazon product there.
 * Easily add only the items that are right for your site.
 * Add the product to the TOP of the post content, the BOTTOM of the post content, or make the post content become part of the product layout (see screenshots for examples)
+* *UPDATE 10/4* - You can now add as many products as you want to any existing page/post content using a Shortcode - see Installation or FAQ page for details.
 
-If you have an Amazon Affiliate account and you don’t think the available Amazon widgets are that great or are what you need, then this plugin might be for you.
+If you have an Amazon Affiliate account and you don't think the available Amazon widgets are that great or are what you need, then this plugin might be for you.
 
 **How it Works:**
 The plugin uses the newly revised (and re-named) Amazon Product Advertising API. Older plugins that use Old API calls will no longer work as of 8/2009 because Amazon implemented a new security call procedure that makes many of them obsolete.
 
-To use the plugin, you must have an Amazon Affiliate Account. You can sign up here if you do not have one – it is free and pretty easy to do. Once you have an account, install the plugin, then enter your Amazon Associate ID in the plugin options page. You are now ready to start adding products to your post!
+To use the plugin, you must have an Amazon Affiliate Account. You can sign up here if you do not have one - it is free and pretty easy to do. Once you have an account, install the plugin, then enter your Amazon Associate ID in the plugin options page. You are now ready to start adding products to your post!
 
-*PLEASE NOTE:* If you DO NOT add your own custom Associate ID, you WILL NOT get credit for any purchases made from your product posts – so don’t set up products on a live site unless you enter that first – or you may lose out on some referral $$. You have been warned!
+*PLEASE NOTE:* If you DO NOT add your own custom Associate ID, you WILL NOT get credit for any purchases made from your product posts - so don't set up products on a live site unless you enter that first - or you may lose out on some referral $$. You have been warned!
 
 
 == Installation ==
@@ -45,14 +46,28 @@ To Add a product to an existing post:
 *  Then enter the ASIN in the ASIN field.
 *  Save or Publish the post.
 
-To Add a New Product Post, you have 2 options:
+To Add a New Product Post, you have 3 options:
 * You can add a new post the regular way (Post / Add New / fill out the items /Publish), and them add the product as outlined above
-* Or you can use the Quick Add Product Feature (called Amazon PIP in the Amazon PIP menu). This is the fastest method for adding a quick product with minimum text. This Method will create a New Post in the selected categories.
+* You can use the Quick Add Product Feature (called Amazon PIP in the Amazon PIP menu). This is the fastest method for adding a quick product with minimum text. This Method will create a New Post in the selected categories.
+* You can add a Product via Shortcode to an existing Page/Post.
+
+To Add a product Via Shortcode:
+* In the Content editor, add **[AMAZONPRODUCT=XXXXXXXXXX]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number.
+* Update the Page/Post. You can add as many products this way as you like. Just keep in mind that there is a call made to the Amazon API for each product added, so addin too many products could cause a noticable increase in page loading time.
 
 
 == Frequently Asked Questions ==
 See the Installation Page for deatils on setting up the Products. 
 A more detailed FAQ will come as questions arise.
+
+= How do I add a product =
+* To Add a New Product Post, you have 3 options:
+* You can add a new post the regular way (Post / Add New / fill out the items /Publish), and them add the product as outlined above
+* You can use the Quick Add Product Feature (called Amazon PIP in the Amazon PIP menu). This is the fastest method for adding a quick product with minimum text. This Method will create a New Post in the selected categories.
+* You can add a Product via Shortcode to an existing Page/Post.
+
+= How do I use the Shortcode? =
+* To Add a product Via Shortcode, go to the Content editor for an existing page/post (or create a new post/page), add **[AMAZONPRODUCT=XXXXXXXXXX]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number. Then update or save the Page/Post. You can add as many products this way as you like. Just keep in mind that there is a call made to the Amazon API for each product added, so addin too many products could cause a noticable increase in page loading time.
 
 == Screenshots ==
 
@@ -61,8 +76,19 @@ A more detailed FAQ will come as questions arise.
 3. Amazon Quick Product Post option for quickly adding the basic information needed for a product. This options automatically creates the corresponding Post for the product.
 4. Plugin Options Panel.
 5. Plugin Menu.
+6. Shortcode Addition to allow unlimited products in post content.
 
 == Changelog ==
+= 1.6 =
+* Added Options to let admin choose if they want to "Hook" into the_excerpt and the_content hooks in Main Options with override on each post/page.(10/3/2009)
+* Added Open in a New Window Option (for Amazon button) in Main Options with override on each page/post.(10/3/2009)
+* Added "Show Only on Single Page" option to individual post/page options.(10/4/2009)
+* Added Shortcode functionality to allow addition of unlimited products in the post/page content.(10/4/2009)
+* Added "Quick Fix - Hide Warnings" option in Main Options. Adds ini_set("display_errors", 0) to code to help some admins hide any Warnings if their PHP settings are set to show them.(10/3/2009)
+* Fixed Array Merge Warning when item is not an array.(10/3/2009)
+* Fixed "This Items not available in your locale" message as to when it acatually displays and spelling.(10/3/2009)
+* Added Options to let admin add their own Error Messages for Item Not available and Amazon Hidden Price notificaton.(10/3/2009)
+* Updated Default CSS styles to include in Stock and Out of Stock classes and made adjustments to other improper styles. (10/3/2009)
 = 1.5 = 
 * Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
 = 1.4 =

@@ -27,6 +27,36 @@
 				    			"4" => array("value" => "fr","text" => "France"),
 				    			"5" => array("value" => "jp","text" => "Japan")
 				    		 )),
+					array(	"name" => "Not Available Error Message",
+							"desc" => "The message to display if the item is not available for some reason, i.e., your locale or no longer available.<br /><br />",
+				    		"id" => $shortname_apipp."_amazon_notavailable_message",
+				    		"type" => "text"),
+				    		
+					array(	"name" => "Amazon Hidden Price Message",
+							"desc" => "For Some products, Amazon will hide the List price of a product. When hidden, this plugin cannot show a price for the product. This message will display in the List Price area when that occurs.<br /><br />",
+				    		"id" => $shortname_apipp."_amazon_hiddenprice_message",
+				    		"type" => "text"),
+				    		
+					array(	"name" => "Hook plugin into Excerpt?",
+							"desc" => "If you want to have the product displayed when the <code>the_excerpt()</code> function is called, select this box. Disable this function if your theme uses short excerpts on pages, such as the home page. You can override this on each individual page/post.<br /><br />",
+				    		"id" => $shortname_apipp."_hook_excerpt",
+				    		"type" => "checkbox"),
+					
+					array(	"name" => "Hook plugin into Content?",
+							"desc" => "If you want to have the product displayed when the <code>the_content()</code> function is called, select this box. NOTE: This is the standard call - if you disable both Excerpt and Content, the only way you can add products to a page/post is to add the shortcode (<code>[AMAZONPRODUCT=XXXXXX]</code> where XXXXXX is the ASIN or ISBN 10). You can override this on each individual page/post.<br /><br />",
+				    		"id" => $shortname_apipp."_hook_content",
+				    		"type" => "checkbox"),
+					
+					array(	"name" => "Quick Fix - Hide Warnings?",
+							"desc" => "IMPORTANT MESSAGE: if you check this box, the plugin will excecute the code, <code>ini_set(\"display_errors\", 0); </code> to force stop WARNING messages. This can be helpful if your server php configuration has error reporting on and you are getting warning messages. This WILL override any setting you have in your php.ini or php config files. It is not recommended you turn this on unless you need it.<br /><br />",
+				    		"id" => $shortname_apipp."_hide_warnings_quickfix",
+				    		"type" => "checkbox"),
+				
+					array(	"name" => "Open Product Link in New Window?",
+							"desc" => "If you want to have the product displayed in a new window, check this box. Default is no.<br /><br />",
+				    		"id" => $shortname_apipp."_open_new_window",
+				    		"type" => "checkbox"),
+
 					array(	"name" => "Use My Custom Styles?",
 							"desc" => "If you want to use your own styles, check this box and enter them below.<br /><br />",
 				    		"id" => $shortname_apipp."_product_styles_mine",
@@ -49,6 +79,7 @@
 	}
 	
 	function apipp_options_add_admin_page($themename,$shortname,$options) {
+	$up_opt='';
 	    if ( basename(__FILE__) == 'amazon-product-in-a-post-options.php' ) {
 	    
 	        if ( 'save' == $_REQUEST['action'] && $_REQUEST[$shortname.'_option']== $shortname ) {
@@ -275,7 +306,7 @@
 	function apipp_option_wrapper_header($values){
 		?>
 		<tr valign="top"> 
-		    <th scope="row" style="text-align:left;"><?php echo $values['name']; ?>:</th>
+		    <th scope="row" style="text-align:left;width:240px;"><?php echo $values['name']; ?>:</th>
 		    <td>
 		<?php
 	}
@@ -285,11 +316,11 @@
 		    </td>
 		</tr>
 		<tr valign="top">
-			<td>&nbsp;</td><td><small><?php echo $values['desc']; ?></small></td>
+			<td>&nbsp;</td><td valign="top"><small><?php echo $values['desc']; ?></small></td>
 		</tr>
 		<?php 
 	}
-$thedefaultapippstyle='
+$thedefaultapippstyle=' /*version 1.5*/
 	table.amazon-product-table {
 		border-collapse : collapse;
 		border : 0 none !important ;
@@ -353,7 +384,7 @@ $thedefaultapippstyle='
 	table.amazon-product-price {
 		border-collapse : collapse;
 		border : 0 none;
-		width : auto;
+		/*width : auto;*/
 		padding : 0 !important ;
 	}
 	table.amazon-product-price a img.amazon-image {
@@ -368,10 +399,10 @@ $thedefaultapippstyle='
 		font-size : 10px;
 		color : #666;
 		text-align : left;
-		width : 125px;
+		width : 10%;
 	}
 	td.amazon-list-price {
-		width : 75%;
+		width : 90%;
 		text-decoration : line-through;
 		text-align : left;
 	}
@@ -379,7 +410,7 @@ $thedefaultapippstyle='
 		font-size : 10px;
 		color : #666;
 		text-align : left;
-		width : 125px;
+		width : 10%;
 	}
 	td.amazon-price {
 		font-size : 14px;
@@ -391,7 +422,7 @@ $thedefaultapippstyle='
 		font-size : 10px;
 		color : #666;
 		text-align : left;
-		width : 125px;
+		width : 10%;
 	}
 	td.amazon-new {
 		font-size : 14px;
@@ -403,7 +434,7 @@ $thedefaultapippstyle='
 		font-size : 10px;
 		color : #666;
 		text-align : left;
-		width : 125px;
+		width : 10%;
 	}
 	td.amazon-used {
 		color : #666;
@@ -422,6 +453,14 @@ $thedefaultapippstyle='
 		font-size : 10px;
 		color : #666;
 		text-align : left;
+	}
+	span.instock {
+		font-size:8pt;
+		color:#008000;
+	}
+	span.outofstock {
+		font-size:8pt;
+		color:#800000;
 	}
 	';
 

@@ -1,5 +1,5 @@
 <?php
-DEFINE(DEBUG, FALSE);
+define('DEBUG', false);
 //hash_hmac code from comment by Ulrich in http://mierendo.com/software/aws_signed_query/
 //sha256.inc.php from http://www.nanolink.ca/pub/sha256/ 
 
@@ -120,7 +120,11 @@ function GetChildren ($vals, &$i, $type)
 						unset ($children [$vals [$i]['tag']][$index]);
 						$children [$vals [$i]['tag']][$index] = $attributes;
 					}
-					$children [$vals [$i]['tag']][$index] = array_merge ($children [$vals [$i]['tag']][$index], $attributes);
+					if(!is_array($children [$vals [$i]['tag']][$index])){
+						$children [$vals [$i]['tag']][$index] = $attributes;
+					}else{
+						$children [$vals [$i]['tag']][$index] = array_merge ($children [$vals [$i]['tag']][$index], $attributes);
+					}
 				} else {
 					$value = $children [$vals [$i]['tag']];
 					unset ($children [$vals [$i]['tag']]);
@@ -136,16 +140,21 @@ function GetChildren ($vals, &$i, $type)
 }
 
 
-function FormatASINResult($Result)
+function FormatASINResult($Result) //main function for single product
   {
-    $Item = $Result['ItemLookupResponse']['Items']['Item'];
-    $ItemAttr = $Item['ItemAttributes'];
-  	$ImageSM = $Item['SmallImage']['URL'];
-  	$ImageMD = $Item['MediumImage']['URL'];
-  	$ImageLG = $Item['LargeImage']['URL'];
-  	$lowestNewPrice = $Item["OfferSummary"]["LowestNewPrice"]["FormattedPrice"];
-  	$lowestUsedPrice = $Item["OfferSummary"]["LowestUsedPrice"]["FormattedPrice"];
-    
+    $Item 					= $Result['ItemLookupResponse']['Items']['Item'];
+    $ItemAttr 				= $Item['ItemAttributes'];
+  	$ImageSM 				= $Item['SmallImage']['URL'];
+  	$ImageMD 				= $Item['MediumImage']['URL'];
+  	$ImageLG 				= $Item['LargeImage']['URL'];
+  	$lowestNewPrice 		= $Item["OfferSummary"]["LowestNewPrice"]["FormattedPrice"];
+  	$lowestUsedPrice 		= $Item["OfferSummary"]["LowestUsedPrice"]["FormattedPrice"];
+    $TotalNew 				= $Item["OfferSummary"]["TotalNew"];
+    $TotalUsed 				= $Item["OfferSummary"]["TotalUsed"];
+    $TotalCollectible 		= $Item["OfferSummary"]["TotalCollectible"];
+    $TotalRefurbished 		= $Item["OfferSummary"]["TotalRefurbished"];
+
+  	if($lowestNewPrice=='Too low to display'){$isPriceHidden=1;}else{$isPriceHidden=0;}
     if(!isset($Item['Offers']['Offer']['OfferListing']['Price'])){$SalePrice = $Item['Offers']['Offer']['OfferListing']['Price'];}else{$SalePrice = $Item['OfferSummary']['LowestNewPrice']['Amount'];}
     if(is_array($ItemAttr["Binding"])){$Binding = implode(", ", $ItemAttr["Binding"]);}else{$Binding = $ItemAttr["Binding"];}
     if(is_array($ItemAttr["Author"])){$Author = implode(", ", $ItemAttr["Author"]);}else{$Author = $ItemAttr["Author"];}
@@ -156,8 +165,12 @@ function FormatASINResult($Result)
     if(is_array($ItemAttr["AudienceRating"])){$Rating = implode(", ", $ItemAttr["AudienceRating"]);}else{$Rating = $ItemAttr["AudienceRating"];}
     if(is_array($ItemAttr["RunningTime"])){$RunTime = $ItemAttr["RunningTime"]["value"].' '.$ItemAttr["RunningTime"]["Units"];}else{$RunTime = '';}
    
-    $OfferListingId = $Item['Offers']['Offer']['OfferListing']['OfferListingId'];
-	$ListPrice 		= $ItemAttr["ListPrice"]["FormattedPrice"] . ' ' . $ItemAttr["ListPrice"]["CurrencyCode"];
+    $OfferListingId 		= $Item['Offers']['Offer']['OfferListing']['OfferListingId'];
+	if(isset($ItemAttr["ListPrice"]["FormattedPrice"])){
+		$ListPrice 		= $ItemAttr["ListPrice"]["FormattedPrice"] . ' ' . $ItemAttr["ListPrice"]["CurrencyCode"];
+	}else{
+		$ListPrice 		= '0';
+	}
 	$ReleaseDate 	= $ItemAttr["ReleaseDate"];
 
 	if(isset($ItemAttr["ListPrice"]["Amount"]) && isset($SalePrice['Amount'])){
@@ -196,6 +209,9 @@ function FormatASINResult($Result)
 				    'RunTime' => $RunTime,
 				    'LowestNewPrice' => $lowestNewPrice,
 				    'LowestUsedPrice' => $lowestUsedPrice,
+				    'PriceHidden' => $isPriceHidden,
+				    'TotalNew' => $TotalNew,
+				    'TotalUsed' => $TotalUsed,
                     'Errors' => $Result['ItemLookupResponse']['Items']['Request']['Errors']
                    );
     return $RetVal;  
