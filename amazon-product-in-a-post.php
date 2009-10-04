@@ -5,9 +5,12 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or all sales credit will go to the plugin creator by default.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 1.4
+Version: 1.6
 
 Version info:
+1.6 - 
+1.5 - Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
+1.4 - Added menthod to restore default CSS if needed - by deleting all CSS in options panel and saving - default css will re-appear in box. (9/16/2009) 
 1.3	- Added new feature to be able to adjust or add your own styles. (9/16/2009)
 1.2	- Fix to image call procedure to help with "no image available" issue. (9/15/2009)
 1.1	- Minor Fixes/Spelling Error corrections & code cleanup to prep for WordPress hosting of Plugin. (9/14/2009)
@@ -28,11 +31,29 @@ Version info:
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+// Warnings Quickfix
+	if(get_option('apipp_hide_warnings_quickfix')==true){
+		 ini_set("display_errors", 0); //turns off error display
+	}
+
 // Includes
 	require_once("sha256.inc.php"); //required for php4
 	require_once("aws_signed_request.php"); //major workhorse for plugin
 	require_once("amazon-product-in-a-post-tools.php"); //edit box for plugin
 	require_once("amazon-product-in-a-post-options.php"); //admin options for plugin
+
+//upgrade check. Lets me add/change the default style etc to fix/add new items during updrages.
+	$thisstyleversion=get_option('apipp_product_styles_default_version');
+	if($thisstyleversion!="1.6"){
+		update_option("apipp_product_styles_default",$thedefaultapippstyle);
+		update_option("apipp_product_styles_default_version","1.6");
+		update_option("apipp_amazon_notavailable_message","This item is may not be available in your area. Please click the image or title of product to check pricing & availability."); //default message
+		update_option("apipp_amazon_hiddenprice_message","Price Not Listed"); //default message - done
+		update_option("apipp_hook_content","1"); //default is yes - done
+		update_option("apipp_hook_excerpt","0"); //default is no - done
+		update_option('apipp_open_new_window',"0"); //newoption added at 1.6 - done
+	}
 
 // Variables
 	global $public_key;
@@ -42,18 +63,45 @@ Version info:
 	global $aws_plugin_version;
 	global $aws_partner_locale;
 	global $thedefaultapippstyle;
+	global $amazonhiddenmsg;
+	global $amazonerrormsg;
+	global $apipphookexcerpt;
+	global $apipphookcontent;
+	global $apippopennewwindow;
+	global $apippnewwindowhtml;
 	
 	session_start();	
     if(!isset($_SESSION['Amazon-PIPP-Cart-HMAC'])) $_SESSION['Amazon-PIPP-Cart-HMAC'] = '';
     if(!isset($_SESSION['Amazon-PIPP-Cart-Encoded-HMAC'])) $_SESSION['Amazon-PIPP-Cart-Encoded-HMAC']='';
     if(!isset($_SESSION['Amazon-PIPP-Cart-ID'])) $_SESSION['Amazon-PIPP-Cart-ID']='';
-    //echo session_id();
-	$public_key 	= get_option('awsplugin_amazon_publickey'); //Developer Public AWS Key
-	$private_key 	= get_option('awsplugin_amazon_secretkey'); //Developer Secret AWS Key
-	$aws_partner_id	= get_option('apipp_amazon_associateid'); //Amazon Partner ID 
+    
+	$public_key 		= get_option('awsplugin_amazon_publickey'); //Developer Public AWS Key
+	$private_key 		= get_option('awsplugin_amazon_secretkey'); //Developer Secret AWS Key
+	$aws_partner_id		= get_option('apipp_amazon_associateid'); //Amazon Partner ID 
 	$aws_partner_locale	= get_option('apipp_amazon_locale'); //Amazon Locale
-	$awsPageRequest = 1;
+	$awsPageRequest 	= 1;
 	$aws_plugin_version = "1.0";
+	$amazonhiddenmsg 	= get_option('apipp_amazon_hiddenprice_message'); //Amazon Hidden Price Message
+	$amazonerrormsg 	= get_option('apipp_amazon_notavailable_message'); //Amazon Error No Product Message
+	$apipphookexcerpt 	= get_option('apipp_hook_excerpt'); //Hook the excerpt?
+	$apipphookcontent 	= get_option('apipp_hook_content'); //Hook the content?
+	$apippopennewwindow = get_option('apipp_open_new_window'); //open in new window?
+	$aws_eatra_pages 	= '"ItemPage"=>"'.$awspagequery.'",';
+	$thereapippstyles 	= get_option("apipp_product_styles_default"); 
+	$apippnewwindowhtml	='';
+
+
+	if($apippopennewwindow==true){
+		$apippnewwindowhtml=' target="amazonwin" ';
+	}
+	
+	if($amazonerrormsg==''){
+		$amazonerrormsg='Product Unavailable.';
+	}
+	
+	if($amazonhiddenmsg==''){
+		$amazonhiddenmsg='Visit Amazon for Price.';
+	}
 
 	if($aws_partner_locale==''){
 		update_option('apipp_amazon_locale','com'); //set default to US
@@ -72,34 +120,31 @@ Version info:
 		$private_key = "oKUKoxCKgsmN1pmNbBYYi6DT9vMJfNMdt3Q1VUfJ"; //Developer Secret AWS Key
 	}
 	
-	if(isset($_GET['awspage'])){
+	if(isset($_GET['awspage'])){ //future item for search results
 		if(is_numeric($_GET['awspage'])){
 			$awspagequery = (int)$wpdb->escape($_GET['awspage']);
 		}
 	}
 
-	if($awspagequery>1){
+	if($awspagequery>1){ //future item for search results
 		$awsPageRequest = $awspagequery;
 	}
-	$aws_eatra_pages = '"ItemPage"=>"'.$awspagequery.'",';
 	
-	$thereapippstyles = get_option("apipp_product_styles_default"); 
-	if(trim(get_option("apipp_product_styles")) == ''){
+	if(trim(get_option("apipp_product_styles")) == ''){ //reset to default styles if user deletes styles in admin
 		update_option("apipp_product_styles",$thedefaultapippstyle);
 	}
 
-
 // Filters & Hooks
-	add_filter('the_content', 'aws_prodinpost_filter', 10);
-	add_filter('the_excerpt', 'aws_prodinpost_filter', 10);
-	add_action('wp_head','aws_prodinpost_addhead',10);
+	add_filter('the_content', 'aws_prodinpost_filter_content', 10); //hook content - we will filter the override after
+	add_filter('the_excerpt', 'aws_prodinpost_filter_excerpt', 10); //hook excerpt - we will filter the override after 
+	add_action('wp_head','aws_prodinpost_addhead',10); //add styles to hesd
+	add_action('admin_head','aws_prodinpost_addadminhead',10); //add admin styles to admin head
 	//add_action('wp','aws_prodinpost_cartsetup', 1, 2); //Future Item
-	add_action('admin_head','aws_prodinpost_addadminhead',10);
 
 // Functions
 	//Single Product API Call - Returns One Product Data
 	function getSingleAmazonProduct($asin='',$extratext=''){
-		global $public_key, $private_key, $aws_partner_id,$aws_partner_locale;
+		global $public_key, $private_key, $aws_partner_id,$aws_partner_locale,$amazonhiddenmsg,$amazonerrormsg,$apippopennewwindow,$apippnewwindowhtml;
 		if ($asin!=''){
 			$ASIN = $asin; //valid ASIN
 			$errors='';
@@ -148,40 +193,59 @@ Version info:
 				$returnval .= '							<td class="amazon-post-text" colspan="2">'.$extratext.'</td>'."\n";
 				$returnval .= '						</tr>'."\n";
 				}
-				if(isset($result["ListPrice"]) && $result["ListPrice"]!=' '){
+				If($result["PriceHidden"]==1 ){
+					$returnval .= '						<tr>'."\n";
+					$returnval .= '							<td class="amazon-list-price-label">List Price:</td>'."\n";
+					$returnval .= '							<td class="amazon-list-price-label">'.$amazonhiddenmsg.'</td>'."\n";
+					$returnval .= '						</tr>'."\n"; 
+				}elseif($result["ListPrice"]!='0'){
 					$returnval .= '						<tr>'."\n";
 					$returnval .= '							<td class="amazon-list-price-label">List Price:</td>'."\n";
 					$returnval .= '							<td class="amazon-list-price">'. $result["ListPrice"] .'</td>'."\n";
 					$returnval .= '						</tr>'."\n";
-					if(isset($result["LowestNewPrice"])){
-						$returnval .= '						<tr>'."\n";
-						$returnval .= '							<td class="amazon-new-label">New From:</td>'."\n";
-						$returnval .= '							<td class="amazon-new">'. $result["LowestNewPrice"] .'</td>'."\n";
-						$returnval .= '						</tr>'."\n";
-					}
-					if(isset($result["LowestUsedPrice"])){
-						$returnval .= '						<tr>'."\n";
-						$returnval .= '							<td class="amazon-used-label">Used From:</td>'."\n";
-						$returnval .= '							<td class="amazon-used">'. $result["LowestUsedPrice"] .'</td>'."\n";
-						$returnval .= '						</tr>'."\n";
+				}
+				if(isset($result["LowestNewPrice"])){
+					if($result["LowestNewPrice"]=='Too low to display'){
+						$newPrice = 'Check Amazon For Pricing';
+					}else{
+						$newPrice = $result["LowestNewPrice"];
 					}
 					$returnval .= '						<tr>'."\n";
-					$returnval .= '							<td valign="top" width="100%" colspan="2">'."\n";
-					$returnval .= '								<div class="amazon-dates">'."\n";
-					if(isset($result["ReleaseDate"])){
-						if(strtotime($result["ReleaseDate"]) > strtotime(date("Y-m-d",time()))){
-					$returnval .= '									<span class="amazon-preorder"><br />This title will be released on '.date("F j, Y", strtotime($result["ReleaseDate"])).'.</span>'."\n";
-						}else{
-					$returnval .= '									<span class="amazon-release-date">Released '.date("F j, Y", strtotime($result["ReleaseDate"])).'.</span>'."\n";
-						}
+					$returnval .= '							<td class="amazon-new-label">New From:</td>'."\n";
+					if($result["TotalNew"]>0){
+						$returnval .= '							<td class="amazon-new">'. $newPrice .' <span class="instock">In Stock</span></td>'."\n";
+					}else{
+						$returnval .= '							<td class="amazon-new">'. $newPrice .' <span class="outofstock">Out of Stock</span></td>'."\n";
 					}
-					$returnval .= '									<br /><div><a style="display:block;margin-top:8px;width:158px;height:26px;" href="' . $result["URL"] .'"><img src="'.get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/images/buyamzon-button.png" border="0" style="border:0 none !important;margin:0px !important;background:transparent !important;"/></a></div>'."\n";
-					$returnval .= '								</div>'."\n";
-					$returnval .= '							</td>'."\n";
 					$returnval .= '						</tr>'."\n";
-				}else{
+				}
+				if(isset($result["LowestUsedPrice"])){
 					$returnval .= '						<tr>'."\n";
-					$returnval .= '							<td class="amazon-price-save-label" colspan="2">This items is not available in your locale.</td>'."\n";
+					$returnval .= '							<td class="amazon-used-label">Used From:</td>'."\n";
+					if($result["TotalUsed"]>0){
+						$returnval .= '						<td class="amazon-used">'. $result["LowestUsedPrice"] .' <span class="instock">In Stock</span></td>'."\n";
+					}else{
+						$returnval .= '						<td class="amazon-new">'. $result["LowestNewPrice"] . ' <span class="outofstock">Out of Stock</span></td>'."\n";
+					}
+					$returnval .= '						</tr>'."\n";
+				}
+				$returnval .= '						<tr>'."\n";
+				$returnval .= '							<td valign="top" colspan="2">'."\n";
+				$returnval .= '								<div class="amazon-dates">'."\n";
+				if(isset($result["ReleaseDate"])){
+					if(strtotime($result["ReleaseDate"]) > strtotime(date("Y-m-d",time()))){
+				$returnval .= '									<span class="amazon-preorder"><br />This title will be released on '.date("F j, Y", strtotime($result["ReleaseDate"])).'.</span>'."\n";
+					}else{
+				$returnval .= '									<span class="amazon-release-date">Released '.date("F j, Y", strtotime($result["ReleaseDate"])).'.</span>'."\n";
+					}
+				}
+				$returnval .= '									<br /><div><a style="display:block;margin-top:8px;width:165px;" '. $apippnewwindowhtml .' href="' . $result["URL"] .'"><img src="'.get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/images/buyamzon-button.png" border="0" style="border:0 none !important;margin:0px !important;background:transparent !important;"/></a></div>'."\n";
+				$returnval .= '								</div>'."\n";
+				$returnval .= '							</td>'."\n";
+				$returnval .= '						</tr>'."\n";
+				If(!isset($result["LowestUsedPrice"]) && !isset($result["LowestNewPrice"]) && !isset($result["ListPrice"])){
+					$returnval .= '						<tr>'."\n";
+					$returnval .= '							<td class="amazon-price-save-label" colspan="2">This item is may not be available in your area. Please click the image or title of product to check pricing.</td>'."\n";
 					$returnval .= '						</tr>'."\n";
 				}
 				$returnval .= '					</table>'."\n";
@@ -409,27 +473,148 @@ Version info:
 	    return $base_url;
 	}
 	
-	  function aws_prodinpost_filter($text){
-	  	global $post;
+	  function aws_prodinpost_filter_excerpt($text){
+	  	global $post,$apipphookexcerpt;
 	  	$ActiveProdPostAWS = get_post_meta($post->ID,'amazon-product-isactive',true);
 	  	$singleProdPostAWS = get_post_meta($post->ID,'amazon-product-single-asin',true);
 	  	$AWSPostLoc = get_post_meta($post->ID,'amazon-product-content-location',true);
-	  	if($singleProdPostAWS!='' && $ActiveProdPostAWS!=''){
-	  		if($AWSPostLoc=='2'){
-	  			//Post Content is the description
-	  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text);
-	  		}elseif($AWSPostLoc=='3'){
-	  			//Post Content before product
-	  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'');
-	  		}else{
-	  			//Post Content after product - default
-	  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'').'<br />'.$text;
-	  		}
-	  		return $theproduct;
-	  	} else {
-	  		return $text;
-	  	}
+	  	$apippExcerptHookOverride = get_post_meta($post->ID,'amazon-product-excerpt-hook-override',true);
+	  	$apippShowSingularonly = get_post_meta($post->ID,'amazon-product-singular-only',true);
+		
+		if(($apipphookexcerpt==true && $apippExcerptHookOverride!='3')){ //if options say to show it, show it
+			//replace short tag here. Handle a bit different than content so they get stripped if they don't want to hook excerpt 
+			//we don't want to show the [AMAZON-PRODUCT=XXXXXXXX] tag in the excerpt text!
+		 	if ( stristr( $text, '[AMAZONPRODUCT' )) {
+				$search = "@(?:<p>)*\s*\[AMAZONPRODUCT\s*=\s*(\w+|^\+)\]\s*(?:</p>)*@i"; 
+				if	(preg_match_all($search, $text, $matches)) {
+					if (is_array($matches)) {
+						foreach ($matches[1] as $key =>$v0) {
+							$search = $matches[0][$key];
+							$ASINis	= $matches[1][$key];
+							if($apippShowSingularonly=='1' && !is_singular()){
+								$text	= str_replace ($search, '', $text);
+							}else{
+								$text	= str_replace ($search, getSingleAmazonProduct($ASINis,''), $text);
+							}
+						}
+					}
+				}
+		  	}		
+			if($apippShowSingularonly=='1'){
+			  	if(is_singular()&& ($singleProdPostAWS!='' && $ActiveProdPostAWS!='')){
+			  		if($AWSPostLoc=='2'){
+			  			//Post Content is the description
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text);
+			  		}elseif($AWSPostLoc=='3'){
+			  			//Post Content before product
+			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'');
+			  		}else{
+			  			//Post Content after product - default
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'').'<br />'.$text;
+			  		}
+			  		return $theproduct;
+			  	} else {
+			  		return $text;
+			  	}
+			}else{
+			  	if($singleProdPostAWS!='' && $ActiveProdPostAWS!=''){
+			  		if($AWSPostLoc=='2'){
+			  			//Post Content is the description
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text);
+			  		}elseif($AWSPostLoc=='3'){
+			  			//Post Content before product
+			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'');
+			  		}else{
+			  			//Post Content after product - default
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'').'<br />'.$text;
+			  		}
+			  		return $theproduct;
+			  	} else {
+			  		return $text;
+			  	}
+			}
+		}else{
+		   if ( stristr( $text, '[AMAZONPRODUCT' )) {
+				$search = "@(?:<p>)*\s*\[AMAZONPRODUCT\s*=\s*(\w+|^\+)\]\s*(?:</p>)*@i"; 
+				if	(preg_match_all($search, $text, $matches)) {
+					if (is_array($matches)) {
+						foreach ($matches[1] as $key =>$v0) {
+							$search = $matches[0][$key];
+							$ASINis	= $matches[1][$key];
+							$text	= str_replace ($search, '', $text); //take the darn thing out!
+						}
+					}
+				}
+		    }		
+		
+		}
+		return $text;
 	  }
+	  function aws_prodinpost_filter_content($text){
+	  	global $post,$apipphookcontent;
+	  	$ActiveProdPostAWS = get_post_meta($post->ID,'amazon-product-isactive',true);
+	  	$singleProdPostAWS = get_post_meta($post->ID,'amazon-product-single-asin',true);
+	  	$AWSPostLoc = get_post_meta($post->ID,'amazon-product-content-location',true);
+	  	$apippContentHookOverride = get_post_meta($post->ID,'amazon-product-content-hook-override',true);
+	  	$apippShowSingularonly = get_post_meta($post->ID,'amazon-product-singular-only',true);
+
+		//replace short tag here
+		   if ( stristr( $text, '[AMAZONPRODUCT' )) {
+				$search = "@(?:<p>)*\s*\[AMAZONPRODUCT\s*=\s*(\w+|^\+)\]\s*(?:</p>)*@i"; 
+				if	(preg_match_all($search, $text, $matches)) {
+					if (is_array($matches)) {
+						foreach ($matches[1] as $key =>$v0) {
+							$search = $matches[0][$key];
+							$ASINis	= $matches[1][$key];
+							if($apippShowSingularonly=='1' && !is_singular()){
+								$text	= str_replace ($search, '', $text);
+							}else{
+								$text	= str_replace ($search, getSingleAmazonProduct($ASINis,''), $text);
+							}
+						}
+					}
+				}
+		    }
+			if($apippShowSingularonly=='1'){
+			    if(is_singular() && (($apipphookcontent==true && $apippContentHookOverride!='3') || $apippContentHookOverride=='' || $apipphookcontent=='')){ //if options say to show it, show it
+				  	if($singleProdPostAWS!='' && $ActiveProdPostAWS!=''){
+				  		if($AWSPostLoc=='2'){
+				  			//Post Content is the description
+				  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text);
+				  		}elseif($AWSPostLoc=='3'){
+				  			//Post Content before product
+				  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'');
+				  		}else{
+				  			//Post Content after product - default
+				  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'').'<br />'.$text;
+				  		}
+				  		return $theproduct;
+				  	} else {
+				  		return $text;
+				  	}
+				 }
+			}else{
+			    if(($apipphookcontent==true && $apippContentHookOverride!='3') || $apippContentHookOverride=='' || $apipphookcontent==''){ //if options say to show it, show it
+				  	if($singleProdPostAWS!='' && $ActiveProdPostAWS!=''){
+				  		if($AWSPostLoc=='2'){
+				  			//Post Content is the description
+				  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text);
+				  		}elseif($AWSPostLoc=='3'){
+				  			//Post Content before product
+				  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'');
+				  		}else{
+				  			//Post Content after product - default
+				  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'').'<br />'.$text;
+				  		}
+				  		return $theproduct;
+				  	} else {
+				  		return $text;
+				  	}
+				 }
+			}
+		 return $text;
+	  }
+
 	function aws_prodinpost_addadminhead(){
 	  echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/amazon-product-in-a-post-styles-icons.css" type="text/css" media="screen" />'."\n";
 	}

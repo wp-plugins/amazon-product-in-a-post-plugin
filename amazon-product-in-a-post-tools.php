@@ -1,16 +1,16 @@
 <?php
 // Tools
-
+global $appipBulidBox;
 //ACTIONS
 	//Create the Meta Box for edits
-	add_action('admin_menu', create_function("$b","if( function_exists( 'add_meta_box' ))add_meta_box( 'amazonProductInAPostBox1', __( 'Amazon Product In a Post Settings', 'sp' ), 'amazonProductInAPostBox1', 'post', 'normal', 'high' );"));
-	add_action('admin_menu', create_function("$b","if( function_exists( 'add_meta_box' ))add_meta_box( 'amazonProductInAPostBox1', __( 'Amazon Product In a Post Settings', 'sp' ), 'amazonProductInAPostBox1', 'page', 'normal', 'high' );"));
+	add_action('admin_menu', create_function("$appipBulidBox","if( function_exists( 'add_meta_box' ))add_meta_box( 'amazonProductInAPostBox1', __( 'Amazon Product In a Post Settings', 'sp' ), 'amazonProductInAPostBox1', 'post', 'normal', 'high' );"));
+	add_action('admin_menu', create_function("$appipBulidBox","if( function_exists( 'add_meta_box' ))add_meta_box( 'amazonProductInAPostBox1', __( 'Amazon Product In a Post Settings', 'sp' ), 'amazonProductInAPostBox1', 'page', 'normal', 'high' );"));
 	//Create the Admin Menus
 	add_action('admin_menu', 'apipp_plugin_menu');
 
 //FUNCTIONS
 	//Custom Save Post items for Quick Add
-	if($_POST['createpost']){ //form saved
+	if(isset($_POST['createpost'])){ //form saved
 		if(isset($_POST['post_category_count'])){
 			$totalcategories = $_POST['post_category_count'];
 			for($i=0;$i<=$totalcategories;$i++){
@@ -39,6 +39,22 @@
 		echo '<label for="amazon-product-isactive"><b>' . __("Product is Active?", 'sp' ) . '</b></label> ';
 		if(get_post_meta($post->ID, 'amazon-product-isactive', true)!=''){$menuhide="checked";}else{$menuhide="";}
 		echo '<br /><br />&nbsp;&nbsp;<input type="checkbox" name="amazon-product-isactive" value="1" '.$menuhide.' /> <i>if checked the product will be live</i><br /><br />';
+
+		echo '<label for="amazon-product-content-hook-override"><b>' . __("Hook into Content?", 'sp' ) . '</b></label> ';
+		if(get_post_meta($post->ID, 'amazon-product-content-hook-override', true)=='2' || (get_post_meta($post->ID, 'amazon-product-content-hook-override', true)=='' && get_option('apipp_hook_content')==true)){$hookcontent="checked";}else{$hookcontent="";}
+		echo '<br /><br />&nbsp;&nbsp;<input type="checkbox" name="amazon-product-content-hook-override" value="2" '.$hookcontent.' /> <i>if checked the product will be added when <code>the_content()</code> is used. On by default unless set in options.</i><br /><br />';
+
+		echo '<label for="amazon-product-excerpt-hook-override"><b>' . __("Hook into Excerpt?", 'sp' ) . '</b></label> ';
+		if(get_post_meta($post->ID, 'amazon-product-excerpt-hook-override', true)=='2' || (get_post_meta($post->ID, 'amazon-product-excerpt-hook-override', true)=='' && get_option('apipp_hook_excerpt')==true)){$hookexcerpt="checked";}else{$hookexcerpt="";}
+		echo '<br /><br />&nbsp;&nbsp;<input type="checkbox" name="amazon-product-excerpt-hook-override" value="2" '.$hookexcerpt.' /> <i>if checked the product will be added to the EXCERPT when <code>the_excerpt()</code> is used. Off by default unless set in options.</i><br /><br />';
+
+		echo '<label for="amazon-product-singular-only"><b>' . __("Show Only on Single Page?", 'sp' ) . '</b></label> ';
+		if(get_post_meta($post->ID, 'amazon-product-singular-only', true)=='1'){$singleonly="checked";}else{$singleonly="";}
+		echo '<br /><br />&nbsp;&nbsp;<input type="checkbox" name="amazon-product-singular-only" value="1" '.$singleonly.' /> <i>if checked the product will only show when in single view. In other words, only when on the permalink page. Off by default.</i><br /><br />';
+
+		echo '<label for="amazon-product-newwindow"><b>' . __("Open Product Link in New Window?", 'sp' ) . '</b></label> ';
+		if(get_post_meta($post->ID, 'amazon-product-newwindow', true)=='2' || (get_post_meta($post->ID, 'amazon-product-newwindow', true)=='' && get_option('apipp_open_new_window')==true)){$newwin="checked";}else{$newwin="";}
+		echo '<br /><br />&nbsp;&nbsp;<input type="checkbox" name="amazon-product-newwindow" value="2" '.$newwin.' /> <i>if checked the product will open a new browser window. Off by default unless set in options.</i><br /><br />';
 	
 		echo '<label for="amazon-product-content-location"><b>' . __("Where would you like your product to show within the post?", 'sp' ) . '</b></label>';
 		echo '<br /><br />&nbsp;&nbsp;<input type="radio" name="amazon-product-content-location" value="1" '. ((get_post_meta($post->ID, 'amazon-product-content-location', true)==='1') || (get_post_meta($post->ID, 'amazon-product-content-location', true)=='') ? "checked" : '') .' /> Above Post Content - <i>Default - Product will be first then post text</i><br />';
@@ -66,8 +82,15 @@
 		$mydata['amazon-product-isactive'] = $_POST['amazon-product-isactive'];
 		$mydata['amazon-product-content-location'] = $_POST['amazon-product-content-location'];
 		$mydata['amazon-product-single-asin'] = $_POST['amazon-product-single-asin'];
-		
+		$mydata['amazon-product-excerpt-hook-override'] = $_POST['amazon-product-excerpt-hook-override'];
+		$mydata['amazon-product-content-hook-override'] = $_POST['amazon-product-content-hook-override'];
+		$mydata['amazon-product-newwindow'] = $_POST['amazon-product-newwindow'];
+		$mydata['amazon-product-singular-only'] = $_POST['amazon-product-singular-only'];
 		if($mydata['amazon-product-isactive']=='' && $mydata['amazon-product-single-asin']==""){$mydata['amazon-product-content-location']='';}
+		if($mydata['amazon-product-excerpt-hook-override']==''){$mydata['amazon-product-excerpt-hook-override']='3';}
+		if($mydata['amazon-product-content-hook-override']==''){$mydata['amazon-product-content-hook-override']='3';}
+		if($mydata['amazon-product-newwindow']==''){$mydata['amazon-product-newwindow']='3';}
+		
 		// Add values of $mydata as custom fields
 
 		foreach ($mydata as $key => $value) { //Let's cycle through the $mydata array!
