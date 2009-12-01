@@ -56,6 +56,20 @@
 							"desc" => "If you want to have the product displayed in a new window, check this box. Default is no.<br /><br />",
 				    		"id" => $shortname_apipp."_open_new_window",
 				    		"type" => "checkbox"),
+					
+					array(	"name" => "Show on Single Page Only?",
+							"desc" => "If you want to have the product displayed only when the page/post is singular, check this box. Default is no.<br /><br />",
+				    		"id" => $shortname_apipp."_show_single_only",
+				    		"type" => "checkbox"),
+
+					array(	"name" => "API get method",
+							"desc" => "If you are seeing BLANK products it may be because your server does not support the php file_get_contents() function. If that is the case, try CURL option to see if it resolves the problem. Default is File Get Contents method.<br /><br />",
+				    		"id" => $shortname_apipp."_API_call_method",
+				    		"type" => "select",
+				    		"options" => array(
+				    			"0" => array("value" => "0","text" => "file_get_contents() (default)"),
+				    			"1" => array("value" => "1","text" => "CURL"),
+				    		 )),
 
 					array(	"name" => "Use My Custom Styles?",
 							"desc" => "If you want to use your own styles, check this box and enter them below.<br /><br />",
@@ -100,7 +114,17 @@
 						}else{
 							foreach($value['options'] as $mc_key => $mc_value){
 								$up_opt = $value['id'].'_'.$mc_key;						
-								if( isset( $_REQUEST[ $up_opt ] ) ) { update_option( $up_opt, $_REQUEST[ $up_opt ]  ); } else { delete_option( $up_opt ); } 
+								if( isset( $_REQUEST[ $up_opt ] ) ) { update_option( $up_opt, $_REQUEST[ $up_opt ]  ); $update_optionapp=$_REQUEST[ $up_opt ];} else { delete_option( $up_opt );$update_optionapp=''; } 
+								//echo $value['id'].'- - - -';
+								if( $value['id'] == 'apipp_API_call_method' ){
+									if($update_optionapp=='0'){
+										update_option('awsplugin_amazon_usefilegetcontents','1');
+										update_option('awsplugin_amazon_usecurl','0');
+									}else{
+										update_option('awsplugin_amazon_usefilegetcontents','0');
+										update_option('awsplugin_amazon_usecurl','1');
+									}
+								}
 							}
 						}
 					}

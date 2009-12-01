@@ -3,8 +3,8 @@ Contributors: Don Fischer
 Donate link: http://fischercreativemedia.com/donate/
 Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode
 Requires at least: 2.5
-Tested up to: 2.8.4
-Stable tag: 1.6
+Tested up to: 2.8.6
+Stable tag: 1.7
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
@@ -69,6 +69,19 @@ A more detailed FAQ will come as questions arise.
 = How do I use the Shortcode? =
 * To Add a product Via Shortcode, go to the Content editor for an existing page/post (or create a new post/page), add **[AMAZONPRODUCT=XXXXXXXXXX]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number. Then update or save the Page/Post. You can add as many products this way as you like. Just keep in mind that there is a call made to the Amazon API for each product added, so addin too many products could cause a noticable increase in page loading time.
 
+= My Products are coming up blank - what do I do? =
+* Most likely the reson is your server does not support external URL call using the file_get_contents() function. If you don't have access to your sites php.ini file to change the settings (most people don't), then on the options pages for the plugin, change the API get method to "CURL" and save the settings. This will fix the problem in most cases.
+
+= I Want to Change the Look of the Products - can you do that for me? = 
+* I would love to say yes, but we cannot make custom changes for everyone that askes - there are just not enough hours in the day - if you REALLY want us to do it for you, contact us - and for a small fee, we will give you whatever look/style you want. Kepp in mind that your theme has a lot to do with the way your products look. 
+You can tweak the look yourself if you have experience with CSS styles. The options page have a style for each element displayed in the product, so you can tweak it however you like. If you screw it up - just reset it back to the default and start over.
+
+= My product shows up fine, but there is no price - what's wrong? =
+* Some products on Amazon.com are provided my external vendors. If a vendor want to hide the price from others until a certain price is reached, they have that ability. When that occurs, Amazon will NOT send the price in the API call - so no price will be displayed. You can edit the custom message that is displayed in the options panel if you wish.
+
+= Great Plugin! How do I donate to the cause? = 
+* Excellent question! The plugin is provided free to the public - you can use it however you like - where ever you like - you can even change it however you like. Should you decide that the plugin has been a great helped and want to donate to our plugin development fund, you may do so at [here](http://fischercreativemedia.com/wordpress-plugins/donate/ "here").
+
 == Screenshots ==
 
 1. Amazon Products displayed on a page with the Post Content as part of the product (option 3 when setting up product). Note, this is using the default styles with the Fusion 3.1 theme by [digitalnature](http://digitalnature.ro/ "digitalnature"). Different theme styles may cause your layout to look VERY different.
@@ -79,6 +92,10 @@ A more detailed FAQ will come as questions arise.
 6. Shortcode Addition to allow unlimited products in post content.
 
 == Changelog ==
+= 1.7 = 
+* Add Curl option for users that cant use file_get_contents() for some reason or another. (12/1/2009)
+* Added Show on Single Page Only option to Options Page.(11/30/2009)
+* Added a way to change encoding display of prices from API if funny characters are showing.(12/1/2009)
 = 1.6 =
 * Added Options to let admin choose if they want to "Hook" into the_excerpt and the_content hooks in Main Options with override on each post/page.(10/3/2009)
 * Added Open in a New Window Option (for Amazon button) in Main Options with override on each page/post.(10/3/2009)

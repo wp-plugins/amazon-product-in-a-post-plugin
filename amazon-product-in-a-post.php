@@ -5,11 +5,21 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or all sales credit will go to the plugin creator by default.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 1.6
+Version: 1.7
 
 Version info:
-1.6 - 
-1.5 - Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
+1.7 - Add Curl option for users that cant use file_get_contents() for some reason or another. (12/1/2009)
+	  Added Show on Single Page Only option to Options Page.(11/30/2009)
+	  Added a way to change encoding display of prices from API if funny characters are showing.(12/1/2009)
+1.6 - Added Options to let admin choose if they want to "Hook" into the_excerpt and the_content hooks in Main Options with override on each post/page.(10/3/2009)
+ 	  Added Open in a New Window Option (for Amazon button) in Main Options with override on each page/post.(10/3/2009)
+	  Added "Show Only on Single Page" option to individual post/page options.(10/4/2009)
+	  Added Shortcode functionality to allow addition of unlimited products in the post/page content.(10/4/2009)
+	  Added "Quick Fix - Hide Warnings" option in Main Options. Adds ini_set("display_errors", 0) to code to help some admins hide any Warnings if their PHP settings are set to show them.(10/3/2009)
+	  Fixed Array Merge Warning when item is not an array.(10/3/2009)
+	  Fixed "This Items not available in your locale" message as to when it acatually displays and spelling.(10/3/2009)
+	  Added Options to let admin add their own Error Messages for Item Not available and Amazon Hidden Price notificaton.(10/3/2009)
+	  Updated Default CSS styles to include in Stock and Out of Stock classes and made adjustments to other improper styles. (10/3/2009)1.5 - Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
 1.4 - Added menthod to restore default CSS if needed - by deleting all CSS in options panel and saving - default css will re-appear in box. (9/16/2009) 
 1.3	- Added new feature to be able to adjust or add your own styles. (9/16/2009)
 1.2	- Fix to image call procedure to help with "no image available" issue. (9/15/2009)
@@ -54,6 +64,15 @@ Version info:
 		update_option("apipp_hook_excerpt","0"); //default is no - done
 		update_option('apipp_open_new_window',"0"); //newoption added at 1.6 - done
 	}
+//added in 1.7 to allow those that could not use file_get_contents() to use Curl instead.		
+		if(get_option('awsplugin_amazon_usefilegetcontents')==''){update_option('awsplugin_amazon_usefilegetcontents','1');}
+		if(get_option('awsplugin_amazon_usecurl')==''){update_option('awsplugin_amazon_usecurl','0');}
+		//if(get_option('apipp_API_call_method')==''){update_option('apipp_API_call_method','0');}
+		if(get_option('apipp_API_call_method')=='' && get_option('awsplugin_amazon_usecurl')=='0'){
+			update_option('apipp_API_call_method','0');}
+		elseif(get_option('apipp_API_call_method')=='' && get_option('awsplugin_amazon_usecurl')!='1'){
+			update_option('apipp_API_call_method','1');
+		}
 
 // Variables
 	global $public_key;
@@ -69,6 +88,8 @@ Version info:
 	global $apipphookcontent;
 	global $apippopennewwindow;
 	global $apippnewwindowhtml;
+	global $encodemode; //1.7 new
+	
 	
 	session_start();	
     if(!isset($_SESSION['Amazon-PIPP-Cart-HMAC'])) $_SESSION['Amazon-PIPP-Cart-HMAC'] = '';
@@ -88,8 +109,38 @@ Version info:
 	$apippopennewwindow = get_option('apipp_open_new_window'); //open in new window?
 	$aws_eatra_pages 	= '"ItemPage"=>"'.$awspagequery.'",';
 	$thereapippstyles 	= get_option("apipp_product_styles_default"); 
-	$apippnewwindowhtml	='';
+	$apippnewwindowhtml	= '';
+	$apip_getmethod 	= get_option('apipp_API_call_method');
+	$apip_usefileget 	= '0';
+	$apip_usecurlget	= '0';
+	$encodemode 		= get_option('appip_encodemode'); //1.7 added - UTF-8 will be default
 
+	// 1.7 api get method defaults/check
+	if($apip_getmethod=='0'){
+		$apip_usefileget = '1';
+	}
+	if($apip_getmethod=='1'){
+		$apip_usecurlget = '1';
+	}
+	if($apip_getmethod==''){
+		$apip_usefileget = '1'; //set default if not set
+	}
+	
+	//1.7 Encode Mode
+	if(get_option('appip_encodemode')==''){
+		update_option('appip_encodemode','UTF-8'); //set default to UTF-8
+		$encodemode="UTF-8";
+	}
+	
+	// 1.7 - change encoding if needed via GET
+	// use http://yoursite.com/?resetenc=UTF-8 or http://yoursite.com/?resetenc=ISO-8859-1
+	// this will be the mode you wat the text OUTPUT as.
+	if(isset($_GET['resetenc'])){
+		if($_GET['resetenc']=='ISO-8859-1' || $_GET['resetenc']=='UTF-8'){
+			update_option('appip_encodemode',$_GET['resetenc']);
+			$encodemode = $_GET['resetenc'];
+		}
+	}
 
 	if($apippopennewwindow==true){
 		$apippnewwindowhtml=' target="amazonwin" ';
@@ -201,7 +252,7 @@ Version info:
 				}elseif($result["ListPrice"]!='0'){
 					$returnval .= '						<tr>'."\n";
 					$returnval .= '							<td class="amazon-list-price-label">List Price:</td>'."\n";
-					$returnval .= '							<td class="amazon-list-price">'. $result["ListPrice"] .'</td>'."\n";
+					$returnval .= '							<td class="amazon-list-price">'.  mb_convert_encoding($result["ListPrice"], $encodemode, mb_detect_encoding( $result["ListPrice"], "auto" )) .'</td>'."\n";
 					$returnval .= '						</tr>'."\n";
 				}
 				if(isset($result["LowestNewPrice"])){
@@ -213,9 +264,9 @@ Version info:
 					$returnval .= '						<tr>'."\n";
 					$returnval .= '							<td class="amazon-new-label">New From:</td>'."\n";
 					if($result["TotalNew"]>0){
-						$returnval .= '							<td class="amazon-new">'. $newPrice .' <span class="instock">In Stock</span></td>'."\n";
+						$returnval .= '							<td class="amazon-new">'. mb_convert_encoding($newPrice , $encodemode, mb_detect_encoding( $newPrice, "auto" )).' <span class="instock">In Stock</span></td>'."\n";
 					}else{
-						$returnval .= '							<td class="amazon-new">'. $newPrice .' <span class="outofstock">Out of Stock</span></td>'."\n";
+						$returnval .= '							<td class="amazon-new">'. mb_convert_encoding($newPrice , $encodemode, mb_detect_encoding( $newPrice, "auto" )).' <span class="outofstock">Out of Stock</span></td>'."\n";
 					}
 					$returnval .= '						</tr>'."\n";
 				}
@@ -223,9 +274,10 @@ Version info:
 					$returnval .= '						<tr>'."\n";
 					$returnval .= '							<td class="amazon-used-label">Used From:</td>'."\n";
 					if($result["TotalUsed"]>0){
-						$returnval .= '						<td class="amazon-used">'. $result["LowestUsedPrice"] .' <span class="instock">In Stock</span></td>'."\n";
+						
+						$returnval .= '						<td class="amazon-used">'. mb_convert_encoding($result["LowestUsedPrice"], $encodemode, mb_detect_encoding( $result["LowestUsedPrice"], "auto" )) .' <span class="instock">In Stock</span></td>'."\n";
 					}else{
-						$returnval .= '						<td class="amazon-new">'. $result["LowestNewPrice"] . ' <span class="outofstock">Out of Stock</span></td>'."\n";
+						$returnval .= '						<td class="amazon-new">'. mb_convert_encoding($result["LowestNewPrice"], $encodemode, mb_detect_encoding( $result["LowestUsedPrice"], "auto" )) . ' <span class="outofstock">Out of Stock</span></td>'."\n";
 					}
 					$returnval .= '						</tr>'."\n";
 				}
@@ -479,7 +531,10 @@ Version info:
 	  	$singleProdPostAWS = get_post_meta($post->ID,'amazon-product-single-asin',true);
 	  	$AWSPostLoc = get_post_meta($post->ID,'amazon-product-content-location',true);
 	  	$apippExcerptHookOverride = get_post_meta($post->ID,'amazon-product-excerpt-hook-override',true);
-	  	$apippShowSingularonly = get_post_meta($post->ID,'amazon-product-singular-only',true);
+	  	$apippShowSingularonly = '0';
+	  	if(get_option('appip_show_single_only')=='1'){$apippShowSingularonly = '1';}
+	  	$apippShowSingularonly2 = get_post_meta($post->ID,'amazon-product-singular-only',true);
+		if($apippShowSingularonly2=='1'){$apippShowSingularonly = '1';}
 		
 		if(($apipphookexcerpt==true && $apippExcerptHookOverride!='3')){ //if options say to show it, show it
 			//replace short tag here. Handle a bit different than content so they get stripped if they don't want to hook excerpt 

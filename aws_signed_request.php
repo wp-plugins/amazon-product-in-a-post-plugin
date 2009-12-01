@@ -331,7 +331,8 @@ function aws_signed_request($region, $params, $public_key, $private_key)
         $public_key - your "Access Key ID"
         $private_key - your "Secret Access Key"
     */
-
+	global $apip_usefileget, $apip_usecurlget;
+	
     // some paramters
     $method = "GET";
     $host = "ecs.amazonaws.".$region;
@@ -378,7 +379,24 @@ function aws_signed_request($region, $params, $public_key, $private_key)
     }    
     
     // do request
-    $response = @file_get_contents($request);
+
+   if($apip_usefileget!='0'){
+    	//echo 'file_get_contents';
+    	$response = @file_get_contents($request);
+    }elseif($apip_usecurlget!='0'){
+    	//echo 'curl_get_contents';
+	    $ch = curl_init();
+	    $timeout = 5;
+	    curl_setopt($ch, CURLOPT_URL, $request);
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+	    $data = curl_exec($ch);
+	    curl_close($ch);
+	    $response = $data;
+    }else{
+    	$response = False;
+    }
+    
     
     if(DEBUG)
     {
