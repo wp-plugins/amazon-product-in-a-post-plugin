@@ -5,8 +5,9 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or all sales credit will go to the plugin creator by default.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 1.8
+Version: 1.9
 Version info:
+1.9 - Fix to undefined function error - causing problems - sorry for the trouble everyone. (12/28/2009)
 1.8 - Added Fix for users without encoding functions in PHP4 to be able to use. This may have caused some problems with users on 1.7. (12/21/2009)
 	  Added Options for Language selection. (12/21/2009)
 	  Added French Language and buttons (special thanks to Henri Sequeira for translations). (12/21/2009)

@@ -19,7 +19,7 @@
 	global $aws_partner_locale;
 
 //added in 1.8 for language
-	if(get_option('apipp_amazon_language')===''){update_option('apipp_amazon_language','en');}
+	if(get_option('apipp_amazon_language')==''){update_option('apipp_amazon_language','en');}
 	$aws_partner_locale	= get_option('apipp_amazon_locale'); //Amazon Locale
 	$apip_language = get_option('apipp_amazon_language');
 	$buyamzonbutton	= "buyamzon-button-plain.png";

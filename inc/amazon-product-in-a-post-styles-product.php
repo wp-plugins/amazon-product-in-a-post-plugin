@@ -6,7 +6,6 @@ add_filter('query_vars', 'appip_query_vars');
 function appip_query_vars($vars) {
 	$vars[] = 'appip_style';
    // print_r($vars);
-    initfunc();
     return $vars;
 }
 

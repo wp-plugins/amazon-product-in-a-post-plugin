@@ -4,7 +4,7 @@ Donate link: http://fischercreativemedia.com/donate/
 Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode
 Requires at least: 2.5
 Tested up to: 2.9.1
-Stable tag: 1.8
+Stable tag: 1.9
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
@@ -93,6 +93,8 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 6. Shortcode Addition to allow unlimited products in post content.
 
 == Changelog ==
+= 1.9 =
+* fix to not defined function error. (12/28/2009)
 = 1.8 =
 * Added Fix for users without encoding functions in PHP4 to be able to use. This may have caused some problems with users on 1.7. (12/21/2009)
 * Added Options for Language selection. (12/21/2009)
