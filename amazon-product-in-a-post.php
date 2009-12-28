@@ -216,16 +216,13 @@ Version info:
 		update_option("apipp_product_styles",$thedefaultapippstyle);
 	}
 // Filters & Hooks
-	add_action('init','initfunc',1);
 	add_filter('the_content', 'aws_prodinpost_filter_content', 10); //hook content - we will filter the override after
 	add_filter('the_excerpt', 'aws_prodinpost_filter_excerpt', 10); //hook excerpt - we will filter the override after 
 	add_action('wp_head','aws_prodinpost_addhead',10); //add styles to head
 	add_action('wp','add_appip_jquery'); //enqueue scripts
 	add_action('admin_head','aws_prodinpost_addadminhead',10); //add admin styles to admin head
 	//add_action('wp','aws_prodinpost_cartsetup', 1, 2); //Future Item
-function initfunc(){
-	define('EMPTY_TRASH_DAYS', 160 ); 
-}
+
 // Functions
 	//Single Product API Call - Returns One Product Data
 	function getSingleAmazonProduct($asin='',$extratext='',$extrabutton=0){
@@ -249,7 +246,7 @@ function initfunc(){
 		global $post;
 		//$apippOpenNewWindow = get_post_meta($post->ID,'amazon-product-newwindow',true);
 		//if($apippOpenNewWindow!='3'){$apippnewwindowhtml=' target="amazonwin" ';}
-echo EMPTY_TRASH_DAYS;
+
 		if ($asin!=''){
 			$ASIN = $asin; //valid ASIN
 			$errors='';
