@@ -4,7 +4,7 @@ Donate link: http://fischercreativemedia.com/donate/
 Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode
 Requires at least: 2.5
 Tested up to: 2.9.1
-Stable tag: 1.9
+Stable tag: 1.9.1
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
@@ -18,6 +18,7 @@ What can you use it for? With this plugin you can:
 * Add the product to the TOP of the post content, the BOTTOM of the post content, or make the post content become part of the product layout (see screenshots for examples)
 * *UPDATE 10/4/09* - You can now add as many products as you want to any existing page/post content using a Shortcode - see Installation or FAQ page for details.
 * *UPDATE 12/22/09* - Added French and Spanish language support for text labels in displayed product.
+* *UPDATE 1/3/10* - Added German Language support for text labels in displayed product.
 
 If you have an Amazon Affiliate account and you don't think the available Amazon widgets are that great or are what you need, then this plugin might be for you.
 
@@ -93,6 +94,9 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 6. Shortcode Addition to allow unlimited products in post content.
 
 == Changelog ==
+= 1.9.1 =
+* Fix to WordPress Core location assumption. Caused Problem when WP core was located outside root. (1/3/2010)
+*  Added German Language. (special thanks to Henri Sequeira for translations). (1/3/2010)
 = 1.9 =
 * fix to not defined function error. (12/28/2009)
 = 1.8 =

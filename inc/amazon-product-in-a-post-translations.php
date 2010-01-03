@@ -70,6 +70,20 @@
 		$appip_text_notavalarea = "Esta partida se puede no estar disponible en su &aacute;rea. Por favor, haga clic en la imagen o el título del producto, para comprobar la fijaci&oacute;n de precios.";
 		$appip_text_releasedon 	= "Este t&iacute;tulo ser&aacute; lanzado el";
 		break;
+	case "ge": //German
+		$appip_text_lgimage = "Gr&ouml;&szlig;eres Bild";
+		$appip_text_listprice = "Preis";
+		$appip_text_newfrom = "Neu ab";
+		$appip_text_usedfrom = "gebraucht ab";
+		$appip_text_instock = "Auf Lager";
+		$appip_text_outofstock = "Nicht auf Lager";
+		$appip_text_author = "Von";
+		$appip_text_starring = "Mit";
+		$appip_text_director = "Regisseur(e)";
+		$appip_text_reldate = "Erscheinungstermin";
+		$appip_text_preorder = "Vorbestellbar";
+		$appip_text_notavalarea = "Dieser Artikel ist in ihrem Gebiet nicht verf&uuml;gbar";
+		$appip_text_releasedon = "Dieser Artikel ist verf&uuml;gbar ab";		break;
 	endswitch;
 	
 	//1.8 for language and buttons

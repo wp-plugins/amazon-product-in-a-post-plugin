@@ -5,8 +5,10 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or all sales credit will go to the plugin creator by default.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 1.9
+Version: 1.9.1
 Version info:
+1.9.1-Fix to WordPress Core location assumption. Caused Problem when WP core was located outside root. (1/3/2010)
+	  Added German Language. (special thanks to Henri Sequeira for translations). (1/3/2010)
 1.9 - Fix to undefined function error - causing problems - sorry for the trouble everyone. (12/28/2009)
 1.8 - Added Fix for users without encoding functions in PHP4 to be able to use. This may have caused some problems with users on 1.7. (12/21/2009)
 	  Added Options for Language selection. (12/21/2009)
@@ -126,7 +128,7 @@ Version info:
 	$aws_partner_id		= get_option('apipp_amazon_associateid'); //Amazon Partner ID 
 	//$aws_partner_locale	= get_option('apipp_amazon_locale'); //Amazon Locale - moved to translations file
 	$awsPageRequest 	= 1;
-	$aws_plugin_version = "1.8";
+	$aws_plugin_version = "1.9.1";
 	$amazonhiddenmsg 	= get_option('apipp_amazon_hiddenprice_message'); //Amazon Hidden Price Message
 	$amazonerrormsg 	= get_option('apipp_amazon_notavailable_message'); //Amazon Error No Product Message
 	$apipphookexcerpt 	= get_option('apipp_hook_excerpt'); //Hook the excerpt?
@@ -345,9 +347,9 @@ Version info:
 				$returnval .= '									<span class="amazon-release-date">'.$appip_text_reldate.' '.date("F j, Y", strtotime($result["ReleaseDate"])).'.</span>'."\n";
 					}
 				}
-				$returnval .= '									<br /><div><a style="display:block;margin-top:8px;margin-bottom:5px;width:165px;" '. $apippnewwindowhtml .' href="' . $result["URL"] .'"><img src="'.get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/images/'.$buyamzonbutton.'" border="0" style="border:0 none !important;margin:0px !important;background:transparent !important;"/></a></div>'."\n";
+				$returnval .= '									<br /><div><a style="display:block;margin-top:8px;margin-bottom:5px;width:165px;" '. $apippnewwindowhtml .' href="' . $result["URL"] .'"><img src="'.WP_PLUGIN_URL.'/amazon-product-in-a-post-plugin/images/'.$buyamzonbutton.'" border="0" style="border:0 none !important;margin:0px !important;background:transparent !important;"/></a></div>'."\n";
 				if($extrabutton==1 && $aws_partner_locale!='.com'){
-				//$returnval .= '									<br /><div><a style="display:block;margin-top:8px;margin-bottom:5px;width:165px;" '. $apippnewwindowhtml .' href="' . $result["URL"] .'"><img src="'.get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/images/buyamzon-button.png" border="0" style="border:0 none !important;margin:0px !important;background:transparent !important;"/></a></div>'."\n";
+				//$returnval .= '									<br /><div><a style="display:block;margin-top:8px;margin-bottom:5px;width:165px;" '. $apippnewwindowhtml .' href="' . $result["URL"] .'"><img src="'.WP_PLUGIN_URL.'/amazon-product-in-a-post-plugin/images/buyamzon-button.png" border="0" style="border:0 none !important;margin:0px !important;background:transparent !important;"/></a></div>'."\n";
 				}
 				$returnval .= '								</div>'."\n";
 				$returnval .= '							</td>'."\n";
@@ -559,7 +561,7 @@ Version info:
 		if($base_url!=''){
 	    	return $base_url0.$base_url.$base_url1;
 		}else{
-			$base_url = get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/images/noimage.jpg';
+			$base_url = WP_PLUGIN_URL .'/amazon-product-in-a-post-plugin/images/noimage.jpg';
 	    	return $base_url0.$base_url.$base_url1;
 		}
 	}
@@ -724,20 +726,18 @@ Version info:
 		 return $text;
 	  }
 	function aws_prodinpost_addadminhead(){
-	  echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/css/amazon-product-in-a-post-styles-icons.css" type="text/css" media="screen" />'."\n";
+	  echo '<link rel="stylesheet" href="'.WP_PLUGIN_URL.'/amazon-product-in-a-post-plugin/css/amazon-product-in-a-post-styles-icons.css" type="text/css" media="screen" />'."\n";
 	}
 	function aws_prodinpost_addhead(){
 		global $aws_plugin_version;
 		$amazonStylesToUseMine = get_option("apipp_product_styles_mine"); //is box checked?
 		echo '<'.'!-- Amazon Product In a Post Plugin Styles & Scripts - Version '.$aws_plugin_version.' -->'."\n";
 		if($amazonStylesToUseMine=='true'){ //use there styles
-			//echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/inc/amazon-product-in-a-post-styles-product.php?appip-style=custom" type="text/css" media="screen" />'."\n";
 			echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?appip_style=custom" type="text/css" media="screen" />'."\n";
 		}else{ //use default styles
-			//echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/inc/amazon-product-in-a-post-styles-product.php" type="text/css" media="screen" />'."\n";
 			echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?appip_style=default" type="text/css" media="screen" />'."\n";
 		}
-		echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/'.PLUGINDIR.'/amazon-product-in-a-post-plugin/css/amazon-lightbox.css" type="text/css" media="screen" />'."\n";
+		echo '<link rel="stylesheet" href="'.WP_PLUGIN_URL.'/amazon-product-in-a-post-plugin/css/amazon-lightbox.css" type="text/css" media="screen" />'."\n";
 		echo '<'.'!-- End Amazon Product In a Post Plugin Styles & Scripts-->'."\n";
 	}
 	function add_appip_jquery(){
