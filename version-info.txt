@@ -1,0 +1,58 @@
+Version info:
+2.0	
+	Added Database for caching api calls (10/20/2010)
+	Added Options for Private and Public Keys in the options panel. (10/22/2010)
+	Added Options for Complete Removal and Partial Removal of Plugin on Deactivate. (10/24/2010)
+	Added new error checks to comply with API changes.
+	Added new Display checks to not display anything on error (except an HTML Comment in the code) (10/24/2010)
+	Fixed option naming convention to resolve a few issues with previous versions (10/24/2010)
+	Fixed come code to resolve headers sent issues. (10/23/2010)
+	Modified Style calls to fix issues with earlier versions upgrading to newer version (10/23/2010)
+	Updated FAQs (10/24/2010)
+1.9.2
+	Beta version to add comma sep values to shortcode functionality. (4/13/2010)
+1.9.1
+	Fix to WordPress Core location assumption. Caused Problem when WP core was located outside root. (1/3/2010)
+	Added German Language. (special thanks to Henri Sequeira for translations). (1/3/2010)
+1.9 
+ 	Fix to undefined function error - causing problems - sorry for the trouble everyone. (12/28/2009)
+1.8 
+ 	Added Fix for users without encoding functions in PHP4 to be able to use. This may have caused some problems with users on 1.7. (12/21/2009)
+	Added Options for Language selection. (12/21/2009)
+	Added French Language and buttons (special thanks to Henri Sequeira for translations). (12/21/2009)
+	Added Lightbox type effect for "View Larger Image" function.(12/22/2009)
+	Modified Style Call to use a more WP friendly method to not rely on a "guess" as to where the core WP files are located. (12/22/2009)
+	Fixed Open in new window functionality - was not working 100% of the time. (12/22/2009)
+1.7
+ 	Add Curl option for users that cant use file_get_contents() for some reason or another. (12/1/2009)
+	Added Show on Single Page Only option to Options Page.(11/30/2009)
+	Added a way to change encoding display of prices from API if funny characters are showing.(12/1/2009)
+1.6
+ 	Added Options to let admin choose if they want to "Hook" into the_excerpt and the_content hooks in Main Options with override on each post/page.(10/3/2009)
+ 	Added Open in a New Window Option (for Amazon button) in Main Options with override on each page/post.(10/3/2009)
+	Added "Show Only on Single Page" option to individual post/page options.(10/4/2009)
+	Added Shortcode functionality to allow addition of unlimited products in the post/page content.(10/4/2009)
+	Added "Quick Fix - Hide Warnings" option in Main Options. Adds ini_set("display_errors", 0) to code to help some admins hide any Warnings if their PHP settings are set to show them.(10/3/2009)
+	Fixed Array Merge Warning when item is not an array.(10/3/2009)
+	Fixed "This Items not available in your locale" message as to when it acatually displays and spelling.(10/3/2009)
+	Added Options to let admin add their own Error Messages for Item Not available and Amazon Hidden Price notificaton.(10/3/2009)
+	Updated Default CSS styles to include in Stock and Out of Stock classes and made adjustments to other improper styles. (10/3/2009)1.5 - Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
+1.4
+ 	Added menthod to restore default CSS if needed - by deleting all CSS in options panel and saving - default css will re-appear in box. (9/16/2009) 
+1.3
+	Added new feature to be able to adjust or add your own styles. (9/16/2009)
+1.2	Fix to image call procedure to help with "no image available" issue. (9/15/2009)
+1.1	Minor Fixes/Spelling Error corrections & code cleanup to prep for WordPress hosting of Plugin. (9/14/2009)
+1.0	Plugin Release (9/12/2009)
+
+    Copyright (C) 2009 Donald J. Fischer
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
