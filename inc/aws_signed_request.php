@@ -3,8 +3,7 @@ define('DEBUG', false);
 //hash_hmac code from comment by Ulrich in http://mierendo.com/software/aws_signed_query/
 //sha256.inc.php from http://www.nanolink.ca/pub/sha256/ 
 
-function aws_hash_hmac($algo, $data, $key, $raw_output=False)
-{
+function aws_hash_hmac($algo, $data, $key, $raw_output=False){
   // RFC 2104 HMAC implementation for php.
   // Creates a sha256 HMAC.
   // Eliminates the need to install mhash to compute a HMAC
@@ -13,8 +12,7 @@ function aws_hash_hmac($algo, $data, $key, $raw_output=False)
   // modified by Ulrich Mierendorff to work with sha256 and raw output
   
   $b = 64; // block size of md5, sha256 and other hash functions
-  if (strlen($key) > $b)
-  {
+  if (strlen($key) > $b){
     $key = pack("H*",$algo($key));
   }
   $key = str_pad($key, $b, chr(0x00));
@@ -24,19 +22,16 @@ function aws_hash_hmac($algo, $data, $key, $raw_output=False)
   $k_opad = $key ^ $opad;
   
   $hmac = $algo($k_opad . pack("H*", $algo($k_ipad . $data)));
-  if ($raw_output)
-  {
+  if ($raw_output){
     return pack("H*", $hmac);
-  }
-  else
-  {
+  }else{
     return $hmac;
   }
 } 
 //GetXMLTree and GetChildren code from http://whoooop.co.uk/2005/03/20/xml-to-array/
 
-function GetXMLTree ($xmldata)
-{
+function GetXMLTree ($xmldata){
+	if($xmldata==''){return False;}
 	// we want to know if an error occurs
 	ini_set ('track_errors', '1');
 
@@ -47,7 +42,6 @@ function GetXMLTree ($xmldata)
 	xml_parser_set_option ($parser, XML_OPTION_CASE_FOLDING, 0);
 	if (!xml_parse_into_struct ($parser, $xmldata, $vals, $index)) {
 		$xmlreaderror = true;
-		echo "error1";
 	}
 	xml_parser_free ($parser);
 
@@ -60,13 +54,11 @@ function GetXMLTree ($xmldata)
 
 		$result [$vals [$i]['tag']] = array_merge ($attributes, GetChildren ($vals, $i, 'open'));
 	}
-
 	ini_set ('track_errors', '0');
 	return $result;
 }
 
-function GetChildren ($vals, &$i, $type)
-{
+function GetChildren ($vals, &$i, $type){
 	if ($type == 'complete') {
 		if (isset ($vals [$i]['value']))
 			return ($vals [$i]['value']);
@@ -136,8 +128,8 @@ function GetChildren ($vals, &$i, $type)
 
 	return $children;
 }
-function FormatASINResult($Result) //main function for single product
-  {
+
+function FormatASINResult($Result){ //main function for single product 
     $Item 					= $Result['ItemLookupResponse']['Items']['Item'];
     $ItemAttr 				= $Item['ItemAttributes'];
   	$ImageSM 				= $Item['SmallImage']['URL'];
@@ -169,9 +161,9 @@ function FormatASINResult($Result) //main function for single product
 	}
 	$ReleaseDate 	= $ItemAttr["ReleaseDate"];
 
-	if(isset($ItemAttr["ListPrice"]["Amount"]) && isset($SalePrice['Amount'])){
+	if(isset($ItemAttr["ListPrice"]["Amount"]) && isset($SalePrice['Amount']) ){
 		$SavingsPrice =  number_format(($ItemAttr["ListPrice"]["Amount"]/ 100.0),2) - number_format(($SalePrice['Amount'] / 100.0), 2);
-		$SavingsPercent = ($SavingsPrice / number_format($ItemAttr["ListPrice"]["Amount"]/100,2))*100;
+		if($ItemAttr["ListPrice"]["Amount"]!=0){$SavingsPercent = ($SavingsPrice / number_format($ItemAttr["ListPrice"]["Amount"]/100,2))*100;}else{$SavingsPercent = 0;}
 	}else{
 		$SavingsPrice =  0;
 		$SavingsPercent = 0;
@@ -206,15 +198,14 @@ function FormatASINResult($Result) //main function for single product
 				    'PriceHidden' => $isPriceHidden,
 				    'TotalNew' => $TotalNew,
 				    'TotalUsed' => $TotalUsed,
-                    'Errors' => $Result['ItemLookupResponse']['Items']['Request']['Errors']
+                    'Errors' => $Result['itemlookuperrorresponse']['error']
                    );
     return $RetVal;  
   } 
   
 //FormatSearchResult by Don Fischer
 
-function FormatSearchResult($Result)
-  {
+function FormatSearchResult($Result){
     $Item = $Result;
 	$Author = $Item["Author"];
 	$Binding = $Item["Binding"];
@@ -242,6 +233,7 @@ function FormatSearchResult($Result)
 	$ReleaseDate = $Item["ReleaseDate"];
 	$Studio = $Item["Studio"];
 	$Title = $Item["Title"];
+	
 	//shortcut keys
 	$Price = $ListPriceFormattedPrice . ' ' .$ListPriceCurrencyCode;
 	$PackageDimensions = ($PackageDimensionsLength["value"] / 100) .'in x ' . ($PackageDimensionsWidth["value"] / 100). 'in x '. ($PackageDimensionsHeight["value"] / 100) .'in';
@@ -292,9 +284,7 @@ function FormatSearchResult($Result)
   } 
 
 //aws_signed_request code from http://mierendo.com/software/aws_signed_query/
-
-function aws_signed_request($region, $params, $public_key, $private_key)
-{
+function aws_signed_request($region, $params, $public_key, $private_key){
     /*
     Copyright (c) 2009 Ulrich Mierendorff
 
@@ -320,11 +310,11 @@ function aws_signed_request($region, $params, $public_key, $private_key)
     /*
     Parameters:
         $region - the Amazon(r) region (ca,com,co.uk,de,fr,jp)
-        $params - an array of parameters, eg. array("Operation"=>"ItemLookup",
-                        "ItemId"=>"B000X9FLKM", "ResponseGroup"=>"Small")
+        $params - an array of parameters, eg. array("Operation"=>"ItemLookup", "ItemId"=>"B000X9FLKM", "ResponseGroup"=>"Small")
         $public_key - your "Access Key ID"
         $private_key - your "Secret Access Key"
     */
+    
 	global $apip_usefileget, $apip_usecurlget;
 	
     // some paramters
@@ -335,85 +325,105 @@ function aws_signed_request($region, $params, $public_key, $private_key)
     // additional parameters
     $params["Service"] = "AWSECommerceService";
     $params["AWSAccessKeyId"] = $public_key;
-    // GMT timestamp
     $params["Timestamp"] = gmdate("Y-m-d\TH:i:s\Z");
-    // API version
     $params["Version"] = "2009-03-31";
-    
+ 	$keyurl = $params['AssociateTag'].$params['IdType'].$params['ItemId'].$params['Operation'];
+   
     // sort the parameters
     ksort($params);
-    
     // create the canonicalized query
     $canonicalized_query = array();
-    foreach ($params as $param=>$value)
-    {
+    foreach ($params as $param=>$value){
         $param = str_replace("%7E", "~", rawurlencode($param));
         $value = str_replace("%7E", "~", rawurlencode($value));
         $canonicalized_query[] = $param."=".$value;
-    }
+   }
     $canonicalized_query = implode("&", $canonicalized_query);
-    
+  
     // create the string to sign
     $string_to_sign = $method."\n".$host."\n".$uri."\n".$canonicalized_query;
-    
+   
     // calculate HMAC with SHA256 and base64-encoding
     $signature = base64_encode(aws_hash_hmac("sha256", $string_to_sign, $private_key, True));
     
     // encode the signature for the request
     $signature = str_replace("%7E", "~", rawurlencode($signature));
-    
+   
     // create request
     $request = "https://".$host.$uri."?".$canonicalized_query."&Signature=".$signature;
-    
-    if(DEBUG)
-    {
+
+    if(DEBUG){
       echo('<br/><br/>');
       echo($request);
       echo('<br/><br/>');
     }    
     
     // do request
-
-   if($apip_usefileget!='0'){
-    	//echo 'file_get_contents';
-    	$response = @file_get_contents($request);
-    }elseif($apip_usecurlget!='0'){
-    	//echo 'curl_get_contents';
-	    $ch = curl_init();
-	    $timeout = 5;
-	    curl_setopt($ch, CURLOPT_URL, $request);
-	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
-	    $data = curl_exec($ch);
-	    curl_close($ch);
-	    $response = $data;
-    }else{
-    	$response = False;
-    }
-    
-    
-    if(DEBUG)
-    {
-      echo('<br/><br/>');
-      print_r($response);
-      echo('<br/><br/>');
-    }
-   
-    if ($response === False)
-    {
-        return False;
-    }
-    else
-    {
-     $pxml = GetXMLTree($response);
-     if(DEBUG)
-     {
-       echo('<br/><br/>');
-       print_r($pxml);
-       echo('<br/><br/>');
-     }
-     return $pxml;
-    }
-    
+    	// first check cache check
+		global $wpdb;
+		$body = "";
+		$maxage = 1;
+		$checksql= "SELECT Body, ( NOW() - Updated ) as Age FROM ".$wpdb->prefix."amazoncache WHERE URL = '" . $keyurl . "' AND NOT( Body LIKE '%AccountLimitExceeded%') AND NOT( Body LIKE '%SignatureDoesNotMatch%') AND NOT( Body LIKE '%InvalidParameterValue%');";
+		$result = $wpdb->get_results($checksql);
+		
+		if (count($result) > 0){
+			if ($result[0]->Age <= 6001 && $result[0]->Body != ''){ //that would be 60 min 1 seconds on MYSQL value
+				$pxml = GetXMLTree($result[0]->Body);
+				return $pxml;
+			}else{
+				if($apip_usefileget!='0'){
+					 $response = file_get_contents($request);
+				}elseif($apip_usecurlget!='0'){
+				    $ch = curl_init();
+				    $timeout = 5;
+				    curl_setopt($ch, CURLOPT_URL, $request);
+				    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+				    $data = curl_exec($ch);
+				    curl_close($ch);
+				    $response = $data;
+				}else{
+					$response = False;
+				}
+			    
+				if ($response === False){
+					return False;
+				}else{
+					$xbody = trim(addslashes($response));
+					if(strpos($xbody,'AccountLimitExceeded') >= 1){return 'exceeded';}
+					if(strpos($xbody,'SignatureDoesNotMatch') >= 1){return 'no signature match';}
+					if(strpos($xbody,'InvalidParameterValue') >= 1){return 'not valid';}
+					$updatesql ="INSERT IGNORE INTO ".$wpdb->prefix."amazoncache (URL, Body, Updated) VALUES ('$keyurl', '$xbody', NOW()) ON DUPLICATE KEY UPDATE Body='$xbody', Updated=NOW();";
+					$wpdb->query($updatesql);
+					$pxml = GetXMLTree($response);
+					return $pxml;
+				}
+			}
+		}else{ //if not cached (less than 1 hour ago) OR Error in CACHE - get new
+			if($apip_usefileget!='0'){
+				 $response = file_get_contents($request);
+			}elseif($apip_usecurlget!='0'){
+			    $ch = curl_init();
+			    $timeout = 5;
+			    curl_setopt($ch, CURLOPT_URL, $request);
+			    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
+			    $data = curl_exec($ch);
+			    curl_close($ch);
+			    $response = $data;
+			}else{
+				$response = False;
+				return False;
+			}
+			$xbody = trim(addslashes($response));
+			if(strpos($xbody,'AccountLimitExceeded') >= 1){return 'exceeded';}
+			if(strpos($xbody,'SignatureDoesNotMatch') >= 1){return 'no signature match';}
+			if(strpos($xbody,'InvalidParameterValue') >= 1){return 'not valid';}
+			$updatesql ="INSERT IGNORE INTO ".$wpdb->prefix."amazoncache (URL, Body, Updated) VALUES ('$keyurl', '$xbody', NOW()) ON DUPLICATE KEY UPDATE Body='$xbody', Updated=NOW();";
+			$wpdb->query($updatesql);
+			$pxml = GetXMLTree($response);
+			return $pxml;
+		}
+	return False;
 }
 ?>

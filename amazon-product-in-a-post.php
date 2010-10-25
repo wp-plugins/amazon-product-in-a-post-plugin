@@ -5,35 +5,7 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or all sales credit will go to the plugin creator by default.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 1.9.1
-Version info:
-1.9.1-Fix to WordPress Core location assumption. Caused Problem when WP core was located outside root. (1/3/2010)
-	  Added German Language. (special thanks to Henri Sequeira for translations). (1/3/2010)
-1.9 - Fix to undefined function error - causing problems - sorry for the trouble everyone. (12/28/2009)
-1.8 - Added Fix for users without encoding functions in PHP4 to be able to use. This may have caused some problems with users on 1.7. (12/21/2009)
-	  Added Options for Language selection. (12/21/2009)
-	  Added French Language and buttons (special thanks to Henri Sequeira for translations). (12/21/2009)
-	  Added Lightbox type effect for "View Larger Image" function.(12/22/2009)
-	  Modified Style Call to use a more WP friendly method to not rely on a "guess" as to where the core WP files are located. (12/22/2009)
-	  Fixed Open in new window functionality - was not working 100% of the time. (12/22/2009)
-1.7 - Add Curl option for users that cant use file_get_contents() for some reason or another. (12/1/2009)
-	  Added Show on Single Page Only option to Options Page.(11/30/2009)
-	  Added a way to change encoding display of prices from API if funny characters are showing.(12/1/2009)
-1.6 - Added Options to let admin choose if they want to "Hook" into the_excerpt and the_content hooks in Main Options with override on each post/page.(10/3/2009)
- 	  Added Open in a New Window Option (for Amazon button) in Main Options with override on each page/post.(10/3/2009)
-	  Added "Show Only on Single Page" option to individual post/page options.(10/4/2009)
-	  Added Shortcode functionality to allow addition of unlimited products in the post/page content.(10/4/2009)
-	  Added "Quick Fix - Hide Warnings" option in Main Options. Adds ini_set("display_errors", 0) to code to help some admins hide any Warnings if their PHP settings are set to show them.(10/3/2009)
-	  Fixed Array Merge Warning when item is not an array.(10/3/2009)
-	  Fixed "This Items not available in your locale" message as to when it acatually displays and spelling.(10/3/2009)
-	  Added Options to let admin add their own Error Messages for Item Not available and Amazon Hidden Price notificaton.(10/3/2009)
-	  Updated Default CSS styles to include in Stock and Out of Stock classes and made adjustments to other improper styles. (10/3/2009)1.5 - Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
-1.4 - Added menthod to restore default CSS if needed - by deleting all CSS in options panel and saving - default css will re-appear in box. (9/16/2009) 
-1.3	- Added new feature to be able to adjust or add your own styles. (9/16/2009)
-1.2	- Fix to image call procedure to help with "no image available" issue. (9/15/2009)
-1.1	- Minor Fixes/Spelling Error corrections & code cleanup to prep for WordPress hosting of Plugin. (9/14/2009)
-1.0	- Plugin Release (9/12/2009)
-
+Version: 2.0
     Copyright (C) 2009 Donald J. Fischer
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,13 +18,13 @@ Version info:
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-//error_reporting(E_ALL);
-//ini_set("display_errors", 0); 
 
 // Warnings Quickfix
 	if(get_option('apipp_hide_warnings_quickfix')==true){
 		 ini_set("display_errors", 0); //turns off error display
 	}
+	register_activation_hook(__FILE__,'appip_install');
+	register_deactivation_hook(__FILE__,'appip_deinstall');
 
 // Variables
 	global $public_key;
@@ -86,6 +58,9 @@ Version info:
 	global $addestrabuybutton;
 	global $awspagequery;
 	global $apip_language;
+	global $appuninstall;
+	global $appuninstallall;
+	global $thedefaultapippstyle;
 
 // Includes
 	require_once("inc/sha256.inc.php"); //required for php4
@@ -97,24 +72,31 @@ Version info:
 
 //upgrade check. Lets me add/change the default style etc to fix/add new items during updrages.
 	$thisstyleversion=get_option('apipp_product_styles_default_version');
-	if($thisstyleversion!="1.6"){
+	if($thisstyleversion!="1.7" || get_option("apipp_product_styles_default")==''){
 		update_option("apipp_product_styles_default",$thedefaultapippstyle);
-		update_option("apipp_product_styles_default_version","1.6");
+		update_option("apipp_product_styles_default_version","1.7");
+		
+		//add the new element style to their custom ones - so at least it has the default functionality. They can change it after if they like
+		$apipp_product_styles_cust_temp = get_option("apipp_product_styles");
+ 		if($apipp_product_styles_cust_temp!=''){
+ 			update_option("apipp_product_styles",$apipp_product_styles_cust_temp.'div.appip-multi-divider{margin:10px 0;}');
+ 		}
+ 		
 		update_option("apipp_amazon_notavailable_message","This item is may not be available in your area. Please click the image or title of product to check pricing & availability."); //default message
 		update_option("apipp_amazon_hiddenprice_message","Price Not Listed"); //default message - done
 		update_option("apipp_hook_content","1"); //default is yes - done
 		update_option("apipp_hook_excerpt","0"); //default is no - done
-		update_option('apipp_open_new_window',"0"); //newoption added at 1.6 - done
+		update_option('apipp_open_new_window',"0"); //default is no - newoption added at 1.6 - done
 	}
 //added in 1.7 to allow those that could not use file_get_contents() to use Curl instead.		
-		if(get_option('awsplugin_amazon_usefilegetcontents')==''){update_option('awsplugin_amazon_usefilegetcontents','1');}
-		if(get_option('awsplugin_amazon_usecurl')==''){update_option('awsplugin_amazon_usecurl','0');}
-		//if(get_option('apipp_API_call_method')==''){update_option('apipp_API_call_method','0');}
-		if(get_option('apipp_API_call_method')=='' && get_option('awsplugin_amazon_usecurl')=='0'){
-			update_option('apipp_API_call_method','0');}
-		elseif(get_option('apipp_API_call_method')=='' && get_option('awsplugin_amazon_usecurl')!='1'){
-			update_option('apipp_API_call_method','1');
-		}
+	if(get_option('awsplugin_amazon_usefilegetcontents')==''){update_option('awsplugin_amazon_usefilegetcontents','1');}
+	if(get_option('awsplugin_amazon_usecurl')==''){update_option('awsplugin_amazon_usecurl','0');}
+	//if(get_option('apipp_API_call_method')==''){update_option('apipp_API_call_method','0');}
+	if(get_option('apipp_API_call_method')=='' && get_option('awsplugin_amazon_usecurl')=='0'){
+		update_option('apipp_API_call_method','0');}
+	elseif(get_option('apipp_API_call_method')=='' && get_option('awsplugin_amazon_usecurl')!='1'){
+		update_option('apipp_API_call_method','1');
+	}
 	
 	
 	session_start();	
@@ -123,12 +105,14 @@ Version info:
     if(!isset($_SESSION['Amazon-PIPP-Cart-ID'])) $_SESSION['Amazon-PIPP-Cart-ID']='';
     
 	$awspagequery		= '';
-	$public_key 		= get_option('awsplugin_amazon_publickey'); //Developer Public AWS Key
-	$private_key 		= get_option('awsplugin_amazon_secretkey'); //Developer Secret AWS Key
+	$public_key 		= get_option('apipp_amazon_publickey'); //Developer Public AWS Key
+	$private_key 		= get_option('apipp_amazon_secretkey'); //Developer Secret AWS Key
+	$appuninstall 		= get_option('apipp_uninstall'); //Uninstall database and options
+	$appuninstallall	= get_option('apipp_uninstall_all'); //Uninstall shortcodes in pages an posts
 	$aws_partner_id		= get_option('apipp_amazon_associateid'); //Amazon Partner ID 
 	//$aws_partner_locale	= get_option('apipp_amazon_locale'); //Amazon Locale - moved to translations file
 	$awsPageRequest 	= 1;
-	$aws_plugin_version = "1.9.1";
+	$aws_plugin_version = "2.0";
 	$amazonhiddenmsg 	= get_option('apipp_amazon_hiddenprice_message'); //Amazon Hidden Price Message
 	$amazonerrormsg 	= get_option('apipp_amazon_notavailable_message'); //Amazon Error No Product Message
 	$apipphookexcerpt 	= get_option('apipp_hook_excerpt'); //Hook the excerpt?
@@ -174,7 +158,7 @@ Version info:
 	
 	// 1.7 - change encoding if needed via GET
 	// use http://yoursite.com/?resetenc=UTF-8 or http://yoursite.com/?resetenc=ISO-8859-1
-	// this will be the mode you wat the text OUTPUT as.
+	// this will be the mode you want the text OUTPUT as.
 	if(isset($_GET['resetenc'])){
 		if($_GET['resetenc']=='ISO-8859-1' || $_GET['resetenc']=='UTF-8'){
 			update_option('appip_encodemode',$_GET['resetenc']);
@@ -184,11 +168,9 @@ Version info:
 	if($apippopennewwindow==true){
 		$apippnewwindowhtml=' target="amazonwin" ';
 	}
-	
 	if($amazonerrormsg==''){
 		$amazonerrormsg='Product Unavailable.';
 	}
-	
 	if($amazonhiddenmsg==''){
 		$amazonhiddenmsg='Visit Amazon for Price.';
 	}
@@ -218,7 +200,9 @@ Version info:
 	if(trim(get_option("apipp_product_styles")) == ''){ //reset to default styles if user deletes styles in admin
 		update_option("apipp_product_styles",$thedefaultapippstyle);
 	}
+	
 // Filters & Hooks
+	
 	add_filter('the_content', 'aws_prodinpost_filter_content', 10); //hook content - we will filter the override after
 	add_filter('the_excerpt', 'aws_prodinpost_filter_excerpt', 10); //hook excerpt - we will filter the override after 
 	add_action('wp_head','aws_prodinpost_addhead',10); //add styles to head
@@ -227,6 +211,89 @@ Version info:
 	//add_action('wp','aws_prodinpost_cartsetup', 1, 2); //Future Item
 
 // Functions
+	function appip_deinstall() {
+		global $wpdb;
+		$appuninstall 		= get_option('apipp_uninstall'); 
+		$appuninstallall	= get_option('apipp_uninstall_all');
+		if($appuninstall == 'true'){
+			$appiptable = $wpdb->prefix . 'amazoncache'; 
+			$deleteSQL = "DROP TABLE $appiptable";
+	      	$wpdb->query($deleteSQL);
+			delete_option('apipp_amazon_publickey');
+			delete_option('apipp_amazon_secretkey');
+			delete_option('apipp_uninstall');
+			delete_option('apipp_uninstall_all');
+			delete_option('apipp_amazon_associateid'); 
+			delete_option('apipp_amazon_locale');
+			delete_option('apipp_amazon_hiddenprice_message');
+			delete_option('apipp_amazon_notavailable_message');
+			delete_option('apipp_hook_excerpt');
+			delete_option('apipp_hook_content');
+			delete_option('apipp_open_new_window');
+			delete_option('apipp_product_styles_default'); 
+			delete_option('apipp_API_call_method');
+			delete_option('appip_encodemode');
+			delete_option('apipp_amazon_language');
+			delete_option('apipp_product_styles_mine');
+			delete_option('apipp_version');
+			delete_option('apipp_show_single_only');
+			delete_option('apipp_product_styles_default_version');
+			delete_option('apipp_product_styles');
+		}
+
+		if($appuninstall == 'true' && $appuninstallall == 'true'){
+			//DELETE ALL POST META FOR ITEMS WITH APIPP USAGE
+			$remSQL = "DELETE FROM $wpdb->postmeta WHERE `meta_key` LIKE '%amazon-product%';";
+			$cleanit = $wpdb->query($remSQL);
+			//Now get data for IDs with content or excerpt containing the shortcodes.
+			$thesqla = "SELECT ID, post_content, post_excerpt FROM $wpdb->posts WHERE post_content like '%[AMAZONPRODUCT%' OR post_excerpt like '%[AMAZONPRODUCT%';";
+			$postData = $wpdb->get_results($thesqla);
+			if(count($postData)>0){
+				foreach ($postData as $pdata){
+					$pcontent = $pdata->post_content;
+					$pexcerpt = $pdata->post_excerpt;
+					$pupdate  = 0;
+					$pid 	  = $pdata->ID;
+					$search   = "@(?:<p>)*\s*\[AMAZONPRODUCT\s*=\s*(.+|^\+)\]\s*(?:</p>)*@i"; 
+					if(preg_match_all($search, $pcontent, $matches1)) {
+						if (is_array($matches1)) {
+							foreach ($matches1[1] as $key =>$v0) {
+								$search 	= $matches1[0][$key];
+								$ASINis		= $matches1[1][$key];
+								$pcontent 	= str_replace ($search, '', $pcontent);
+							}
+							$pupdate  = 1;
+						}
+					}
+					if(preg_match_all($search, $pexcerpt, $matches2)) {
+						if (is_array($matches2)) {
+							foreach ($matches2[1] as $key =>$v0) {
+								$search		= $matches2[0][$key];
+								$ASINis		= $matches2[1][$key];
+								$pexcerpt	= str_replace ($search, '', $pexcerpt);
+							}
+							$pupdate  = 1;
+						}
+					}
+					if($pupdate == 1){
+						$wpdb->query("UPDATE $wpdb->posts SET post_excerpt = '$pexcerpt', post_content = '$pcontent' WHERE ID = '$pid';");
+					}
+				}
+			}
+		}
+	}
+	// Install Function - called on activation
+	function appip_install () {
+		global $wpdb, $wp_roles, $wp_version, $aws_plugin_version;
+		if(get_option("apipp_version")== ''){
+			$appiptable = $wpdb->prefix . 'amazoncache'; 
+			$createSQL = "CREATE TABLE IF NOT EXISTS $appiptable (`Cache_id` int(10) NOT NULL auto_increment, `URL` text NOT NULL, `updated` datetime default NULL, `body` text, PRIMARY KEY (`Cache_id`), UNIQUE KEY `URL` (`URL`(255)), KEY `Updated` (`updated`)) ENGINE=MyISAM;";
+	      	//echo $createSQL;
+	      	$wpdb->query($createSQL);
+			add_option("apipp_version", $aws_plugin_version);
+		}
+	}
+
 	//Single Product API Call - Returns One Product Data
 	function getSingleAmazonProduct($asin='',$extratext='',$extrabutton=0){
 		global $public_key, $private_key, $aws_partner_id,$aws_partner_locale,$amazonhiddenmsg,$amazonerrormsg,$apippopennewwindow,$apippnewwindowhtml;
@@ -255,13 +322,26 @@ Version info:
 			$errors='';
 			//Main Amazon API Call
 			$pxml = aws_signed_request($aws_partner_locale, array("Operation"=>"ItemLookup","ItemId"=>"$ASIN","ResponseGroup"=>"ItemAttributes,Images,Offers","IdType"=>"ASIN","AssociateTag"=>"$aws_partner_id"), $public_key, $private_key);
-			
-			//print_r($pxml);
-			if(isset($pxml["ItemLookupResponse"]["Items"]["Request"]["Errors"]["Error"]["Message"])){
-				$errors=$pxml["ItemLookupResponse"]["Items"]["Request"]["Errors"]["Error"]["Message"];
+			if(isset($pxml["itemlookuperrorresponse"]["error"]["code"])){
+				$errors = $pxml["itemlookuperrorresponse"]["error"]["code"]["message"];
 			}
 			if($errors!=''){
 				$hiddenerrors = "<"."!-- HIDDEN AMAZON PRODUCT IN A POST ERROR: ". $errors ."-->";
+				if($extratext!=''){return $hiddenerrors.$extratext;}
+				return $hiddenerrors;
+			}elseif($pxml=='exceeded'){
+				$hiddenerrors = "<"."!-- HIDDEN AMAZON PRODUCT IN A POST ERROR: Requests Exceeded -->";
+				$errors = 'Requests Exceeded';
+				if($extratext!=''){return $hiddenerrors.$extratext;}
+				return $hiddenerrors;
+			}elseif($pxml=='no signature match'){
+				$hiddenerrors = "<"."!-- HIDDEN AMAZON PRODUCT IN A POST ERROR: Signature does not match AWS Signature. Check AWS Keys and Signature method. -->";
+				$errors = 'Signature does not match';
+				if($extratext!=''){return $hiddenerrors.$extratext;}
+				return $hiddenerrors;
+			}elseif($pxml=='not valid'){
+				$hiddenerrors = "<"."!-- HIDDEN AMAZON PRODUCT IN A POST ERROR: Item Not Valid. Possibly not available in your locale or you did not enter a correct ASIN. -->";
+				$errors = 'Not a valid item';
 				if($extratext!=''){return $hiddenerrors.$extratext;}
 				return $hiddenerrors;
 			}else{
@@ -347,7 +427,7 @@ Version info:
 				$returnval .= '									<span class="amazon-release-date">'.$appip_text_reldate.' '.date("F j, Y", strtotime($result["ReleaseDate"])).'.</span>'."\n";
 					}
 				}
-				$returnval .= '									<br /><div><a style="display:block;margin-top:8px;margin-bottom:5px;width:165px;" '. $apippnewwindowhtml .' href="' . $result["URL"] .'"><img src="'.WP_PLUGIN_URL.'/amazon-product-in-a-post-plugin/images/'.$buyamzonbutton.'" border="0" style="border:0 none !important;margin:0px !important;background:transparent !important;"/></a></div>'."\n";
+				$returnval .= '									<br /><div><a style="display:block;margin-top:8px;margin-bottom:5px;width:165px;" '. $apippnewwindowhtml .' href="' . $result["URL"] .'"><img src="'.WP_PLUGIN_URL.'/amazon-product-in-a-post-plugin/images/'.$buyamzonbutton.'" border="0" style="border:0 none !important;margin:0px !important;background:transparent !important;" /></a></div>'."\n";
 				if($extrabutton==1 && $aws_partner_locale!='.com'){
 				//$returnval .= '									<br /><div><a style="display:block;margin-top:8px;margin-bottom:5px;width:165px;" '. $apippnewwindowhtml .' href="' . $result["URL"] .'"><img src="'.WP_PLUGIN_URL.'/amazon-product-in-a-post-plugin/images/buyamzon-button.png" border="0" style="border:0 none !important;margin:0px !important;background:transparent !important;"/></a></div>'."\n";
 				}
@@ -369,186 +449,6 @@ Version info:
 		}
 	}
 	
-	// Search Product API Call - Returns Search Product Data for 10 items per page. 
-	// For Future Use - Not Active Right now.
-	function searchAmazonProduct($searchkey=''){
-		global $public_key, $private_key, $aws_partner_id, $aws_eatra_pages,$aws_partner_locale;
-		$pxml = aws_signed_request($aws_partner_locale, array($aws_eatra_pages."Operation"=>"ItemSearch","SearchIndex"=>Books,"Keywords"=>"harry+potter","ResponseGroup"=>"ItemAttributes","IdType"=>"ASIN","MerchantId"=>"Amazon","AssociateTag"=>"$aws_partner_id"), $public_key, $private_key);
-		foreach($pxml['ItemSearchResponse']['Items']['Item'] as $items){
-			$result 	 = FormatSearchResult($items["ItemAttributes"]);
-			$returnval  .= awsImageGrabber($items["ASIN"], "M") . "<br />";
-			$returnval  .= "Title: ".$result["Title"] . "<br />";
-			$returnval  .= "ASIN: ".$items["ASIN"] . "<br />";
-			$returnval  .= "Price: ".$result["Price"] . "<br />";
-			$returnval  .= "<br /><br />";
-			return $returnval;
-		}
-	}
-	// Purchase URL Product API Call - For Specific Offer Purchase
-	// For Future Use When Cart is Implemented (If I get around to it) - Not Active Right now.
-	function AmazonPurchaseProductURL($offerlistingid=''){
-		global $public_key, $private_key, $aws_partner_id, $aws_eatra_pages,$aws_partner_locale;
-		if($offerlistingid!=''){
-			if($_SESSION['Amazon-PIPP-Cart-ID']==''){
-				//Main API Call if no cart ID is found
-				$pxml = aws_signed_request($aws_partner_locale, array(
-					"Operation" => "CartCreate",
-					"MergeCart"=> "True",
-					"Item.1.OfferListingId" =>$offerlistingid,
-					"Item.1.Quantity" => 1,
-					"AssociateTag"=>"$aws_partner_id"
-					), $public_key, $private_key);
-				$result = $pxml["CartCreateResponse"]["Cart"];
-				$CartId = $result["CartId"]; 
-	            $HMAC   = $result["HMAC"];
-	            $URLEncodedHMAC = $result["URLEncodedHMAC"];
-	            $PurchaseURL = $result["PurchaseURL"];
-				return $PurchaseURL;
-			}else{
-				//Main API Call if a cart ID is found
-				$pxml = aws_signed_request($aws_partner_locale, array(
-					"Operation" => "CartCreate",
-					"MergeCart"=> "True",
-					"Item.1.OfferListingId" =>$offerlistingid,
-					"Item.1.Quantity" => 1,
-					"AssociateTag"=>"$aws_partner_id"
-					), $public_key, $private_key);
-				$result = $pxml["CartCreateResponse"]["Cart"];
-				$CartId = $result["CartId"];
-	            $HMAC   = $result["HMAC"];
-	            $URLEncodedHMAC = $result["URLEncodedHMAC"];
-	            $PurchaseURL = $result["PurchaseURL"];
-				return $PurchaseURL;
-			}
-		}
-		return;
-	}
-	
-	//For Future Use - Not Active Right now. Sets up Cart ID from Amazon API
-	function aws_prodinpost_cartsetup(){ 
-		global $wp_query, $post, $public_key, $private_key, $aws_partner_id, $aws_eatra_pages,$aws_partner_locale;
-		session_start();
-		if(isset($_GET['offerid'])){
-			$offerlistingid = $_GET['offerid'];
-			if(	$_SESSION['Amazon-PIPP-Cart-ID'] !=''){
-				//cartadd
-				$pxml = aws_signed_request($aws_partner_locale, array(
-					"CartId" => $_SESSION['Amazon-PIPP-Cart-ID'],
-					"HMAC" => $_SESSION['Amazon-PIPP-Cart-HMAC'],
-					"Operation" => "CartAdd",
-					"MergeCart"=> "False",
-					"Item.1.OfferListingId" =>$offerlistingid,
-					"Item.1.Quantity" => 1,
-					"AssociateTag"=>"$aws_partner_id"
-					), $public_key, $private_key);
-				$result = $pxml["CartAddResponse"]["Cart"];
-				$CartId = $result["CartId"]; 
-	            $HMAC   = $result["HMAC"];
-	            $URLEncodedHMAC = $result["URLEncodedHMAC"];
-	            $PurchaseURL = $result["PurchaseURL"];
-			}else{
-				//cartcreate
-				$pxml = aws_signed_request($aws_partner_locale, array(
-					"Operation" => "CartCreate",
-					"MergeCart"=> "False",
-					"Item.1.OfferListingId" =>$offerlistingid,
-					"Item.1.Quantity" => 1,
-					"AssociateTag"=>"$aws_partner_id"
-					), $public_key, $private_key);
-				$result = $pxml["CartCreateResponse"]["Cart"];
-				$CartId = $result["CartId"]; 
-	            $HMAC   = $result["HMAC"];
-	            $URLEncodedHMAC = $result["URLEncodedHMAC"];
-	            $_SESSION['Amazon-PIPP-Cart-HMAC'] = $HMAC;
-	            $_SESSION['Amazon-PIPP-Cart-Encoded-HMAC'] = $URLEncodedHMAC;
-	            $_SESSION['Amazon-PIPP-Cart-ID'] = $CartId;
-				
-				//cartadd
-				$pxml = aws_signed_request($aws_partner_locale, array(
-					"CartId" => $CartId,
-					"HMAC" => $HMAC ,
-					"Operation" => "CartAdd",
-					"MergeCart"=> "False",
-					"Item.1.OfferListingId" =>$offerlistingid,
-					"Item.1.Quantity" => 1,
-					"AssociateTag"=>"$aws_partner_id"
-					), $public_key, $private_key);
-				$result = $pxml["CartAddResponse"]["Cart"];
-				$CartId = $result["CartId"]; 
-	            $HMAC   = $result["HMAC"];
-	            $URLEncodedHMAC = $result["URLEncodedHMAC"];
-	            $PurchaseURL = $result["PurchaseURL"];
-			}
-			
-		}
-			// This Part Manipulates/Tricks the $post and $wp_query Objects to 
-			// create a custom Added to Cart Page without needing to Physically create one.
-			// It also makes it so you don't need to go to Amazon.com when you add an item to the cart.
-			
-			if(isset($_GET['offerid'])){
-				unset($wp_query->posts);
-				unset($wp_query->post);
-				unset($wp_query->comments); 
-		    	unset($wp_query->comment);
-				$wp_query->post_count = 1;
-				$wp_query->comment_count = 0;
-				$wp_query->current_comment = -1;
-				$wp_query->found_posts = 1;
-				$wp_query->max_num_pages = 1;
-				$wp_query->max_num_comment_pages = 0;
-				$wp_query->is_single = 0 ;
-				$wp_query->is_preview = 0 ;
-				$wp_query->is_page = 1;
-				$wp_query->is_archive = 0; 
-				$wp_query->is_date = 0; 
-				$wp_query->is_year = 0; 
-				$wp_query->is_month = 0; 
-				$wp_query->is_day = 0; 
-				$wp_query->is_time = 0; 
-				$wp_query->is_author = 0; 
-				$wp_query->is_category = 0; 
-				$wp_query->is_tag = 0; 
-				$wp_query->is_tax = 0; 
-				$wp_query->is_search = 0; 
-				$wp_query->is_feed = 0; 
-				$wp_query->is_comment_feed = 0; 
-				$wp_query->is_trackback = 0; 
-				$wp_query->is_home = 0;
-				$wp_query->is_404 = 0; 
-				$wp_query->is_comments_popup = 0; 
-				$wp_query->is_admin = 0; 
-				$wp_query->is_attachment = 0; 
-				$wp_query->is_singular = 0; 
-				$wp_query->is_robots = 0; 
-				$wp_query->is_posts_page = 0; 
-				$wp_query->is_paged = 0; 
-				$postsarray = array(
-					'ID' => 0,
-					'post_author' =>  1,
-					'post_date' =>  date("Y-m-d h:i:s", time()),
-					'post_date_gmt' =>  date("Y-m-d h:i:s", time()),
-					'post_content' => "Thank you. The item has been added to yout cart. To checkout, <a href=\"http://www.amazon.com/gp/cart/view.html/\">go here</a>.",
-					'post_title' =>  "The Product has been added to your Cart.",
-					'post_excerpt' =>  "test excerpt",
-					'post_status' =>  "publish",
-					'comment_status' =>  "closed",
-					'ping_status' =>  "closed",
-					'post_name' =>  "don-title-test",
-					'post_modified' =>  date("Y-m-d h:i:s", time()),
-					'post_modified_gmt' =>  date("Y-m-d h:i:s", time()),
-					'post_content_filtered' => "test Don", 
-					'post_parent' =>  0,
-					'guid' =>  get_bloginfo('url'),
-					'menu_order' =>  0,
-					'post_type' =>  "page",
-					'comment_count' =>  0
-				);
-			$wp_query->posts =	array((object)$postsarray);
-			add_filter('edit_post_link', create_function( '$a', 'return "";' ), 10);
-			add_filter('the_title', create_function( '$a', 'return "The Product has been added to your Cart.";' ), 10);
-			add_filter('the_permalink', create_function( '$a', 'return "'.get_bloginfo('url').'";' ), 10);		
-			}
-	}
 	//Amazon Product Image from ASIN function - Returns HTML Image Code
 	function awsImageGrabber($imgurl, $class=""){
 		global $asin;
@@ -671,7 +571,8 @@ Version info:
 	  	$apippShowSingularonly = get_post_meta($post->ID,'amazon-product-singular-only',true);
 		//replace short tag here
 		   if ( stristr( $text, '[AMAZONPRODUCT' )) {
-				$search = "@(?:<p>)*\s*\[AMAZONPRODUCT\s*=\s*(\w+|^\+)\]\s*(?:</p>)*@i"; 
+				//$search = "@(?:<p>)*\s*\[AMAZONPRODUCT\s*=\s*(\w+|^\+|,)\]\s*(?:</p>)*@i"; //need to change to allow commas in regex
+				$search = "@(?:<p>)*\s*\[AMAZONPRODUCT\s*=\s*(.+|^\+)\]\s*(?:</p>)*@i"; 
 				if	(preg_match_all($search, $text, $matches)) {
 					if (is_array($matches)) {
 						foreach ($matches[1] as $key =>$v0) {
@@ -680,7 +581,21 @@ Version info:
 							if($apippShowSingularonly=='1' && !is_singular()){
 								$text	= str_replace ($search, '', $text);
 							}else{
-								$text	= str_replace ($search, getSingleAmazonProduct($ASINis,''), $text);
+								if(strpos($ASINis,',')){
+									$product_text = '';
+									//clean the spaces out if any
+									$ASINis = str_replace(' ','',$ASINis);
+									$ASINisArray = explode(',',$ASINis);
+									//loop through them
+									foreach($ASINisArray as $ASINmt){
+										$product_text	.= getSingleAmazonProduct($ASINmt,'');
+										$product_text	.= '<div class="appip-multi-divider"><!--appip divider--></div>';
+									}
+									//replace the original shortcode with new multi products
+									$text	= str_replace ($search, $product_text, $text);
+								}else{
+									$text	= str_replace ($search, getSingleAmazonProduct($ASINis,''), $text);
+								}
 							}
 						}
 					}
@@ -733,9 +648,9 @@ Version info:
 		$amazonStylesToUseMine = get_option("apipp_product_styles_mine"); //is box checked?
 		echo '<'.'!-- Amazon Product In a Post Plugin Styles & Scripts - Version '.$aws_plugin_version.' -->'."\n";
 		if($amazonStylesToUseMine=='true'){ //use there styles
-			echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?appip_style=custom" type="text/css" media="screen" />'."\n";
+			echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?apipp_style=custom" type="text/css" media="screen" />'."\n";
 		}else{ //use default styles
-			echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?appip_style=default" type="text/css" media="screen" />'."\n";
+			echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?apipp_style=default" type="text/css" media="screen" />'."\n";
 		}
 		echo '<link rel="stylesheet" href="'.WP_PLUGIN_URL.'/amazon-product-in-a-post-plugin/css/amazon-lightbox.css" type="text/css" media="screen" />'."\n";
 		echo '<'.'!-- End Amazon Product In a Post Plugin Styles & Scripts-->'."\n";

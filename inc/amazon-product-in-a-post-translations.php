@@ -89,7 +89,7 @@
 	//1.8 for language and buttons
 	if($aws_partner_locale=='com'){$buyamzonbutton = "buyamzon-button.png";} //set back to .com for US locale
 	if($aws_partner_locale=='fr' || $apip_language =='fr'){$buyamzonbutton = "buyamzon-button-fr.png";} //set back to .fr for French locale
-	if($apip_language =='sp'){$buyamzonbutton = "buyamzon-button-plain.png";} //set back to .com for Spanish language
+	if($apip_language =='appplugin'){$buyamzonbutton = "buyamzon-button-plain.png";} //set back to .com for Spanish language
 	if($aws_partner_locale=='co.uk'){$buyamzonbutton = "buyamzon-button-uk.png";} //set back to .uk for UK locale
 
 ?>

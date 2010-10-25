@@ -11,6 +11,14 @@
 							"desc" => "Your Amazon Affiliate ID<br /><br />",
 				    		"id" => $shortname_apipp."_amazon_associateid",
 				    		"type" => "text"),
+					array(	"name" => "Amazon Public Key",
+							"desc" => "Your Amazon Public Key. If you do not have one, you will need to sign up for one. <a href='http://aws-portal.amazon.com/gp/aws/developer/account/index.html' target='_blank'>You can do so here</a>.<br /><br />",
+				    		"id" => $shortname_apipp."_amazon_publickey",
+				    		"type" => "text"),
+					array(	"name" => "Amazon Private Key",
+							"desc" => "Your Amazon Private Key. <a href='http://www.clickonf5.org/tutorial/amazon-developer-api-secret-access-key/6932' target='_blank'>Check out this page</a> for more information on Public and Secret Keys.<br /><br />",
+				    		"id" => $shortname_apipp."_amazon_secretkey",
+				    		"type" => "textlong"),
 					array(	"name" => "Your Amazon Locale/Region",
 							"desc" => "The Locale to use for Amazon API Calls (ca,com,co.uk,de,fr,jp) Default is 'com' for US.<br /><br />",
 				    		"id" => $shortname_apipp."_amazon_locale",
@@ -35,12 +43,12 @@
 					array(	"name" => "Not Available Error Message",
 							"desc" => "The message to display if the item is not available for some reason, i.e., your locale or no longer available.<br /><br />",
 				    		"id" => $shortname_apipp."_amazon_notavailable_message",
-				    		"type" => "text"),
+				    		"type" => "textlong"),
 				    		
 					array(	"name" => "Amazon Hidden Price Message",
 							"desc" => "For Some products, Amazon will hide the List price of a product. When hidden, this plugin cannot show a price for the product. This message will display in the List Price area when that occurs.<br /><br />",
 				    		"id" => $shortname_apipp."_amazon_hiddenprice_message",
-				    		"type" => "text"),
+				    		"type" => "textlong"),
 				    		
 					array(	"name" => "Hook plugin into Excerpt?",
 							"desc" => "If you want to have the product displayed when the <code>the_excerpt()</code> function is called, select this box. Disable this function if your theme uses short excerpts on pages, such as the home page. You can override this on each individual page/post.<br /><br />",
@@ -57,6 +65,16 @@
 				    		"id" => $shortname_apipp."_hide_warnings_quickfix",
 				    		"type" => "checkbox"),
 				
+					array(	"name" => "Uninstall when deactivated?",
+							"desc" => "<span style='color:red;font-weight:bold;'>CAREFUL WITH THIS!!</span> If you check this box, ALL settings and database items will be removed when you deativate the plugin<br /><br />",
+				    		"id" => $shortname_apipp."_uninstall",
+				    		"type" => "checkbox"),
+
+					array(	"name" => "Remove ALL traces when uninstalled?",
+							"desc" => "<span style='color:red;font-weight:bold;'>AGAIN, BE CAREFUL WITH THIS!!</span> If you check this box AND the above box, <i>ALL</i> Amazon shortcodes will be removed from posts and pages and all meta data associated with this plugin will be cleaned up and cleared out when you deativate this plugin. As a safety precaution, both boxes must be checked or data will not be removed.<br /><br />",
+				    		"id" => $shortname_apipp."_uninstall_all",
+				    		"type" => "checkbox"),
+
 					array(	"name" => "Open Product Link in New Window?",
 							"desc" => "If you want to have the product displayed in a new window, check this box. Default is no.<br /><br />",
 				    		"id" => $shortname_apipp."_open_new_window",
@@ -78,7 +96,6 @@
 							"desc" => "If you want to use your own styles, check this box and enter them below.<br /><br />",
 				    		"id" => $shortname_apipp."_product_styles_mine",
 				    		"type" => "checkbox"),
-					
 					array(	"name" => "Product Styles",
 							"desc" => "Your Custom styles can go here.<br /><br />",
 				    		"id" => $shortname_apipp."_product_styles",
@@ -155,11 +172,15 @@
 	}
 	
 	function apipp_options_admin_page($themename, $shortname, $options) {
+		global $public_key,$private_key;
+		global $appuninstall;
+		global $appuninstallall;
 	    if ( $_REQUEST['saved'] ) echo '<div id="message" class="updated fade"><p><strong>'.$themename.' settings saved.</strong></p></div>';
 	    if ( $_REQUEST['reset'] ) echo '<div id="message" class="updated fade"><p><strong>'.$themename.' settings reset.</strong></p></div>';
 	?>
 	<div class="wrap"><div id="icon-amazon" class="icon32"><br /></div>
 	<h2><?php echo $themename; ?> options</h2>
+	<?php /*echo $public_key."|".$private_key.'|'. $appuninstall.'|'. $appuninstallall;*/ ?>
 	<form method="post" action="">
 	<input type="hidden" name="<?php echo $shortname; ?>_option" id="<?php echo $shortname; ?>_option" value="<?php echo $shortname; ?>" />
 	<table class="optiontable">
@@ -170,6 +191,13 @@
 			apipp_option_wrapper_header($value);
 			?>
 			        <input style="width:240px;" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" type="<?php echo $value['type']; ?>" value="<?php if ( get_settings( $value['id'] ) != "") { echo get_settings( $value['id'] ); } else { echo $value['std']; } ?>" />
+			<?php
+			apipp_option_wrapper_footer($value);
+			break;
+			case 'textlong':
+			apipp_option_wrapper_header($value);
+			?>
+			        <input style="width:95%;" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" type="<?php echo $value['type']; ?>" value="<?php if ( get_settings( $value['id'] ) != "") { echo get_settings( $value['id'] ); } else { echo $value['std']; } ?>" />
 			<?php
 			apipp_option_wrapper_footer($value);
 			break;
@@ -346,7 +374,7 @@
 		</tr>
 		<?php 
 	}
-$thedefaultapippstyle=' /*version 1.5*/
+$thedefaultapippstyle=' /*version 1.7*/
 	table.amazon-product-table {
 		border-collapse : collapse;
 		border : 0 none !important ;
@@ -487,6 +515,9 @@ $thedefaultapippstyle=' /*version 1.5*/
 	span.outofstock {
 		font-size:8pt;
 		color:#800000;
+	}
+	div.appip-multi-divider {
+		margin:10px 0;
 	}
 	';
 ?>

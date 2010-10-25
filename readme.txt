@@ -3,8 +3,8 @@ Contributors: Don Fischer
 Donate link: http://fischercreativemedia.com/donate/
 Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode
 Requires at least: 2.5
-Tested up to: 2.9.1
-Stable tag: 1.9.1
+Tested up to: 3.0.1
+Stable tag: 2.0
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
@@ -32,6 +32,8 @@ To use the plugin, you must have an Amazon Affiliate Account. You can sign up he
 
 == Installation ==
 After you intall the plugin, you need to set up your Amazon Affiliate/Associate ID in the Options panel located in the AMAZON PIP menu under AMAZON PIP OPTIONS. 
+
+An AWS Public and Private/Secret KEY are HIGHLY RECOMMENDED. If you use the one that is builtinto the plugin by default, you WILL experience crazy behavior in your product pages. This is due to the changes Amazon made the AWS key usage on 10/15/2010. There is a limit to the number of API calls in an hour based on the User - so if you use mine, it will eventually reach the limit and your products will NOT display until it resets. Please be aware of this before contacting me about problems, because it will be the first question I ask.
 
 No additional adjustments are needed unless you want to configure your own CSS styles. Styles can be adjusted or removed in the Options Panel as well.
 
@@ -62,7 +64,19 @@ No additional adjustments are needed unless you want to configure your own CSS s
 See the Installation Page for deatils on setting up the Products. 
 A more detailed FAQ will come as questions arise.
 
-= How do I add a product =
+= MY PROCUCTS DO NOT DISPLAY! What is wrong? =
+* It could be several things. The FIRST thing to check is the AMAZON Public and Private/Secret Keys in the options page. If they are blank, you need to sign up for your own from amazon. You can sign up here http://aws-portal.amazon.com/gp/aws/developer/account/index.html to get your own. Without it, your products will be subject to the limits of the built in API Keys - which are limited to the number of calls per hour. Once that limit is reached, no more products will be displayed until it resets. Amazon changed this on 10/15/2010, so if it worked before and is not working now, that should be your first course of action.
+* Another common cause, is the method of the api call. By default, it is set to use "file_get_contents", but since some servers do not allow this method you may need to use the older CURL method. Change this in the options page and then check to see if the problem is resolved.
+
+= My Products only display a blank image and a "()" for the title - what is wrong? =
+* See the above question and answer - the cause and fix are the same.
+
+= Can I uninstall everything if I don't want to use the plugin anymore? =
+* Yes. With version 2.0 forward, if you want to remove EVERY TRACE of the plugin, you can (There is also a less permanent removal if you you think you may want it back in the future).
+* The full removal can be initiated by checking "Uninstall when deactivated" AND "Remove ALL traces when uninstalled" in the options page - then deactivate the plugin as usual. This will remove ALL traces of the plugin... that means: the database, options, post meta values, and shortcodes in posts and pages.
+* The partial removal can be initiated by checking only the "Uninstall when deactivated" option, then save and decativate the plugin as usual. This will remove the database (which is only chached products) and the basic options. All meta and shortcodes will remain.
+
+= How do I add a product? =
 * To Add a New Product Post, you have 3 options:
 * You can add a new post the regular way (Post / Add New / fill out the items /Publish), and them add the product as outlined above
 * You can use the Quick Add Product Feature (called Amazon PIP in the Amazon PIP menu). This is the fastest method for adding a quick product with minimum text. This Method will create a New Post in the selected categories.
@@ -94,6 +108,17 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 6. Shortcode Addition to allow unlimited products in post content.
 
 == Changelog ==
+= 2.0 =
+* Added Database for caching api calls (10/20/2010)
+* Added Options for Private and Public Keys in the options panel. (10/22/2010)
+* Added Options for Complete Removal and Partial Removal of Plugin on Deactivate. (10/24/2010)
+* Added new error checks to comply with API changes.
+* Added new Display checks to not display anything on error (except an HTML Comment in the code) (10/24/2010)
+* Fixed option naming convention to resolve a few issues with previous versions (10/24/2010)
+* Fixed come code to resolve headers sent issues. (10/23/2010)
+* Modified Style calls to fix issues with earlier versions upgrading to newer version (10/23/2010)
+* Updated FAQs (10/24/2010)
+
 = 1.9.1 =
 * Fix to WordPress Core location assumption. Caused Problem when WP core was located outside root. (1/3/2010)
 *  Added German Language. (special thanks to Henri Sequeira for translations). (1/3/2010)
