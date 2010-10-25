@@ -5,7 +5,7 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or all sales credit will go to the plugin creator by default.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 2.0
+Version: 2.0.1
     Copyright (C) 2009 Donald J. Fischer
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -322,26 +322,32 @@ Version: 2.0
 			$errors='';
 			//Main Amazon API Call
 			$pxml = aws_signed_request($aws_partner_locale, array("Operation"=>"ItemLookup","ItemId"=>"$ASIN","ResponseGroup"=>"ItemAttributes,Images,Offers","IdType"=>"ASIN","AssociateTag"=>"$aws_partner_id"), $public_key, $private_key);
+			if(!is_array($pxml)){
+				$pxml2=$pxml;
+				$pxml = array();
+				$pxml["itemlookuperrorresponse"]["error"]["code"]["message"] = $pxml2;
+			}
 			if(isset($pxml["itemlookuperrorresponse"]["error"]["code"])){
 				$errors = $pxml["itemlookuperrorresponse"]["error"]["code"]["message"];
 			}
-			if($errors!=''){
-				$hiddenerrors = "<"."!-- HIDDEN AMAZON PRODUCT IN A POST ERROR: ". $errors ."-->";
-				if($extratext!=''){return $hiddenerrors.$extratext;}
-				return $hiddenerrors;
-			}elseif($pxml=='exceeded'){
+			
+			if($errors=='exceeded'){
 				$hiddenerrors = "<"."!-- HIDDEN AMAZON PRODUCT IN A POST ERROR: Requests Exceeded -->";
 				$errors = 'Requests Exceeded';
 				if($extratext!=''){return $hiddenerrors.$extratext;}
 				return $hiddenerrors;
-			}elseif($pxml=='no signature match'){
+			}elseif($errors=='no signature match'){
 				$hiddenerrors = "<"."!-- HIDDEN AMAZON PRODUCT IN A POST ERROR: Signature does not match AWS Signature. Check AWS Keys and Signature method. -->";
 				$errors = 'Signature does not match';
 				if($extratext!=''){return $hiddenerrors.$extratext;}
 				return $hiddenerrors;
-			}elseif($pxml=='not valid'){
+			}elseif($errors=='not valid'){
 				$hiddenerrors = "<"."!-- HIDDEN AMAZON PRODUCT IN A POST ERROR: Item Not Valid. Possibly not available in your locale or you did not enter a correct ASIN. -->";
 				$errors = 'Not a valid item';
+				if($extratext!=''){return $hiddenerrors.$extratext;}
+				return $hiddenerrors;
+			}elseif($errors!=''){
+				$hiddenerrors = "<"."!-- HIDDEN AMAZON PRODUCT IN A POST ERROR: ". $errors ."-->";
 				if($extratext!=''){return $hiddenerrors.$extratext;}
 				return $hiddenerrors;
 			}else{

@@ -4,7 +4,7 @@ Donate link: http://fischercreativemedia.com/donate/
 Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode
 Requires at least: 2.5
 Tested up to: 3.0.1
-Stable tag: 2.0
+Stable tag: 2.0.1
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
