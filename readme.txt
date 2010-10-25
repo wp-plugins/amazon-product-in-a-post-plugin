@@ -8,6 +8,8 @@ Stable tag: 2.0
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
+**NOTE:** Due to changes in Amazon's API call limitations, this plugin now requires you have an AWS Public and Private Key of your own to use. You can get a new Key by signing up at http://aws-portal.amazon.com/gp/aws/developer/account/index.html.
+
 Amazon Product In a Post Plugin is used to to quickly add a formatted Amazon Product/Item to a post or page by using just the Amazon product ASIN (also known as the ISBN-10).
 
 What can you use it for? With this plugin you can:
