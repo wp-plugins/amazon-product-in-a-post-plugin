@@ -5,8 +5,8 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or all sales credit will go to the plugin creator by default.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 2.0.1
-    Copyright (C) 2009 Donald J. Fischer
+Version: 2.0.2
+    Copyright (C) 2009-2012 Donald J. Fischer
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -318,10 +318,13 @@ Version: 2.0.1
 		//if($apippOpenNewWindow!='3'){$apippnewwindowhtml=' target="amazonwin" ';}
 
 		if ($asin!=''){
-			$ASIN = $asin; //valid ASIN
-			$errors='';
-			//Main Amazon API Call
-			$pxml = aws_signed_request($aws_partner_locale, array("Operation"=>"ItemLookup","ItemId"=>"$ASIN","ResponseGroup"=>"ItemAttributes,Images,Offers","IdType"=>"ASIN","AssociateTag"=>"$aws_partner_id"), $public_key, $private_key);
+			$ASIN 					= $asin; //valid ASIN
+			$errors 				= '';
+			$appip_responsegroup 	= "ItemAttributes,Images,Offers,Reviews";
+			$appip_operation 		= "ItemLookup";
+			$appip_idtype	 		= "ASIN";
+			$pxml 					= aws_signed_request($aws_partner_locale, array("Operation"=>$appip_operation,"ItemId"=>$ASIN,"ResponseGroup" => $appip_responsegroup,"IdType"=>$appip_idtype,"AssociateTag"=>$aws_partner_id ), $public_key, $private_key);
+			
 			if(!is_array($pxml)){
 				$pxml2=$pxml;
 				$pxml = array();

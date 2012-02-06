@@ -319,14 +319,15 @@ function aws_signed_request($region, $params, $public_key, $private_key){
 	
     // some paramters
     $method = "GET";
-    $host = "ecs.amazonaws.".$region;
+    //$host = "ecs.amazonaws.".$region; //old API
+    $host = "webservices.amazon.".$region; //new API 12-2011
     $uri = "/onca/xml";
     
     // additional parameters
     $params["Service"] = "AWSECommerceService";
     $params["AWSAccessKeyId"] = $public_key;
     $params["Timestamp"] = gmdate("Y-m-d\TH:i:s\Z");
-    $params["Version"] = "2009-03-31";
+    $params["Version"] = "2011-08-01"; //"2009-03-31";
  	$keyurl = $params['AssociateTag'].$params['IdType'].$params['ItemId'].$params['Operation'];
    
     // sort the parameters

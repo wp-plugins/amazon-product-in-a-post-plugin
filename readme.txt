@@ -2,13 +2,15 @@
 Contributors: Don Fischer
 Donate link: http://fischercreativemedia.com/donate/
 Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode
-Requires at least: 2.5
-Tested up to: 3.0.1
-Stable tag: 2.0.1
+Requires at least: 3.0
+Tested up to: 3.3.2
+Stable tag: 2.0.2
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
 == Description ==
-**NOTE:** Due to changes in Amazon's API call limitations on 10/15/2010, this plugin now requires you have an AWS Public and Private Key of your own to use. You can get a new Key by signing up at http://aws-portal.amazon.com/gp/aws/developer/account/index.html.
+**NOTE:** *Version 2.0.2 only uplades the Amazon API call that goes into effect on 02/06/2012.* If you do not update the plugin will cease to function after 02/06/2012.
+
+Due to changes in Amazon's API call limitations on 10/15/2010, this plugin now requires you have an AWS Public and Private Key of your own to use. You can get a new Key by signing up at http://aws-portal.amazon.com/gp/aws/developer/account/index.html.
 
 Amazon Product In a Post Plugin is used to to quickly add a formatted Amazon Product/Item to a post or page by using just the Amazon product ASIN (also known as the ISBN-10).
 
@@ -110,6 +112,9 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 6. Shortcode Addition to allow unlimited products in post content.
 
 == Changelog ==
+= 2.0.2 =
+* Updated Amazon API Call to the latest version. REQUIRED by Amazon.
+
 = 2.0 =
 * Added Database for caching api calls (10/20/2010)
 * Added Options for Private and Public Keys in the options panel. (10/22/2010)
