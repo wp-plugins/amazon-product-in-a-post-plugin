@@ -1,9 +1,9 @@
 === Plugin Name ===
 Contributors: Don Fischer
 Donate link: http://fischercreativemedia.com/donate/
-Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode
+Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode, AWS
 Requires at least: 3.0
-Tested up to: 3.3.2
+Tested up to: 3.4.2
 Stable tag: 2.0.2
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
