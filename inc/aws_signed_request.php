@@ -25,13 +25,13 @@ if(!function_exists('aws_hash_hmac')){
 	} 
 }
 
-if(!function_exists('GetXMLTree')){
-	function GetXMLTree ($xmldata){
-		//GetXMLTree and GetChildren code from http://whoooop.co.uk/2005/03/20/xml-to-array/
+if(!function_exists('appip_get_XML_structure')){
+	function appip_get_XML_structure ($xmldata,$cached=0){
 		if($xmldata==''){return False;}
 		ini_set ('track_errors', '1');
 		$xmlreaderror = false;
-		$parser = xml_parser_create ('ISO-8859-1');
+		$charset = get_bloginfo( 'charset' ) =='' ? 'UTF-8' : get_bloginfo( 'charset' );
+		$parser = xml_parser_create ($charset);
 		xml_parser_set_option ($parser, XML_OPTION_SKIP_WHITE, 1);
 		xml_parser_set_option ($parser, XML_OPTION_CASE_FOLDING, 0);
 		if (!xml_parse_into_struct ($parser, $xmldata, $vals, $index)) {$xmlreaderror = true;}
@@ -47,6 +47,7 @@ if(!function_exists('GetXMLTree')){
 			$result [$vals [$i]['tag']] = array_merge ($attributes, GetChildren ($vals, $i, 'open'));
 		}
 		ini_set ('track_errors', '0');
+		$result['CachedAPPIP'] = $cached;
 		return $result;
 	}
 }
@@ -125,6 +126,8 @@ if(!function_exists('FormatASINResult')){
 	//main function for single product created by Don Fischer http://www.fischercreativemedia.com
 	function FormatASINResult($Result){ 
 		$Item = isset($Result['ItemLookupResponse']['Items']['Item']) ? $Result['ItemLookupResponse']['Items']['Item'] : false;
+		$cache = isset($Result['CachedAPPIP']) ? $Result['CachedAPPIP'] : 0 ;
+		
 		$errors = '';
 		if(isset($Result['ItemLookupErrorResponse']['Error']['Code'])){
 			$errors = "<"."!-- HIDDEN APIP ERROR: ".$Result['ItemLookupErrorResponse']['Error']['Code'].": ".$Result['ItemLookupErrorResponse']['Error']['Message']."-->"."\n";
@@ -145,9 +148,11 @@ if(!function_exists('FormatASINResult')){
 		if(isset($Item[0])){
 			$Itema = $Item;
 			foreach($Itema as $Item){
+				$Item['CachedAPPIP'] = $cache;
 				$RetValNew[] = GetAPPIPReturnValArray($Item,$errors);
 			}
 		}elseif($Item != false){
+			$Item['CachedAPPIP'] = $cache;
 			$RetValNew[] = GetAPPIPReturnValArray($Item,$errors);
 		}else{
 			$RetValNew[] = array('Error'=> "{$errors}",'NoData' => 1);
@@ -170,6 +175,7 @@ function GetAPPIPReturnValArray($Item,$Errors){
     $ASIN 										= isset($Item['ASIN']) ? $Item['ASIN'] : array();
     $ItemRev									= isset($Item['CustomerReviews']) ? $Item['CustomerReviews'] : array();
 	$DescriptionAmz								= isset($Item["EditorialReviews"]["EditorialReview"]) ? $Item["EditorialReviews"]["EditorialReview"] : array();
+	$cached										= isset($Item["CachedAPPIP"]) ? $Item["CachedAPPIP"] : 0;
 
 // IMAGES
 	if($ImageSM == '' && $ImageSets != ''){
@@ -362,9 +368,21 @@ function GetAPPIPReturnValArray($Item,$Errors){
 		$SavingsPrice =  0;
 		$SavingsPercent = 0;
 	}
-
-	$appTitle 				= ($appBinding != '' ) ? $appTitle .' ('.$appBinding.')' : $appTitle;
-	$EDescprition 			= $DescriptionAmz["Content"];
+	global $show_format;
+	if($show_format==1){
+		$appTitle 				= ($appBinding != '' ) ? $appTitle .' ('.$appBinding.')' : $appTitle;
+	}
+	if(isset($DescriptionAmz[0])){
+		foreach($DescriptionAmz as $descarr){
+			if(isset($descarr['Source'])){$tmpsrc = $descarr['Source'];}
+			if(isset($descarr['Content'])){$tmpcon = $descarr['Content'];}
+			$EDescprition[]		= array('Source'=>$tmpsrc,'Content'=>$tmpcon);
+		}
+	}else{
+		if(isset($DescriptionAmz['Source'])){$tmpsrc = $DescriptionAmz['Source'];}
+		if(isset($DescriptionAmz['Content'])){$tmpcon = $DescriptionAmz['Content'];}
+		$EDescprition[]			= array('Source'=>$tmpsrc,'Content'=>$tmpcon);
+	}
 	$ImageSetsArray 		= array();
 	if(isset($ImageSets[0])){
 		foreach($ImageSets as $imgset){
@@ -425,7 +443,7 @@ function GetAPPIPReturnValArray($Item,$Errors){
 	"IsEligibleForTradeIn" 					=> "{$appIsEligibleForTradeIn}",
 	"IsMemorabilia" 						=> "{$appIsMemorabilia}",
 	"IssuesPerYear" 						=> "{$appIssuesPerYear}",
-	'ItemDesc' 								=> "{$EDescprition}",
+	'ItemDesc' 								=>  $EDescprition,
 	"ItemDimensions" 						=> "{$appItemDimensions}",
 	"ItemPartNumber" 						=> "{$appItemPartNumber}",
 	"Label" 								=> "{$appLabel}",
@@ -491,7 +509,8 @@ function GetAPPIPReturnValArray($Item,$Errors){
 	"NewAmazonPricing" 						=> "{$newAmzPricing}",
 	"TotalAmzOffers" 						=> "{$appTotalOffers}",
 	"MoreOffersUrl" 						=> "{$appMoreOffersUrl}",
-	"TotalOfferPages" 						=> $appTotalOfferPages
+	"TotalOfferPages" 						=> $appTotalOfferPages,
+	"CachedAPPIP"							=> $cached,
      );
     return $RetVal;  
 } 
@@ -614,7 +633,7 @@ if(!function_exists('aws_signed_request')){
 		$purge_cache = ($_GET['purge-cache'] == '1' && $_GET['auth'] == $userauth) ? 1 : 0; 
 		if (count($result) > 0){
 			if ($result[0]->Age <= 6001 && $result[0]->Body != '' && $purge_cache == 0){ //that would be 60 min 1 seconds on MYSQL value
-				$pxml = GetXMLTree($result[0]->Body);
+				$pxml = appip_get_XML_structure($result[0]->Body, $result[0]->Age);
 				return $pxml;
 			}else{
 				if($apip_usefileget!='0'){
@@ -637,7 +656,7 @@ if(!function_exists('aws_signed_request')){
 					$xbody = trim(addslashes($response));
 					$updatesql ="INSERT IGNORE INTO ".$wpdb->prefix."amazoncache (URL, Body, Updated) VALUES ('$keyurl', '$xbody', NOW()) ON DUPLICATE KEY UPDATE Body='$xbody', Updated=NOW();";
 					$wpdb->query($updatesql);
-					$pxml = GetXMLTree($response);
+					$pxml = appip_get_XML_structure($response,0);
 					return $pxml;
 				}
 			}
@@ -661,10 +680,9 @@ if(!function_exists('aws_signed_request')){
 			$xbody = trim(addslashes($response));
 			$updatesql ="INSERT IGNORE INTO ".$wpdb->prefix."amazoncache (URL, Body, Updated) VALUES ('$keyurl', '$xbody', NOW()) ON DUPLICATE KEY UPDATE Body='$xbody', Updated=NOW();";
 			$wpdb->query($updatesql);
-			$pxml = GetXMLTree($response);
+			$pxml = appip_get_XML_structure($response,0);
 			return $pxml;
 		}
 		return False;
 	}
 }
-?>
