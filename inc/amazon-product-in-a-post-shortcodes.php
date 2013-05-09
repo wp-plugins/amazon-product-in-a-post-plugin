@@ -46,6 +46,7 @@ function amazon_product_shortcode_mini_function($atts, $content = ''){
 		$ASIN 					= (is_array($asin))? implode(',',$asin) : $asin; //valid ASIN or ASINs 
 		$errors 				= '';
 		$pxml 					= aws_signed_request($locale, array("Operation" => "ItemLookup","ItemId" => $ASIN,"ResponseGroup" => "Large","IdType" => "ASIN","AssociateTag" => $partner_id ), $public_key, $private_key);
+		//print_r($pxml);
 		if(!is_array($pxml)){
 			$pxmlErr["ItemLookupErrorResponse"]["Errors"]["Code"] = 'ERROR!';
 			$pxmlErr["ItemLookupErrorResponse"]["Errors"]["Message"] = $pxml;
@@ -148,7 +149,7 @@ function amazon_product_shortcode_mini_function($atts, $content = ''){
 										$labels['large-image-link'] = $labels[$fieldarr].' ';
 									}
 									if(awsImageGrabberURL($currasin,"P")!=''){
-										$retarr[$currasin][$fieldarr] = '<div class="amazon-image-link-wrapper"><a rel="appiplightbox-'.$result['ASIN'].'" href="'.awsImageGrabberURL($currasin,"P").'"><span class="amazon-element-large-img-link">'.$labels['large-image-link'].'</span></a></div>';
+										$retarr[$currasin][$fieldarr] = '<div class="amazon-image-link-wrapper"><a rel="appiplightbox-'.$result['ASIN'].'" href="'.awsImageURLModify($result['LargeImage'],"P").'"><span class="amazon-element-large-img-link">'.$labels['large-image-link'].'</span></a></div>';
 									}
 									break;
 								case 'features':

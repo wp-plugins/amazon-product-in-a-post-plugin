@@ -50,7 +50,40 @@ global $appipBulidBox;
 		}else{
 			add_action('save_post', 'amazonProductInAPostSavePostdata', 1, 2); // save the custom fields
 		}
-		
+		if(isset($_GET['appip_debug']) && ($_GET['appip_debug'] == get_option('apipp_amazon_debugkey') && get_option('apipp_amazon_debugkey') !='')){
+			global $wpdb;
+			global $aws_plugin_version;
+			echo '<h1>Amazon Plugin Debug</h1>';
+			$checksql= "SELECT Body, ( NOW() - Updated ) as Age FROM ".$wpdb->prefix."amazoncache ORDER BY Updated DESC;";
+			$result = $wpdb->get_results($checksql);
+			if(!empty($result)){
+				echo '<h2>Amazon Product CACHE</h2>';
+				foreach($result as $psxml){
+					echo '<pre>';
+					echo '[Body]: '.htmlspecialchars($psxml->Body).'<br/>';
+					echo '[Age]: '. $psxml->Age.'<br/>';
+					echo '</pre>';
+				}
+			}
+			echo '<div style="border:1px solid #cccccc; padding:10px; margin:10px 0;font-family:courier; font-size;12px;">';
+			echo '<h2>Amazon Variables</h2>';
+			echo '$aws_plugin_version: '.$aws_plugin_version.'<br/>';
+			echo '$public_key: '. get_option('apipp_amazon_publickey').'<br/>'; 
+			echo '$private_key: '. get_option('apipp_amazon_secretkey').'<br/>'; 
+			echo '$aws_partner_id: '. get_option('apipp_amazon_associateid').'<br/>';
+			echo '$apipphookexcerpt: '. get_option('apipp_hook_excerpt').'<br/>'; 
+			echo '$apipphookcontent: '.get_option('apipp_hook_content').'<br/>'; 
+			echo '$apippopennewwindow: '.get_option('apipp_open_new_window').'<br/>'; 
+			echo '$apip_getmethod: '. get_option('apipp_API_call_method').'<br/>';
+			echo '$encodemode: '.get_option('appip_encodemode').'<br/>'; 
+			echo '</div>';
+			
+			echo '<div style="border:1px solid #cccccc; padding:10px; margin:10px 0;">';
+			echo '<h2>PHP Info</h2>';
+			phpinfo();
+			echo '</div>';
+			exit;
+		}
 	}
 	
 	/* Prints the inner fields for the custom post/page section */
@@ -155,11 +188,58 @@ global $appipBulidBox;
 		global $fullname_apipp, $shortname_apipp, $options_apipp;
 		apipp_options_add_admin_page($fullname_apipp,$shortname_apipp,$options_apipp);
 	  	add_menu_page('Amazon Product In a Post New', 'New Amazon PIP', 'edit_posts', 'apipp-add-new', 'apipp_add_new_post',plugins_url( '/images/aicon-16.png' , dirname(__FILE__)));
-	  	add_submenu_page('apipp-add-new', $fullname_apipp." Options", "Amazon PIP Options", 'manage_options' , $shortname_apipp."_plugin_admin", 'apipp_options_add_subpage');
+		add_submenu_page( 'apipp-add-new', 'FAQs/Help', 'FAQs/Help', 'manage_options', $shortname_apipp.'_plugin-faqs', 'apipp_options_faq_page' );
+	  	add_submenu_page('apipp-add-new', "{$fullname_apipp} Options", "Amazon PIP Options", 'manage_options' , $shortname_apipp."_plugin_admin", 'apipp_options_add_subpage');
 		//add_submenu_page( 'apipp-add-new', 'Layout Styles', 'Layout Styles', 'manage_options', 'appip-layout-styles', 'imw_gen_term_order');
 	  	//add_submenu_page('apipp-add-new', 'New Product Post', 'New Product Post', 'edit_posts', 'apipp-add-new', 'apipp_add_new_post');
 	}
-	
+function apipp_options_faq_page(){
+		include_once(ABSPATH . WPINC . '/feed.php');
+		echo '
+		<div class="wrap">
+			<style type="text/css">
+				.faq-item{border-bottom:1px solid #CCC;padding-bottom:10px;margin-bottom:10px;}
+				.faq-item span.qa{color: #21759B;display: block;float: left;font-family: serif;font-size: 17px;font-weight: bold;margin-left: 0;margin-right: 5px;}
+				 h3.qa{color: #21759B;margin:0px 0px 10px 0;font-family: serif;font-size: 17px;font-weight: bold;}
+				.faq-item .qa-content p:first-child{margin-top:0;}
+				.apipp-faq-links {border-bottom: 1px solid #CCCCCC;list-style-position: inside;margin:10px 0 15px 35px;}
+				.apipp-faq-answers{list-style-position: inside;margin:10px 0 15px 35px;}
+				.toplink{text-align:left;}
+				.qa-content div > code{background: none repeat scroll 0 0 #EFEFEF;border: 1px solid #CCCCCC;display: block;margin-left: 35px;overflow-y: auto;padding: 10px 20px;white-space: nowrap;width: 90%;}
+			</style>
+			<div class="icon32" style="background: url('. plugins_url( "/",dirname(__FILE__)) . 'images/aicon.png) no-repeat transparent;"><br/></div>
+		 	<h2>Amazon Product in a Post FAQs/Help</h2>
+			<div align="left"><p>The FAQS are now on a feed that can be updated on the fly. If you have a question and don\'t see an answer, please send an email to <a href="mailto:plugins@fischercreativemedia.com">plugins@fischercreativemedia.com</a> and ask your question. If it is relevant to the plugin, it will be added to the FAQs feed so it will show up here. Please be sure to include the plugin you are asking a question about (Amazon Product in a Post Plugin), the Debugging Key (located on the options page) and any other information like your WordPress version and examples if the plugin is not working correctly for you. THANKS!</p>
+			<hr noshade color="#C0C0C0" size="1" />
+		';
+		$rss 			= fetch_feed('http://www.fischercreativemedia.com/?feed=apipp_faqs');
+		$linkfaq 		= array();
+		$linkcontent 	= array();
+		if (!is_wp_error( $rss ) ) : 
+		    $maxitems 	= $rss->get_item_quantity(100); 
+		    $rss_items 	= $rss->get_items(0, $maxitems); 
+		endif;
+			$aqr = 0;
+		    if ($maxitems != 0){
+			    foreach ( $rss_items as $item ) :
+			    	$aqr++; 
+			    	$linkfaq[]		= '<li class="faq-top-item"><a href="#faq-'.$aqr.'">'.esc_html( $item->get_title() ).'</a></li>';
+				    $linkcontent[] 	= '<li class="faq-item"><a name="faq-'.$aqr.'"></a><h3 class="qa"><span class="qa">Q. </span>'.esc_html( $item->get_title() ).'</h3><div class="qa-content"><span class="qa answer">A. </span>'.$item->get_content().'</div><div class="toplink"><a href="#faq-top">top &uarr;</a></li>';
+			    endforeach;
+			}
+		echo '<a name="faq-top"></a><h2>Table of Contents</h2>';
+		echo '<ol class="apipp-faq-links">';
+			echo implode("\n",$linkfaq);
+		echo '</ol>';
+		echo '<h2>Questions/Answers</h2>';
+		echo '<ul class="apipp-faq-answers">';
+			echo implode("\n",$linkcontent);
+		echo '</ul>';
+		echo '
+			</div>
+		</div>';
+}
+
 function imw_gen_term_order(){
 	global $current_user, $wpdb;
 	echo '<div class="wrap">';

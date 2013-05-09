@@ -18,13 +18,6 @@ Version: 3.0.0b1
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-if(!defined('WP_DEBUG') || WP_DEBUG==0){
-	//remove for final release!
-	//ini_set('display_errors', 0);
-	//ini_set('log_errors', 1);
-	//ini_set('error_log', dirname(__FILE__) . '/error_log.txt');
-	//error_reporting( E_ALL  & ~E_NOTICE & ~E_WARNING);
-}
 
 // Variables
 	global $public_key;
@@ -72,7 +65,7 @@ if(!defined('WP_DEBUG') || WP_DEBUG==0){
 	register_deactivation_hook(__FILE__,'appip_deinstall');
 	
 // MISC Settings, etc.
-	session_start();	
+	//session_start();	
     //if(!isset($_SESSION['Amazon-PIPP-Cart-HMAC'])) $_SESSION['Amazon-PIPP-Cart-HMAC'] = '';
     //if(!isset($_SESSION['Amazon-PIPP-Cart-Encoded-HMAC'])) $_SESSION['Amazon-PIPP-Cart-Encoded-HMAC']='';
     //if(!isset($_SESSION['Amazon-PIPP-Cart-ID'])) $_SESSION['Amazon-PIPP-Cart-ID']='';
@@ -145,9 +138,7 @@ if(!defined('WP_DEBUG') || WP_DEBUG==0){
 		}
 	}	
 	
-	// 1.7 - change encoding if needed via GET
-	// use http://yoursite.com/?resetenc=UTF-8 or http://yoursite.com/?resetenc=ISO-8859-1
-	// this will be the mode you want the text OUTPUT as.
+	// 1.7 - change encoding if needed via GET -  use http://yoursite.com/?resetenc=UTF-8 or http://yoursite.com/?resetenc=ISO-8859-1 - this will be the mode you want the text OUTPUT as.
 	if(isset($_GET['resetenc'])){
 		if(in_array(strtoupper($_GET['resetenc']),$validEncModes)){
 			update_option('appip_encodemode',strtoupper($_GET['resetenc']));
@@ -194,7 +185,11 @@ if(!defined('WP_DEBUG') || WP_DEBUG==0){
 	if(trim(get_option("apipp_product_styles")) == ''){ //reset to default styles if user deletes styles in admin
 		update_option("apipp_product_styles",$thedefaultapippstyle);
 	}
-	
+	if(trim(get_option("apipp_amazon_debugkey")) == ''){ //generate debug key
+		$randomkey = md5(uniqid(get_bloginfo('url').time(), true));
+		update_option("apipp_amazon_debugkey",$randomkey);
+	}
+
 // Filters & Hooks
 	add_filter('the_content', 'aws_prodinpost_filter_content', 10); //hook content - we will filter the override after
 	add_filter('the_excerpt', 'aws_prodinpost_filter_excerpt', 10); //hook excerpt - we will filter the override after 
@@ -221,7 +216,6 @@ if(!defined('WP_DEBUG') || WP_DEBUG==0){
 
 
 	$thisstyleversion	=	get_option('apipp_product_styles_default_version');
-	//echo $thisstyleversion.'<br/>'.$thedefaultapippstyle;
 	//upgrade check. Lets me add/change the default style etc to fix/add new items during updrages.
 	if($thisstyleversion != "1.8" || get_option("apipp_product_styles_default")==''){
 		update_option("apipp_product_styles_default",$thedefaultapippstyle);

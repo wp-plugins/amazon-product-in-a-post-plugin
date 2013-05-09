@@ -135,23 +135,23 @@ if(!function_exists('FormatASINResult')){
 			foreach($Result['ItemLookupErrorResponse']['Error'] as $temperr){
 				$errors .=  "<"."!-- HIDDEN APIP ERROR: ". $temperr['Code'].": ".$temperr['Message']."-->"."\n";
 			}
-		}elseif(isset($Result['ItemLookupResponse']['Items']['Request']['Errors']['Error'])){
-			$temperrarr = $Result['ItemLookupResponse']['Items']['Request']['Errors']['Error'];
-			if(count($temperrarr) >0 && isset($temperrarr[0])){
-				foreach($temperrarr as $error){
+		}elseif(isset($Result['ItemLookupErrorResponse']['Items']['Request']['Errors']['Error'])){
+			if(!empty($Result['ItemLookupErrorResponse']['Items']['Request']['Errors'])){
+				foreach($Result['ItemLookupErrorResponse']['Items']['Request']['Errors'] as $error){
 					$errors .= "<"."!-- HIDDEN APIP ERROR: ". $error['Code'].': '.$error['Message']."-->"."\n";
 				}
 			}else{
 				$errors .= '';
 			}
 		}
+
 		if(isset($Item[0])){
 			$Itema = $Item;
 			foreach($Itema as $Item){
 				$Item['CachedAPPIP'] = $cache;
 				$RetValNew[] = GetAPPIPReturnValArray($Item,$errors);
 			}
-		}elseif($Item != false){
+		}elseif($Item != false ){
 			$Item['CachedAPPIP'] = $cache;
 			$RetValNew[] = GetAPPIPReturnValArray($Item,$errors);
 		}else{

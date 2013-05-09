@@ -117,5 +117,6 @@
 	if($aws_partner_locale=='fr' || $apip_language =='fr'){$buyamzonbutton = "buyamzon-button-fr.png";} //set back to .fr for French locale
 	if($apip_language =='appplugin'){$buyamzonbutton = "buyamzon-button-plain.png";} //set back to .com for Spanish language
 	if($aws_partner_locale=='co.uk'){$buyamzonbutton = "buyamzon-button-uk.png";} //set back to .uk for UK locale
+	//if(file_exists(get_template_directory().'/images/buyamzon-button.png')){}
 
 ?>
