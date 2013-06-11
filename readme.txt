@@ -35,9 +35,9 @@ To use the plugin, you must have an 1). an Amazon Affiliate Account, and 2). Ama
 
 
 == Installation ==
-After you intall the plugin, you need to set up your Amazon Affiliate/Associate ID in the Options panel located in the AMAZON PIP menu under AMAZON PIP OPTIONS. 
+After you install the plugin, you need to set up your Amazon Affiliate/Associate ID in the Options panel located in the AMAZON PIP menu under AMAZON PIP OPTIONS. 
 
-An AWS Access Key ID and Secrect Access Key REQUIRED. THere is no longer built in keys by default. This change is due to the Amazon Terms of Use agreement. 
+An AWS Access Key ID and Secret Access Key REQUIRED. There is no longer built in keys by default. This change is due to the Amazon Terms of Use agreement. 
 
 No additional adjustments are needed unless you want to configure your own CSS styles. Styles can be adjusted or removed in the Options Panel as well.
 
@@ -70,9 +70,9 @@ No additional adjustments are needed unless you want to configure your own CSS s
 See the Installation Page for details on setting up the Products. There is a dynamic FAQs feed in the plugin that will allow for adding new FAQs as they come up. 
 More detailed FAQs will come as questions/solutions arise.
 
-= MY PROCUCTS DO NOT DISPLAY! What is wrong? =
-* It could be several things. The FIRST thing to check is the AMAZON Access Key ID and Secret Access Key in the options page. If they are blank, you need to sign up for your own from amazon. You can sign up here http://aws-portal.amazon.com/gp/aws/developer/account/index.html to get your own. Without it, your products will display.
-* Also check to make sure you are using Product Advertising Keys. There are many different prodcts from Amazon that require API keys - and this one needs the Product Advertising API Keys specifically.
+= MY PRODUCTS DO NOT DISPLAY! What is wrong? =
+* It could be several things. The FIRST thing to check is the AMAZON Access Key ID and Secret Access Key in the options page. If they are blank, you need to sign up for your own from Amazon. You can sign up here http://aws-portal.amazon.com/gp/aws/developer/account/index.html to get your own. Without it, your products will display.
+* Also check to make sure you are using Product Advertising Keys. There are many different products from Amazon that require API keys - and this one needs the Product Advertising API Keys specifically.
 * Another common cause, is the method of the api call. By default, it is set to use "file_get_contents", but since some servers do not allow this method you may need to use the older CURL method. Change this in the options page and then check to see if the problem is resolved.
 
 = My Products only display a blank image and a "()" for the title - what is wrong? =
@@ -93,11 +93,11 @@ More detailed FAQs will come as questions/solutions arise.
 * To Add a product Via Shortcode, go to the Content editor for an existing page/post (or create a new post/page), add **[AMAZONPRODUCTS asin="XXXXXXXXXX"]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number. Then update or save the Page/Post. You can add as many products this way as you like (up to 10 per shortcode). Just keep in mind that there is a call made to the Amazon API for each shortcode added, so adding too many products could cause a noticable increase in page loading time.
 
 = My Products are coming up blank - what do I do? =
-* Most likely the reson is your server does not support external URL call using the file_get_contents() function. If you don't have access to your sites php.ini file to change the settings (most people don't), then on the options pages for the plugin, change the API get method to "CURL" and save the settings. This will fix the problem in most cases.
+* Most likely the reason is your server does not support external URL call using the file_get_contents() function. If you don't have access to your sites php.ini file to change the settings (most people don't), then on the options pages for the plugin, change the API get method to "CURL" and save the settings. This will fix the problem in most cases.
 * Another common cause is that the API keys are not the correct ones. Be sure you have the Product Advertising keys - if they are not, the plugin will not return an error and not display the products.
 
 = I Want to Change the Look of the Products - can you do that for me? = 
-* I would love to say yes, but we cannot make custom changes for everyone that askes - there are just not enough hours in the day - if you REALLY want us to do it for you, contact us - and for a small fee, we will give you whatever look/style you want. Keep in mind that your theme has a lot to do with the way your products look. 
+* I would love to say yes, but we cannot make custom changes for everyone that asks - there are just not enough hours in the day - if you REALLY want us to do it for you, contact us - and for a small fee, we will give you whatever look/style you want. Keep in mind that your theme has a lot to do with the way your products look. 
 You can tweak the look yourself if you have experience with CSS styles. The options page have a style for each element displayed in the product, so you can tweak it however you like. If you screw it up - just reset it back to the default and start over.
 
 = My product shows up fine, but there is no price - what's wrong? =
@@ -107,7 +107,6 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Excellent question! The plugin is provided free to the public - you can use it however you like - where ever you like - you can even change it however you like. Should you decide that the plugin has been a great help and want to donate to our plugin development fund, you may do so [here](http://fischercreativemedia.com/wordpress-plugins/donate/ "here").
 
 == Screenshots ==
-
 1. Amazon Products displayed on a page with the Post Content as part of the product (option 3 when setting up product). Note, this is using the default styles with the Fusion 3.1 theme by [digitalnature](http://digitalnature.ro/ "digitalnature"). Different theme styles may cause your layout to look VERY different.
 2. Admin post/page edit box used for adding a product.
 3. Amazon Quick Product Post option for quickly adding the basic information needed for a product. This options automatically creates the corresponding Post for the product.
@@ -131,7 +130,7 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 = 3.0=	
 * Added New Shortcode [AMAZONPRODUCTS] (instead of [AMAZONPRODUCT=B0084IG8TM]) - old method will still work 
 * Added Bulk API Call to limit number of calls to API (can use up to 10 ASINs at one time)
-* Updated the depricated function calls
+* Updated the deprecated function calls
 * Increased API return values for use in theme - puts all items in the array now
 * Updated styles to include some new elements
 * Updated database field for amazoncache table to allow for larger data size of cached XML body (as API can now return up to 10 itmes at a time)
@@ -140,14 +139,14 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Updated Install function with styles and database upgrade
 * Added amazon icon button to editor to easily add shortcode.
 * Added new parameters to shortcode to allow custom additions to any post/page:
-	* asin – this is the ASIN or ASINs up to 10 comma separated
-	* locale – this is the Amazon locale you want to get the product from, i.e., com, co.uk, fr, etc. default is your plugin setting
-	* desc – using 1 shows Amazon description (if available) and 0 hides it – default is 0.
-	* features – using 1 shows Amazon Features (if available) and 0 hides it  - default is 0.
-	* listprice – using 1 shows the list price and 0 hides it – default is 1.
-	* partner_id – allows you to add a different parent ID if different for other locale – default is ID in settings.
-	* private_key – allows you to add different private key for locale if different – default is private key in settings.
-	* public_key – allows you to add a different private key for locale if different – default is public key in settings.
+	* asin - this is the ASIN or ASINs up to 10 comma separated
+	* locale - this is the Amazon locale you want to get the product from, i.e., com, co.uk, fr, etc. default is your plugin setting
+	* desc - using 1 shows Amazon description (if available) and 0 hides it - default is 0.
+	* features - using 1 shows Amazon Features (if available) and 0 hides it  - default is 0.
+	* listprice - using 1 shows the list price and 0 hides it - default is 1.
+	* partner_id - allows you to add a different parent ID if different for other locale - default is ID in settings.
+	* private_key - allows you to add different private key for locale if different - default is private key in settings.
+	* public_key - allows you to add a different private key for locale if different - default is public key in settings.
 * New Shortcode would be used like this:
 	* If you want to add a .com item and you have the same partner id, public key, private key and want the features showing:
 	**[AMAZONPRODUCTS asin="B0084IG8TM" features="1" locale="com"]**
@@ -200,7 +199,7 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 = 1.5 = 
 * Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
 = 1.4 =
-* Added menthod to restore default CSS if needed - by deleting all CSS in options panel and saving - default css will re-appear in box. (9/16/2009)
+* Added method to restore default CSS if needed - by deleting all CSS in options panel and saving - default css will re-appear in box. (9/16/2009)
 = 1.3 =	
 * Added new feature to be able to adjust or add your own styles. (9/16/2009)
 = 1.2 =
@@ -212,7 +211,7 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 == Upgrade Notice ==
 
 = 3.5.1 =
-* Adds many new features, fixes several bugs and implements some mandatory Amazon affilate Terms of Use changes.
+* Adds many new features, fixes several bugs and implements some mandatory Amazon Affialte Terms of Use changes.
 
 = 3.1.0 =
-* 3.0.0 up to 3.1.0 where devlopement versions. Figured I would just up the version to match WordPress version after this point.
+* 3.0.0 up to 3.1.0 where devlopment versions. Figured I would just up the version to match WordPress version after this point.
