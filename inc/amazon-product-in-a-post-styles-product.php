@@ -4,6 +4,9 @@ add_filter('query_vars', 'apipp_query_vars');
 
 function apipp_query_vars($vars) {
 	$vars[] = 'apipp_style';
+	$vars[] = 'appip-cache-id';
+	$vars[] = 'appip-cache-del';
+
     return $vars;
 }
 
@@ -31,8 +34,18 @@ function apipp_parse_request($wp) {
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 		print($amazonStylesToUse);
 		exit;
+	}elseif(array_key_exists('appip-cache-id', $wp->query_vars) && $wp->query_vars['appip-cache-id'] != ''){
+		if(array_key_exists('appip-cache-del', $wp->query_vars) && $wp->query_vars['appip-cache-del'] == 'dodel'){
+			global $wpdb;
+			$tempswe = $wpdb->query("DELETE FROM {$wpdb->prefix}amazoncache WHERE Cache_id ='{$wp->query_vars['appip-cache-id']}' LIMIT 1;");
+			if($tempswe){
+				echo 'deleted';
+			}else{
+				echo 'error';
+			}
+			exit;
+		}	
 	}else{
 		return;
 	}
 }
-?>

@@ -1,4 +1,45 @@
 Version info:
+3.5.1	Basic template integration (for future use - or if you are good at hooks and filters and can figure it out on your own - go ahead - the structure is there!)
+	Removed traces of Developer Keys at Amazon's request.
+	Added Amazon Elements shortcode to add bits and pieces of a product to a post - very handy for making a custom layout.
+	Added Amazon Cache Viewer - allows you to manually delete a product cache to initate a new amazon Call. Caches are stored for 60 minutes and updated as the calls are needed.
+	Added Getting Started page to help users set up affiliate and API Key signup. This is becoming more and more complex, so a little help was needed.
+	Added Shortcode Help Page to give examples of how to use the shortcodes effectively.
+	Added feed driven FAQs page - easier for me to update FAQs on the fly that way.
+	Added several Filters and Hooks - will lay them all out in next revision.
+	
+3.1 to 3.5.0 were development versions.
+3.0	Added New Shortcode [AMAZONPRODUCTS] (instead of [AMAZONPRODUCT=B0084IG8TM]) - old method will still work 
+	Added Bulk API Call to limit number of calls to API (can use up to 10 ASINs at one time)
+	Updated the depricated function calls
+	Increased API return values for use in theme - puts all items in the array now
+	Updated styles to include some new elements
+	Updated database field for amazoncache table to allow for larger data size of cached XML body (as API can now return up to 10 itmes at a time)
+	Updated aws_request function
+	Wrapped generic helper functions in !function_exists wrapper to eliminate conflicts with some other Amazon plugins.
+	Updated Install function with styles and database upgrade
+	Added amazon icon button to editor to easily add shortcode.
+	Added new parameters to shortcode to allow custom additions to any post/page:
+		asin – this is the ASIN or ASINs up to 10 comma separated
+		locale – this is the Amazon locale you want to get the product from, i.e., com, co.uk, fr, etc. default is your plugin setting
+		desc – using 1 shows Amazon description (if available) and 0 hides it – default is 0.
+		features – using 1 shows Amazon Features (if available) and 0 hides it  - default is 0.
+		listprice – using 1 shows the list price and 0 hides it – default is 1.
+		partner_id – allows you to add a different parent ID if different for other locale – default is ID in settings.
+		private_key – allows you to add different private key for locale if different – default is private key in settings.
+		public_key – allows you to add a different private key for locale if different – default is public key in settings.
+	New Shortcode would be used like this:
+		If you want to add a .com item and you have the same partner id, public key, private key and want the features showing:
+		[AMAZONPRODUCTS asin="B0084IG8TM" features="1" locale="com"]
+		If you want to add a .com item and you have a different partner id, public key, private key and want the description showing but features not showing:
+		[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" locale="com" public_key="AKIAJDRNJ6OU527HKGXQ" private_key="Nz3FYyeVysc5yjcZwrIV3bhDti/OGyRHEYOWO005" partner_id="wordseen-20"]
+		If you just want to use your same locale but want 2 items with no list price and features showing:
+		[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" features="1" listprice="0"]
+		If you just want 2 products with regular settings:
+		[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE"]
+		If you want to add text to a product:
+		[AMAZONPRODUCTS asin="B0084IG8TM"]your text can go here![/AMAZONPRODUCTS]
+
 2.0	
 	Added Database for caching api calls (10/20/2010)
 	Added Options for Private and Public Keys in the options panel. (10/22/2010)

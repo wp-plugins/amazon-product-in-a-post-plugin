@@ -5,22 +5,26 @@
 	$shortname_apipp = "apipp";
 	
 	$options_apipp= array (
-					array(	"name" => "General Settings",
+					array(	"name" => "General Plugin Settings",
 							"type" => "heading"),
 					array(	"name" => "Amazon Affiliate ID",
 							"desc" => "Your Amazon Affiliate ID<br /><br />",
 				    		"id" => $shortname_apipp."_amazon_associateid",
 				    		"type" => "text"),
-					array(	"name" => "Amazon Public Key",
-							"desc" => "Your Amazon Public Key. If you do not have one, you will need to sign up for one. <a href='http://aws-portal.amazon.com/gp/aws/developer/account/index.html' target='_blank'>You can do so here</a>.<br /><br />",
+					array(	"name" => "Amazon Access Key ID",
+							"desc" => "Your Amazon Access Key ID (or Public Key). If you do not have one, you will need to sign up for one. If you need to sign up, you can do so here:<br /><ul><li>United States (com): <a target='_blank' style='outline: 0px; color: rgb(33, 117, 155);' href='https://affiliate-program.amazon.com/gp/flex/advertising/api/sign-in.html'>https://affiliate-program.amazon.com/gp/flex/advertising/api/sign-in.html</a></li><li>United Kingdon (co.uk): <a target='_blank' style='outline: 0px; color: rgb(33, 117, 155);' href='https://affiliate-program.amazon.co.uk/gp/flex/advertising/api/sign-in.html'>https://affiliate-program.amazon.co.uk/gp/flex/advertising/api/sign-in.html</a></li><li>Canada (ca): <a target='_blank' style='outline: 0px; color: rgb(33, 117, 155);' href='https://associates.amazon.ca/gp/advertising/api/detail/main.html'>https://associates.amazon.ca/gp/advertising/api/detail/main.html</a></li><li>Germany (de): <a target='_blank' style='outline: 0px; color: rgb(33, 117, 155);' href='https://affiliate-program.amazon.com/gp/advertising/api/detail/main.html'>https://affiliate-program.amazon.com/gp/advertising/api/detail/main.html</a></li><li>France (fr): <a target='_blank' style='outline: 0px; color: rgb(33, 117, 155);' href='https://partenaires.amazon.fr/gp/advertising/api/detail/main.html'>https://partenaires.amazon.fr/gp/advertising/api/detail/main.html</a></li><li>Japan (jp): <a target='_blank' style='outline: 0px; color: rgb(33, 117, 155);' href='https://affiliate.amazon.co.jp/gp/advertising/api/detail/agreement.html'>https://affiliate.amazon.co.jp/gp/advertising/api/detail/agreement.html</a></li><li>Spain (es): <a target='_blank' style='outline: 0px; color: rgb(33, 117, 155);' href='https://afiliados.amazon.es/gp/advertising/api/detail/main.html'>https://afiliados.amazon.es/gp/advertising/api/detail/main.html</a></li></ul>",
 				    		"id" => $shortname_apipp."_amazon_publickey",
 				    		"type" => "text"),
-					array(	"name" => "Amazon Private Key",
-							"desc" => "Your Amazon Private Key. <a href='http://www.clickonf5.org/tutorial/amazon-developer-api-secret-access-key/6932' target='_blank'>Check out this page</a> for more information on Public and Secret Keys.<br /><br />",
+					array(	"name" => "Amazon Secret Access Key",
+							"desc" => "Your Amazon Secret Access Key (or Private Key). <a href='admin.php?page=apipp-main-menu'>Check out this page</a> for more information on the Access Key IDs and Secret Access Keys.<br /><br />",
 				    		"id" => $shortname_apipp."_amazon_secretkey",
-				    		"type" => "textlong"),
+				    		"type" => "text"),
+					array(	"name" => "Debug Key",
+							"desc" => "Your Custom Debug Key. If you have problems with the plugin not working and you need help from the developer, email <a href='mailto:appip@fischercreativemedia.com'>appip@fischercreativemedia.com</a> with this key and your website url. They will be able to use it to figure out issues. Without it, they can do nothing to help. This is unique to your site. If you received help and the problem is resolved, you can change it to make sure the developer cannot access the debugging features again, should you feel inclined to do so. <br /><br />",
+				    		"id" => $shortname_apipp."_amazon_debugkey",
+				    		"type" => "text"),
 					array(	"name" => "Your Amazon Locale/Region",
-							"desc" => "The Locale to use for Amazon API Calls (ca,com,co.uk,de,fr,jp) Default is 'com' for US.<br /><br />",
+							"desc" => "The Locale to use for Amazon API Calls (ca,com,co.uk,de,fr,jp,es) Default is 'com' for US.<br /><br />",
 				    		"id" => $shortname_apipp."_amazon_locale",
 				    		"type" => "select",
 				    		"options" => array(
@@ -29,7 +33,8 @@
 				    			"2" => array("value" => "co.uk","text" => "United Kingdom"),
 				    			"3" => array("value" => "de","text" => "Germany"),
 				    			"4" => array("value" => "fr","text" => "France"),
-				    			"5" => array("value" => "jp","text" => "Japan")
+				    			"5" => array("value" => "jp","text" => "Japan"),
+				    			"6" => array("value" => "es","text" => "Spain")
 				    		 )),
 					array(	"name" => "Language",
 							"desc" => "Language to use for Text and Button (currently only English, French and Spanish - default is English).<br /><br />",
@@ -100,7 +105,6 @@
 							"desc" => "Your Custom styles can go here.<br /><br />",
 				    		"id" => $shortname_apipp."_product_styles",
 				    		"type" => "textareabig"),
-				    
 	);
 
 // Functions
@@ -114,40 +118,45 @@
 	    if ( basename(__FILE__) == 'amazon-product-in-a-post-options.php' ) {
 	    	if(isset($_REQUEST['action'])){$req_action=$_REQUEST['action'];}else{$req_action='';}
 		    if(isset($_REQUEST[$shortname.'_option'])){$req_option=$_REQUEST[$shortname.'_option'];}else{$req_option='';}
-    	
 	        if ( 'save' == $req_action && $req_option== $shortname ) {
 	                foreach ($options as $value) {
-						if($value['type'] != 'multicheck'){
-	                    	update_option( $value['id'], $_REQUEST[ $value['id'] ] ); 
-						}else{
-							foreach($value['options'] as $mc_key => $mc_value){
-								$up_opt = $value['id'].'_'.$mc_key;
-								update_option($up_opt, $_REQUEST[$up_opt] );
-							}
-						}
-					}
-	
-	                foreach ($options as $value) {
-						if($value['type'] != 'multicheck'){
-	                    	if( isset( $_REQUEST[ $value['id'] ] ) ) { update_option( $value['id'], $_REQUEST[ $value['id'] ]  ); } else { delete_option( $value['id'] ); } 
-						}else{
+						if($value['type'] == 'multicheck'){
 							foreach($value['options'] as $mc_key => $mc_value){
 								$up_opt = $value['id'].'_'.$mc_key;						
-								if( isset( $_REQUEST[ $up_opt ] ) ) { update_option( $up_opt, $_REQUEST[ $up_opt ]  ); $update_optionapp=$_REQUEST[ $up_opt ];} else { delete_option( $up_opt );$update_optionapp=''; } 
-								//echo $value['id'].'- - - -';
-								if( $value['id'] == 'apipp_API_call_method' ){
-									if($update_optionapp=='0'){
-										update_option('awsplugin_amazon_usefilegetcontents','1');
-										update_option('awsplugin_amazon_usecurl','0');
-									}else{
-										update_option('awsplugin_amazon_usefilegetcontents','0');
-										update_option('awsplugin_amazon_usecurl','1');
-									}
-								}
+								if( isset( $_REQUEST[ $up_opt ] ) ) { 
+									update_option( $up_opt, $_REQUEST[ $up_opt ]  ); 
+									$update_optionapp = $_REQUEST[ $up_opt ];
+								} else { 
+									delete_option( $up_opt );
+									$update_optionapp=''; 
+								} 
 							}
+						}elseif($value['type'] == 'select'){
+							foreach($value['options'] as $mc_key => $mc_value){
+								$up_opt = $value['id'];	
+								if( isset( $_REQUEST[ $up_opt ] ) && ($_REQUEST[ $up_opt ] == $mc_value['value']) ) { 
+									update_option( $value['id'], $mc_value['value']); 
+								} 
+							}
+						}else{
+	                    	if( isset( $_REQUEST[ $value['id'] ] ) ) { 
+								if( $value['id'] == 'apipp_API_call_method' ){
+									if($_REQUEST[ $value['id'] ] == '0'){
+										update_option('appip_amazon_usefilegetcontents',1);
+										update_option('appip_amazon_usecurl',0);
+									}else{
+										update_option('appip_amazon_usefilegetcontents',0);
+										update_option('appip_amazon_usecurl',1);
+									}
+								}else{
+									update_option( $value['id'], $_REQUEST[ $value['id'] ]  ); 
+								}
+	                    	} else {
+	                    		delete_option( $value['id'] );
+	                    	} 
 						}
 					}
-	                header("Location: admin.php?page=".$shortname."_plugin_admin&saved=true");
+	                wp_redirect("admin.php?page=".$shortname."_plugin_admin&saved=true",302);
 	                die;
 	
 	        } else if( 'reset' == $_REQUEST['action'] && $_REQUEST[$shortname.'_option']== $shortname ) {
@@ -162,25 +171,27 @@
 						}
 					}
 				}
-	            header("Location: admin.php?page=".$shortname."_plugin_admin&reset=true");
+	            wp_redirect("admin.php?page=".$shortname."_plugin_admin&reset=true",302);
 	            die;
 	
 	        }
 	    }
-	
-	
 	}
 	
 	function apipp_options_admin_page($themename, $shortname, $options) {
 		global $public_key,$private_key;
 		global $appuninstall;
+		global $thedefaultapippstyle;
 		global $appuninstallall;
+		if(get_option('apipp_product_styles') ==''){update_option('apipp_product_styles',$thedefaultapippstyle);}
+		if( $_REQUEST['dismissmsg'] == '1'){update_option('appip_dismiss_msg',1);echo '<div id="message" class="updated fade"><p><strong>'.$themename.' message dismissed.</strong></p></div>';}
 	    if ( $_REQUEST['saved'] ) echo '<div id="message" class="updated fade"><p><strong>'.$themename.' settings saved.</strong></p></div>';
 	    if ( $_REQUEST['reset'] ) echo '<div id="message" class="updated fade"><p><strong>'.$themename.' settings reset.</strong></p></div>';
 	?>
 	<div class="wrap"><div id="icon-amazon" class="icon32"><br /></div>
+	<style type="text/css">small{font-size:13px;color:#777;line-height: 19px;}</style>
 	<h2><?php echo $themename; ?> options</h2>
-	<?php /*echo $public_key."|".$private_key.'|'. $appuninstall.'|'. $appuninstallall;*/ ?>
+
 	<form method="post" action="">
 	<input type="hidden" name="<?php echo $shortname; ?>_option" id="<?php echo $shortname; ?>_option" value="<?php echo $shortname; ?>" />
 	<table class="optiontable">
@@ -190,14 +201,14 @@
 			case 'text':
 			apipp_option_wrapper_header($value);
 			?>
-			        <input style="width:240px;" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" type="<?php echo $value['type']; ?>" value="<?php if ( get_settings( $value['id'] ) != "") { echo get_settings( $value['id'] ); } else { echo $value['std']; } ?>" />
+			        <input style="width:300px;" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" type="<?php echo $value['type']; ?>" value="<?php if ( get_option( $value['id'] ) != "") { echo get_option( $value['id'] ); } else { echo $value['std']; } ?>" />
 			<?php
 			apipp_option_wrapper_footer($value);
 			break;
 			case 'textlong':
 			apipp_option_wrapper_header($value);
 			?>
-			        <input style="width:95%;" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" type="<?php echo $value['type']; ?>" value="<?php if ( get_settings( $value['id'] ) != "") { echo get_settings( $value['id'] ); } else { echo $value['std']; } ?>" />
+			        <input style="width:95%;" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" type="<?php echo $value['type']; ?>" value="<?php if ( get_option( $value['id'] ) != "") { echo get_option( $value['id'] ); } else { echo $value['std']; } ?>" />
 			<?php
 			apipp_option_wrapper_footer($value);
 			break;
@@ -207,7 +218,7 @@
 			?>
 		            <select style="width:240px;" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>">
 		                <?php foreach ($value['options'] as $option) { ?>
-		                <option<?php if ( get_settings( $value['id'] ) == $option["value"]) { echo ' selected="selected"'; } elseif ($option["value"] == $value['std']) { echo ' selected="selected"'; } ?> value="<?php echo $option["value"]; ?>"><?php echo $option["text"]; ?></option>
+		                <option<?php if ( get_option( $value['id'] ) == $option["value"]) { echo ' selected="selected"'; } elseif ($option["value"] == $value['std']) { echo ' selected="selected"'; } ?> value="<?php echo $option["value"]; ?>"><?php echo $option["text"]; ?></option>
 		                <?php } ?>
 		            </select>
 			<?php
@@ -223,7 +234,7 @@
 			?>
 		            <select style="width:240px;" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>">
 						<?php foreach ($categories as $cat) {
-						if ( get_settings( $value['id'] ) == $cat->cat_ID) { $selected = ' selected="selected"'; } else { $selected = ''; }
+						if ( get_option( $value['id'] ) == $cat->cat_ID) { $selected = ' selected="selected"'; } else { $selected = ''; }
 						$opt = '<option value="' . $cat->cat_ID . '"' . $selected . '>' . $cat->cat_name . '</option>';
 						echo $opt; } ?>
 		            </select>
@@ -238,22 +249,22 @@
 			apipp_option_wrapper_header($value);
 			?>
 					<textarea name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" style="width:400px;height:100px;"><?php 
-					if( get_settings($value['id']) != "") {
-							echo stripslashes(get_settings($value['id']));
+					if( get_option($value['id']) != "") {
+							echo stripslashes(get_option($value['id']));
 						}else{
 							echo $value['std'];
 					}?></textarea>
 			<?php
-			apipp_option_wrapper_footer($value);
+				apipp_option_wrapper_footer($value);
 			break;
 			
 			case 'textareabig':
 			$ta_options = $value['options'];
 			apipp_option_wrapper_header($value);
 			?>
-					<textarea name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" style="font-size:10px;width:650px;height:500px;"><?php 
-					if( get_settings($value['id']) != "") {
-							echo stripslashes(get_settings($value['id']));
+					<textarea name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>" style="font-size:13px;width:650px;height:500px;line-height:19px"><?php 
+					if( get_option($value['id']) != "") {
+							echo stripslashes(get_option($value['id']));
 						}else{
 							echo $value['std'];
 					}?></textarea>
@@ -265,9 +276,9 @@
 			apipp_option_wrapper_header($value);
 			
 	 		foreach ($value['options'] as $key=>$option) { 
-					$radio_setting = get_settings($value['id']);
+					$radio_setting = get_option($value['id']);
 					if($radio_setting != ''){
-			    		if ($key == get_settings($value['id']) ) {
+			    		if ($key == get_option($value['id']) ) {
 							$checked = "checked=\"checked\"";
 							} else {
 								$checked = "";
@@ -288,7 +299,7 @@
 			
 			case "checkbox":
 			apipp_option_wrapper_header($value);
-							if(get_settings($value['id'])){
+							if(get_option($value['id'])){
 								$checked = "checked=\"checked\"";
 							}else{
 								$checked = "";
@@ -304,9 +315,9 @@
 			
 	 		foreach ($value['options'] as $key=>$option) {
 		 			$pn_key = $value['id'] . '_' . $key;
-					$checkbox_setting = get_settings($pn_key);
+					$checkbox_setting = get_option($pn_key);
 					if($checkbox_setting != ''){
-			    		if (get_settings($pn_key) ) {
+			    		if (get_option($pn_key) ) {
 							$checked = "checked=\"checked\"";
 							} else {
 								$checked = "";
@@ -328,7 +339,7 @@
 			case "heading":
 			?>
 			<tr valign="top"> 
-			    <td colspan="2" style="text-align: center;"><h3><?php echo $value['name']; ?></h3></td>
+			    <td colspan="2" style="text-align: left;"><h2><?php echo $value['name']; ?></h2><br/></td>
 			</tr>
 			<?php
 			break;
@@ -341,20 +352,15 @@
 	?>
 	
 	</table>
-	
-	<p class="submit">
-	<input name="save" type="submit" value="Save changes" />    
-	<input type="hidden" name="action" value="save" />
-	</p>
+	<p class="submit"><input name="save" type="submit" value="Save changes" class="button-primary" /><input type="hidden" name="action" value="save" /></p>
 	</form>
-	<form method="post">
+	<!--form method="post">
 	<input type="hidden" name="<?php echo $shortname; ?>_option" id="<?php echo $shortname; ?>_option" value="<?php echo $shortname; ?>" />
 	<p class="submit">
 	<input name="reset" type="submit" value="Reset" />
 	<input type="hidden" name="action" value="reset" />
 	</p>
-	</form>
-	
+	</form-->
 	<?php
 	}
 	function apipp_option_wrapper_header($values){
@@ -374,13 +380,13 @@
 		</tr>
 		<?php 
 	}
-$thedefaultapippstyle=' /*version 1.7*/
-	table.amazon-product-table {
+$thedefaultapippstyle=' /*version 1.9*/
+	.amazon-product-table {
 		border-collapse : collapse;
 		border : 0 none !important ;
 		width : 100%;
 	}
-	table.amazon-product-table td {
+	.amazon-product-table td {
 		border : 0 none !important ;
 		padding : 0 !important ;
 	}
@@ -390,7 +396,7 @@ $thedefaultapippstyle=' /*version 1.7*/
 		float : left;
 		padding : 0 10px 0 10px;
 	}
-	table.amazon-product-table hr {
+	.amazon-product-table hr {
 		display : block;
 	}
 	span.amazon-tiny {
@@ -427,6 +433,30 @@ $thedefaultapippstyle=' /*version 1.7*/
 		color : #666;
 		font-size : 12px;
 	}
+	.amazon-manufacturer{
+		color : #666;
+		font-size : 12px;
+	}
+	.amazon-ESRB{
+		color : #666;
+		font-size : 12px;
+	}
+	.amazon-feature{
+		color : #666;
+		font-size : 12px;
+	}
+	.amazon-platform{
+		color : #666;
+		font-size : 12px;
+	}
+	.amazon-system{
+		color : #666;
+		font-size : 12px;
+	}
+	span.amazon-starring {
+		color : #666;
+		font-size : 12px;
+	}
 	span.amazon-director {
 		color : #666;
 		font-size : 12px;
@@ -435,62 +465,65 @@ $thedefaultapippstyle=' /*version 1.7*/
 		color : #666;
 		font-size : 12px;
 	}
-	table.amazon-product-price {
+	.amazon-product-price {
 		border-collapse : collapse;
 		border : 0 none;
 		/*width : auto;*/
 		padding : 0 !important ;
 	}
-	table.amazon-product-price a img.amazon-image {
+	.amazon-product-price a img.amazon-image {
 		background-color : transparent !important ;
 		border : 0 none !important ;
 	}
-	td.amazon-post-text {
+	.amazon-post-text {
 		text-align : left;
 		padding : 0 !important ;
 	}
-	td.amazon-list-price-label {
+	.appip-label{
+		color : #666;
+	}
+	.amazon-list-price-label {
 		font-size : 10px;
 		color : #666;
 		text-align : left;
-		width : 10%;
+		width : auto;
 	}
-	td.amazon-list-price {
-		width : 90%;
+	.amazon-list-price {
+		width : auto;
 		text-decoration : line-through;
 		text-align : left;
 	}
-	td.amazon-price-label {
+	.amazon-price-label {
 		font-size : 10px;
 		color : #666;
 		text-align : left;
-		width : 10%;
+		width : auto;
 	}
-	td.amazon-price {
+	.amazon-price {
 		font-size : 14px;
 		color : #800000;
 		font-weight : bold;
 		text-align : left;
 	}
-	td.amazon-new-label {
+	.amazon-new-label {
 		font-size : 10px;
 		color : #666;
 		text-align : left;
-		width : 10%;
+		width : auto;
 	}
-	td.amazon-new {
+	.amazon-new {
 		font-size : 14px;
 		color : #800000;
 		text-align : left;
 		font-weight : bold;
 	}
-	td.amazon-used-label {
+	.amazon-used-label {
 		font-size : 10px;
 		color : #666;
 		text-align : left;
-		width : 10%;
+		width : auto;
 	}
-	td.amazon-used {
+	.amazon-used {
 		color : #666;
 		text-align : left;
 	}
@@ -520,4 +553,3 @@ $thedefaultapippstyle=' /*version 1.7*/
 		margin:10px 0;
 	}
 	';
-?>

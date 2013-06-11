@@ -33,17 +33,12 @@
  *
  * 2008-05-10: Moved all helper functions into a class.  API access unchanged.
  */
-if (!defined('__PHP_SHA256_NANO_'))
-{
-    define('__PHP_SHA256_NANO_', true);
-
-class shaHelper
-{
-	    function shaHelper()
-	    {
+if (!defined('__PHP_SHA256_NANO_')){
+define('__PHP_SHA256_NANO_', true);
+class shaHelper{
+	    function shaHelper(){
 	        // nothing to construct here...
 	    }
-
 	    // Do the SHA-256 Padding routine (make input a multiple of 512 bits)
 		    function char_pad($str)
 		    {
@@ -263,11 +258,9 @@ class shaHelper
 	        $h[7] = (int)0x5be0cd19;
 	
 	        // loop through message blocks and compute hash. ( For i=1 to N : )
-	        for ($i = 0; $i < count($M); $i++)
-	        {
+	        for ($i = 0; $i < count($M); $i++){
 	            // Break input block into 16 32-bit words (message schedule prep)
 	            $MI = $sh->int_split($M[$i]);
-	
 	            // Initialize working variables
 	            $_a = (int)$h[0];
 	            $_b = (int)$h[1];
@@ -282,41 +275,31 @@ class shaHelper
 	            unset($_T1);
 	            unset($_T2);
 	            $W = array();
-	
 	            // Compute the hash and update
-	            for ($t = 0; $t < 16; $t++)
-	            {
+	            for ($t = 0; $t < 16; $t++){
 	                // Prepare the first 16 message schedule values as we loop
 	                $W[$t] = $MI[$t];
-	
 	                // Compute hash
 	                $_T1 = $sh->addmod2n($sh->addmod2n($sh->addmod2n($sh->addmod2n($_h, $sh->Sigma1($_e)), $sh->Ch($_e, $_f, $_g)), $K[$t]), $W[$t]);
 	                $_T2 = $sh->addmod2n($sh->Sigma0($_a), $sh->Maj($_a, $_b, $_c));
-	
 	                // Update working variables
 	                $_h = $_g; $_g = $_f; $_f = $_e; $_e = $sh->addmod2n($_d, $_T1);
 	                $_d = $_c; $_c = $_b; $_b = $_a; $_a = $sh->addmod2n($_T1, $_T2);
 	            }
-	
-	            for (; $t < 64; $t++)
-	            {
+	            for (; $t < 64; $t++){
 	                // Continue building the message schedule as we loop
 	                $_s0 = $W[($t+1)&0x0F];
 	                $_s0 = $sh->sigma_0($_s0);
 	                $_s1 = $W[($t+14)&0x0F];
 	                $_s1 = $sh->sigma_1($_s1);
-	
 	                $W[$t&0xF] = $sh->addmod2n($sh->addmod2n($sh->addmod2n($W[$t&0xF], $_s0), $_s1), $W[($t+9)&0x0F]);
-	
 	                // Compute hash
 	                $_T1 = $sh->addmod2n($sh->addmod2n($sh->addmod2n($sh->addmod2n($_h, $sh->Sigma1($_e)), $sh->Ch($_e, $_f, $_g)), $K[$t]), $W[$t&0xF]);
 	                $_T2 = $sh->addmod2n($sh->Sigma0($_a), $sh->Maj($_a, $_b, $_c));
-	
 	                // Update working variables
 	                $_h = $_g; $_g = $_f; $_f = $_e; $_e = $sh->addmod2n($_d, $_T1);
 	                $_d = $_c; $_c = $_b; $_b = $_a; $_a = $sh->addmod2n($_T1, $_T2);
 	            }
-	
 	            $h[0] = $sh->addmod2n($h[0], $_a);
 	            $h[1] = $sh->addmod2n($h[1], $_b);
 	            $h[2] = $sh->addmod2n($h[2], $_c);
@@ -326,14 +309,11 @@ class shaHelper
 	            $h[6] = $sh->addmod2n($h[6], $_g);
 	            $h[7] = $sh->addmod2n($h[7], $_h);
 	        }
-	
 	        // Convert the 32-bit words into human readable hexadecimal format.
 	        $hexStr = sprintf("%08x%08x%08x%08x%08x%08x%08x%08x", $h[0], $h[1], $h[2], $h[3], $h[4], $h[5], $h[6], $h[7]);
-	
 	        return $hexStr;
 	    }
     } //sha256
-
 } // __PHP_SHA256_NANO_
 
 ?>

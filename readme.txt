@@ -1,43 +1,43 @@
-=== Plugin Name ===
-Contributors: Don Fischer
-Donate link: http://fischercreativemedia.com/donate/
-Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode, AWS
-Requires at least: 3.0
-Tested up to: 3.4.2
-Stable tag: 2.0.2
+=== Amazon Product in a Post Plugin ===
+Contributors: prophecy2040
+Donate link: http://www.fischercreativemedia.com/donations/
+Tags: Amazon, Affilate, Product, Post, Page, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode
+Requires at least: 2.5
+Tested up to: 3.5.1
+Stable tag: 3.5.1
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Quickly add formatted Amazon Products to post/page by using just the Amazon ASIN (ISBN-10). Great for monetizing your posts.
-== Description ==
-**NOTE:** *Version 2.0.2 only uplades the Amazon API call that goes into effect on 02/06/2012.* If you do not update the plugin will cease to function after 02/06/2012.
 
-Due to changes in Amazon's API call limitations on 10/15/2010, this plugin now requires you have an AWS Public and Private Key of your own to use. You can get a new Key by signing up at http://aws-portal.amazon.com/gp/aws/developer/account/index.html.
+== Description ==
+**NOTE:** Due to changes in Amazon's Product Advertising API Terms of Use, this plugin requires you have an AWS Access Key ID and Secret Access Key of your own to use. See FAQs for links to sign up.
 
 Amazon Product In a Post Plugin is used to to quickly add a formatted Amazon Product/Item to a post or page by using just the Amazon product ASIN (also known as the ISBN-10).
 
 What can you use it for? With this plugin you can:
 
-* Add any Amazon product or item to an existing Post (or Page).
+* Add any Amazon product or item to an existing Post (or Page) or custom Post Type (using the shortcode).
 * Monetize your blog posts with custom Amazon Product and add your own Reviews, descriptions or any other thing you would normally want to add to a post - and still have the Amazon product there.
 * Easily add only the items that are right for your site.
 * Add the product to the TOP of the post content, the BOTTOM of the post content, or make the post content become part of the product layout (see screenshots for examples)
-* *UPDATE 10/4/09* - You can now add as many products as you want to any existing page/post content using a Shortcode - see Installation or FAQ page for details.
-* *UPDATE 12/22/09* - Added French and Spanish language support for text labels in displayed product.
-* *UPDATE 1/3/10* - Added German Language support for text labels in displayed product.
+* You can now add as many products as you want to any existing page/post content using a Shortcode - see Installation or FAQ page for details.
+* Limited French, German and Spanish language support for text labels in displayed product.
 
 If you have an Amazon Affiliate account and you don't think the available Amazon widgets are that great or are what you need, then this plugin might be for you.
 
 **How it Works:**
-The plugin uses the newly revised (and re-named) Amazon Product Advertising API. Older plugins that use Old API calls will no longer work as of 8/2009 because Amazon implemented a new security call procedure that makes many of them obsolete.
+The plugin uses the newly revised (and re-named) Amazon Product Advertising API.
 
-To use the plugin, you must have an Amazon Affiliate Account. You can sign up here if you do not have one - it is free and pretty easy to do. Once you have an account, install the plugin, then enter your Amazon Associate ID in the plugin options page. You are now ready to start adding products to your post!
+To use the plugin, you must have an 1). an Amazon Affiliate Account, and 2). Amazon Product Advertising API keys. You can sign up here if you do not have them - it is free and not extremely difficuly (takes about 15 total for both). Once you have an account, install the plugin, then enter your Amazon Associate ID in the plugin options page. Then enter you API keys. You are now ready to start adding products to your post!
 
-*PLEASE NOTE:* If you DO NOT add your own custom Associate ID, you WILL NOT get credit for any purchases made from your product posts - so don't set up products on a live site unless you enter that first - or you may lose out on some referral $$. You have been warned!
+*PLEASE NOTE:* If you DO NOT add your custom Associate ID, you WILL NOT get credit for any purchases made from your product posts - so don't set up products on a live site unless you enter that first - or you may lose out on some referral $$.
 
 
 == Installation ==
 After you intall the plugin, you need to set up your Amazon Affiliate/Associate ID in the Options panel located in the AMAZON PIP menu under AMAZON PIP OPTIONS. 
 
-An AWS Public and Private/Secret KEY are HIGHLY RECOMMENDED. If you use the one that is builtinto the plugin by default, you WILL experience crazy behavior in your product pages. This is due to the changes Amazon made the AWS key usage on 10/15/2010. There is a limit to the number of API calls in an hour based on the User - so if you use mine, it will eventually reach the limit and your products will NOT display until it resets. Please be aware of this before contacting me about problems, because it will be the first question I ask.
+An AWS Access Key ID and Secrect Access Key REQUIRED. THere is no longer built in keys by default. This change is due to the Amazon Terms of Use agreement. 
 
 No additional adjustments are needed unless you want to configure your own CSS styles. Styles can be adjusted or removed in the Options Panel as well.
 
@@ -46,7 +46,7 @@ No additional adjustments are needed unless you want to configure your own CSS s
 **Adding products is a simple process.**
 
 = To Add a product to an existing post: =
-*  Go into the full edit mode for the post (Post/Edit then select the post).
+*  Go into the full edit mode for the post or page (Post/Edit then select the post).
 *  Under the Content editor, there will be a box called Amazon Product In a Post Settings. Maximize it if it is not already fully visible.
 *  There are 3 sections to fill out, Active, Location and ASIN (See below for adding via Shortcode).
 *  If Active is checked, the product will be live if the post is published.
@@ -54,22 +54,25 @@ No additional adjustments are needed unless you want to configure your own CSS s
 *  Then enter the ASIN in the ASIN field.
 *  Save or Publish the post.
 
-= To Add a New Product Post, you have 3 options: =
+= To Add a New Product Post, you have 4 options: =
 * You can add a new post the regular way (Post / Add New / fill out the items /Publish), and them add the product as outlined above
-* You can use the Quick Add Product Feature (called Amazon PIP in the Amazon PIP menu). This is the fastest method for adding a quick product with minimum text. This Method will create a New Post in the selected categories.
-* You can add a Product via Shortcode to an existing Page/Post.
+* You can use the Quick Add Product Feature (called New Amazon Post in the Amazon Product menu). This is the fastest method for adding a quick product with minimum text. This Method will create a New Post in the selected categories with the select post type.
+* You can add a Product via Shortcode to an existing Page/Post or Custom Post Type.
+* You can add products to the sidebar widgets using the shortcode method.
 
 = To Add a product Via Shortcode: =
-* In the Content editor, add **[AMAZONPRODUCT=XXXXXXXXXX]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number.
-* Update the Page/Post. You can add as many products this way as you like. Just keep in mind that there is a call made to the Amazon API for each product added, so addin too many products could cause a noticable increase in page loading time.
-* Some settings in the individual page/post options will affect the shortcodes - you can use the 'open in new window, 
+* In the Content editor, add **[AMAZONPRODUCTS asin="XXXXXXXXXX"]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number.
+* To add many products at a time, Separate the ASINs with a comma, like so (up to 10 per shortcode): **[AMAZONPRODUCTS asin="XXXXXXXXXX,XXXXXXXXXX,XXXXXXXXXX,XXXXXXXXXX"]**
+* Update the Page/Post. You can add as many products this way as you like. Just keep in mind that there is a call made to the Amazon API for each shortcode added, so adding too separate shortcodes many could cause a noticable increase in page loading time.
+* Some settings in the individual page/post options will affect the shortcodes
 
 == Frequently Asked Questions ==
-See the Installation Page for deatils on setting up the Products. 
-A more detailed FAQ will come as questions arise.
+See the Installation Page for details on setting up the Products. There is a dynamic FAQs feed in the plugin that will allow for adding new FAQs as they come up. 
+More detailed FAQs will come as questions/solutions arise.
 
 = MY PROCUCTS DO NOT DISPLAY! What is wrong? =
-* It could be several things. The FIRST thing to check is the AMAZON Public and Private/Secret Keys in the options page. If they are blank, you need to sign up for your own from amazon. You can sign up here http://aws-portal.amazon.com/gp/aws/developer/account/index.html to get your own. Without it, your products will be subject to the limits of the built in API Keys - which are limited to the number of calls per hour. Once that limit is reached, no more products will be displayed until it resets. Amazon changed this on 10/15/2010, so if it worked before and is not working now, that should be your first course of action.
+* It could be several things. The FIRST thing to check is the AMAZON Access Key ID and Secret Access Key in the options page. If they are blank, you need to sign up for your own from amazon. You can sign up here http://aws-portal.amazon.com/gp/aws/developer/account/index.html to get your own. Without it, your products will display.
+* Also check to make sure you are using Product Advertising Keys. There are many different prodcts from Amazon that require API keys - and this one needs the Product Advertising API Keys specifically.
 * Another common cause, is the method of the api call. By default, it is set to use "file_get_contents", but since some servers do not allow this method you may need to use the older CURL method. Change this in the options page and then check to see if the problem is resolved.
 
 = My Products only display a blank image and a "()" for the title - what is wrong? =
@@ -87,13 +90,14 @@ A more detailed FAQ will come as questions arise.
 * You can add a Product via Shortcode to an existing Page/Post.
 
 = How do I use the Shortcode? =
-* To Add a product Via Shortcode, go to the Content editor for an existing page/post (or create a new post/page), add **[AMAZONPRODUCT=XXXXXXXXXX]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number. Then update or save the Page/Post. You can add as many products this way as you like. Just keep in mind that there is a call made to the Amazon API for each product added, so addin too many products could cause a noticable increase in page loading time.
+* To Add a product Via Shortcode, go to the Content editor for an existing page/post (or create a new post/page), add **[AMAZONPRODUCTS asin="XXXXXXXXXX"]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number. Then update or save the Page/Post. You can add as many products this way as you like (up to 10 per shortcode). Just keep in mind that there is a call made to the Amazon API for each shortcode added, so adding too many products could cause a noticable increase in page loading time.
 
 = My Products are coming up blank - what do I do? =
 * Most likely the reson is your server does not support external URL call using the file_get_contents() function. If you don't have access to your sites php.ini file to change the settings (most people don't), then on the options pages for the plugin, change the API get method to "CURL" and save the settings. This will fix the problem in most cases.
+* Another common cause is that the API keys are not the correct ones. Be sure you have the Product Advertising keys - if they are not, the plugin will not return an error and not display the products.
 
 = I Want to Change the Look of the Products - can you do that for me? = 
-* I would love to say yes, but we cannot make custom changes for everyone that askes - there are just not enough hours in the day - if you REALLY want us to do it for you, contact us - and for a small fee, we will give you whatever look/style you want. Kepp in mind that your theme has a lot to do with the way your products look. 
+* I would love to say yes, but we cannot make custom changes for everyone that askes - there are just not enough hours in the day - if you REALLY want us to do it for you, contact us - and for a small fee, we will give you whatever look/style you want. Keep in mind that your theme has a lot to do with the way your products look. 
 You can tweak the look yourself if you have experience with CSS styles. The options page have a style for each element displayed in the product, so you can tweak it however you like. If you screw it up - just reset it back to the default and start over.
 
 = My product shows up fine, but there is no price - what's wrong? =
@@ -112,8 +116,49 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 6. Shortcode Addition to allow unlimited products in post content.
 
 == Changelog ==
-= 2.0.2 =
-* Updated Amazon API Call to the latest version. REQUIRED by Amazon.
+= 3.5.1 =
+* Basic template integration (for future use - or if you are good at hooks and filters and can figure it out on your own - go ahead - the structure is there!)
+* Removed traces of Developer Keys at Amazon's request.
+* Added Amazon Elements shortcode to add bits and pieces of a product to a post - very hady for making a custom layout.
+* Added Amazon Cache Viewer - allows you to manually delete a product cache to initate a new amazon Call. Caches are stored for 60 minutes and updated as the calls are needed.
+* Added Getting Started page to help users set up affiliate and API Key signup. This is becoming more and more complex, so a little help was needed.
+* Added Shortcode Help Page to give examples of how to use the shortcodes effectively.
+* Added feed driven FAQs page - easier for me to update FAQs on the fly that way.
+* Added several Filters and Hooks - will lay them all out in next revision.
+	
+= 3.1 to 3.5.0 =
+* development versions.
+= 3.0=	
+* Added New Shortcode [AMAZONPRODUCTS] (instead of [AMAZONPRODUCT=B0084IG8TM]) - old method will still work 
+* Added Bulk API Call to limit number of calls to API (can use up to 10 ASINs at one time)
+* Updated the depricated function calls
+* Increased API return values for use in theme - puts all items in the array now
+* Updated styles to include some new elements
+* Updated database field for amazoncache table to allow for larger data size of cached XML body (as API can now return up to 10 itmes at a time)
+* Updated aws_request function
+* Wrapped generic helper functions in !function_exists wrapper to eliminate conflicts with some other Amazon plugins.
+* Updated Install function with styles and database upgrade
+* Added amazon icon button to editor to easily add shortcode.
+* Added new parameters to shortcode to allow custom additions to any post/page:
+	* asin – this is the ASIN or ASINs up to 10 comma separated
+	* locale – this is the Amazon locale you want to get the product from, i.e., com, co.uk, fr, etc. default is your plugin setting
+	* desc – using 1 shows Amazon description (if available) and 0 hides it – default is 0.
+	* features – using 1 shows Amazon Features (if available) and 0 hides it  - default is 0.
+	* listprice – using 1 shows the list price and 0 hides it – default is 1.
+	* partner_id – allows you to add a different parent ID if different for other locale – default is ID in settings.
+	* private_key – allows you to add different private key for locale if different – default is private key in settings.
+	* public_key – allows you to add a different private key for locale if different – default is public key in settings.
+* New Shortcode would be used like this:
+	* If you want to add a .com item and you have the same partner id, public key, private key and want the features showing:
+	**[AMAZONPRODUCTS asin="B0084IG8TM" features="1" locale="com"]**
+	* If you want to add a .com item and you have a different partner id, public key, private key and want the description showing but features not showing:
+	**[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" locale="com" public_key="AKIAJDRNJ6OU527HKGXQ" private_key="Nz3FYyeVysc5yjcZwrIV3bhDti/OGyRHEYOWO005" partner_id="wordseen-20"]
+	*If you just want to use your same locale but want 2 items with no list price and features showing:
+	**[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" features="1" listprice="0"]
+	*If you just want 2 products with regular settings:
+	**[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE"]
+	*If you want to add text to a product:
+	**[AMAZONPRODUCTS asin="B0084IG8TM"]your text can go here![/AMAZONPRODUCTS]
 
 = 2.0 =
 * Added Database for caching api calls (10/20/2010)
@@ -164,3 +209,10 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Minor Fixes/Spelling Error corrections & code cleanup to prep for WordPress hosting of Plugin. (9/14/2009)
 = 1.0 =
 * Plugin Release (9/12/2009)
+== Upgrade Notice ==
+
+= 3.5.1 =
+* Adds many new features, fixes several bugs and implements some mandatory Amazon affilate Terms of Use changes.
+
+= 3.1.0 =
+* 3.0.0 up to 3.1.0 where devlopement versions. Figured I would just up the version to match WordPress version after this point.
