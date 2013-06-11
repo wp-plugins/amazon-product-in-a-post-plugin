@@ -1,0 +1,99 @@
+Version info:
+3.5.1	Basic template integration (for future use - or if you are good at hooks and filters and can figure it out on your own - go ahead - the structure is there!)
+	Removed traces of Developer Keys at Amazon's request.
+	Added Amazon Elements shortcode to add bits and pieces of a product to a post - very hady for making a custom layout.
+	Added Amazon Cache Viewer - allows you to manually delete a product cache to initate a new amazon Call. Caches are stored for 60 minutes and updated as the calls are needed.
+	Added Getting Started page to help users set up affiliate and API Key signup. This is becoming more and more complex, so a little help was needed.
+	Added Shortcode Help Page to give examples of how to use the shortcodes effectively.
+	Added feed driven FAQs page - easier for me to update FAQs on the fly that way.
+	Added several Filters and Hooks - will lay them all out in next revision.
+	
+3.1 to 3.5.0 were development versions.
+3.0	Added New Shortcode [AMAZONPRODUCTS] (instead of [AMAZONPRODUCT=B0084IG8TM]) - old method will still work 
+	Added Bulk API Call to limit number of calls to API (can use up to 10 ASINs at one time)
+	Updated the depricated function calls
+	Increased API return values for use in theme - puts all items in the array now
+	Updated styles to include some new elements
+	Updated database field for amazoncache table to allow for larger data size of cached XML body (as API can now return up to 10 itmes at a time)
+	Updated aws_request function
+	Wrapped generic helper functions in !function_exists wrapper to eliminate conflicts with some other Amazon plugins.
+	Updated Install function with styles and database upgrade
+	Added amazon icon button to editor to easily add shortcode.
+	Added new parameters to shortcode to allow custom additions to any post/page:
+		asin – this is the ASIN or ASINs up to 10 comma separated
+		locale – this is the Amazon locale you want to get the product from, i.e., com, co.uk, fr, etc. default is your plugin setting
+		desc – using 1 shows Amazon description (if available) and 0 hides it – default is 0.
+		features – using 1 shows Amazon Features (if available) and 0 hides it  - default is 0.
+		listprice – using 1 shows the list price and 0 hides it – default is 1.
+		partner_id – allows you to add a different parent ID if different for other locale – default is ID in settings.
+		private_key – allows you to add different private key for locale if different – default is private key in settings.
+		public_key – allows you to add a different private key for locale if different – default is public key in settings.
+	New Shortcode would be used like this:
+		If you want to add a .com item and you have the same partner id, public key, private key and want the features showing:
+		[AMAZONPRODUCTS asin="B0084IG8TM" features="1" locale="com"]
+		If you want to add a .com item and you have a different partner id, public key, private key and want the description showing but features not showing:
+		[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" locale="com" public_key="AKIAJDRNJ6OU527HKGXQ" private_key="Nz3FYyeVysc5yjcZwrIV3bhDti/OGyRHEYOWO005" partner_id="wordseen-20"]
+		If you just want to use your same locale but want 2 items with no list price and features showing:
+		[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" features="1" listprice="0"]
+		If you just want 2 products with regular settings:
+		[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE"]
+		If you want to add text to a product:
+		[AMAZONPRODUCTS asin="B0084IG8TM"]your text can go here![/AMAZONPRODUCTS]
+
+2.0	
+	Added Database for caching api calls (10/20/2010)
+	Added Options for Private and Public Keys in the options panel. (10/22/2010)
+	Added Options for Complete Removal and Partial Removal of Plugin on Deactivate. (10/24/2010)
+	Added new error checks to comply with API changes.
+	Added new Display checks to not display anything on error (except an HTML Comment in the code) (10/24/2010)
+	Fixed option naming convention to resolve a few issues with previous versions (10/24/2010)
+	Fixed come code to resolve headers sent issues. (10/23/2010)
+	Modified Style calls to fix issues with earlier versions upgrading to newer version (10/23/2010)
+	Updated FAQs (10/24/2010)
+1.9.2
+	Beta version to add comma sep values to shortcode functionality. (4/13/2010)
+1.9.1
+	Fix to WordPress Core location assumption. Caused Problem when WP core was located outside root. (1/3/2010)
+	Added German Language. (special thanks to Henri Sequeira for translations). (1/3/2010)
+1.9 
+ 	Fix to undefined function error - causing problems - sorry for the trouble everyone. (12/28/2009)
+1.8 
+ 	Added Fix for users without encoding functions in PHP4 to be able to use. This may have caused some problems with users on 1.7. (12/21/2009)
+	Added Options for Language selection. (12/21/2009)
+	Added French Language and buttons (special thanks to Henri Sequeira for translations). (12/21/2009)
+	Added Lightbox type effect for "View Larger Image" function.(12/22/2009)
+	Modified Style Call to use a more WP friendly method to not rely on a "guess" as to where the core WP files are located. (12/22/2009)
+	Fixed Open in new window functionality - was not working 100% of the time. (12/22/2009)
+1.7
+ 	Add Curl option for users that cant use file_get_contents() for some reason or another. (12/1/2009)
+	Added Show on Single Page Only option to Options Page.(11/30/2009)
+	Added a way to change encoding display of prices from API if funny characters are showing.(12/1/2009)
+1.6
+ 	Added Options to let admin choose if they want to "Hook" into the_excerpt and the_content hooks in Main Options with override on each post/page.(10/3/2009)
+ 	Added Open in a New Window Option (for Amazon button) in Main Options with override on each page/post.(10/3/2009)
+	Added "Show Only on Single Page" option to individual post/page options.(10/4/2009)
+	Added Shortcode functionality to allow addition of unlimited products in the post/page content.(10/4/2009)
+	Added "Quick Fix - Hide Warnings" option in Main Options. Adds ini_set("display_errors", 0) to code to help some admins hide any Warnings if their PHP settings are set to show them.(10/3/2009)
+	Fixed Array Merge Warning when item is not an array.(10/3/2009)
+	Fixed "This Items not available in your locale" message as to when it acatually displays and spelling.(10/3/2009)
+	Added Options to let admin add their own Error Messages for Item Not available and Amazon Hidden Price notificaton.(10/3/2009)
+	Updated Default CSS styles to include in Stock and Out of Stock classes and made adjustments to other improper styles. (10/3/2009)1.5 - Remove hook to the_excerpt because it could cause problems in themes that only want to show text. (9/17/2009)
+1.4
+ 	Added menthod to restore default CSS if needed - by deleting all CSS in options panel and saving - default css will re-appear in box. (9/16/2009) 
+1.3
+	Added new feature to be able to adjust or add your own styles. (9/16/2009)
+1.2	Fix to image call procedure to help with "no image available" issue. (9/15/2009)
+1.1	Minor Fixes/Spelling Error corrections & code cleanup to prep for WordPress hosting of Plugin. (9/14/2009)
+1.0	Plugin Release (9/12/2009)
+
+    Copyright (C) 2009 Donald J. Fischer
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
