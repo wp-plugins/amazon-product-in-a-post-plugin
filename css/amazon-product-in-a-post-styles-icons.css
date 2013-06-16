@@ -1,0 +1,12 @@
+div#icon-amazon{background:url(../images/aicon.png) no-repeat !important;}
+.apip-posttypes{}
+.apip-ptype{float:left;}
+.apip-ptype label{display:block;margin:3px 15px 5px 0;}
+.apip-ptypecb{}
+.apip-new-pppy{max-width:100%;min-width:50%;margin-top:50px;}
+.apip-new-pppy tbody > tr > td:first-child{width:225px;}
+.apip-new-pppy > tr > td:first-child{width:225px;}
+.apip-new-pppy tr:nth-child(odd) {background: #efefef;}
+.apip-new-pppy tr:nth-child(even) {background: #transparent;}
+.apip-extra-pad-bot td{padding-bottom:15px;}
+.apip-extra-pad-top td{padding-top:15px;}
