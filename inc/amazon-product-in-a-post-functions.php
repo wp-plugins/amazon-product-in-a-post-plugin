@@ -68,9 +68,7 @@ if(!function_exists('getSingleAmazonProduct')){
 			$set_array				= array("Operation" => $appip_operation,"ItemId" => $ASIN,"ResponseGroup" => $appip_responsegroup,"IdType" => $appip_idtype,"AssociateTag" => $manual_partner_id );
 			$api_request_array		= array('locale'=>$manual_locale,'public_key'=>$manual_public_key,'private_key'=>$manual_private_key,'api_request_array'=>$set_array);
 			$request_array			= apply_filters('appip_pre_request_array',$api_request_array);
-			//print_r($request_array);
 			$pxml 					= aws_signed_request($request_array['locale'],$request_array['api_request_array'],$request_array['public_key'],$request_array['private_key']);
-			//echo $pxml;
 			if(!is_array($pxml)){
 				$pxml2	= $pxml;
 				$pxml 	= array();
@@ -91,7 +89,6 @@ if(!function_exists('getSingleAmazonProduct')){
 							endif;
 						else:
 							unset($temppart);
-							//$temppart[] = '<div>-----------------------</div>';
 							$temppart[] = '<div>';
 							$temppart[] = '	<div class="amazon-image-wrapper"><a href="[!URL!]" [!TARGET!]>[!IMAGE!]</a></div>';
 							$temppart[] = '	<a rel="appiplightbox-[!ASIN!]" href="[!LARGEIMAGE!]"><span class="amazon-tiny">[!LARGEIMAGETXT!]</span></a>';
@@ -266,30 +263,37 @@ if(!function_exists('getSingleAmazonProduct')){
 									}
 								}
 								if(isset($result["LowestNewPrice"])){
-									if($result["LowestNewPrice"]=='Too low to display'){
-										$newPrice = 'Check Amazon For Pricing';
+									if($result["Binding"] == 'Kindle Edition'){
+										$returnval .= '						<tr>'."\n";
+										$returnval .= '							<td class="amazon-new-label">Kindle Edition:</td>'."\n";
+										$returnval .= '							<td class="amazon-new">Check Amazon for Pricing <span class="instock">Digital Only</span></td>'."\n";
+										$returnval .= '						</tr>'."\n";
 									}else{
-										$newPrice = $result["LowestNewPrice"];
+										if($result["LowestNewPrice"] == 'Too low to display'){
+											$newPrice = 'Check Amazon For Pricing';
+										}else{
+											$newPrice = $result["LowestNewPrice"];
+										}
+										$returnval .= '						<tr>'."\n";
+										$returnval .= '							<td class="amazon-new-label">'.$appip_text_newfrom.':</td>'."\n";
+										if($result["TotalNew"]>0){
+											$returnval .= '							<td class="amazon-new">'. maybe_convert_encoding($newPrice ).' <span class="instock">'.$appip_text_instock.'</span></td>'."\n";
+										}else{
+											$returnval .= '							<td class="amazon-new">'. maybe_convert_encoding($newPrice ).' <span class="outofstock">'.$appip_text_outofstock.'</span></td>'."\n";
+										}
+										$returnval .= '						</tr>'."\n";
 									}
-									$returnval .= '						<tr>'."\n";
-									$returnval .= '							<td class="amazon-new-label">'.$appip_text_newfrom.':</td>'."\n";
-									if($result["TotalNew"]>0){
-										$returnval .= '							<td class="amazon-new">'. maybe_convert_encoding($newPrice ).' <span class="instock">'.$appip_text_instock.'</span></td>'."\n";
-									}else{
-										$returnval .= '							<td class="amazon-new">'. maybe_convert_encoding($newPrice ).' <span class="outofstock">'.$appip_text_outofstock.'</span></td>'."\n";
-									}
-									$returnval .= '						</tr>'."\n";
 								}
-								if(isset($result["LowestUsedPrice"])){
+								if(isset($result["LowestUsedPrice"]) && $result["Binding"] != 'Kindle Edition'){
 									$returnval .= '						<tr>'."\n";
 									$returnval .= '							<td class="amazon-used-label">'.$appip_text_usedfrom.':</td>'."\n";
 									if($result["TotalUsed"] > 0){
 										$returnval .= '						<td class="amazon-used">'. maybe_convert_encoding($result["LowestUsedPrice"]) .' <span class="instock">'.$appip_text_instock.'</span></td>'."\n";
 									}else{
-										if($result["LowestNewPrice"] == '' || $result["LowestNewPrice"] =="0"){
+										if($result["LowestUsedPrice"] == '' || $result["LowestUsedPrice"] =="0"){
 											$usedfix = '';
 										}else{
-											$usedfix = maybe_convert_encoding($result["LowestNewPrice"]);
+											$usedfix = maybe_convert_encoding($result["LowestUsedPrice"]);
 										}
 										$returnval .= '						<td class="amazon-new">'. $usedfix . ' <span class="outofstock">'.$appip_text_outofstock.'</span></td>'."\n";
 									}
@@ -568,4 +572,5 @@ if(!function_exists('aws_prodinpost_filter_content')){
 		wp_enqueue_script('jquery'); 
 		wp_enqueue_script('appip-amazonlightbox'); 
 	}
+	
 	

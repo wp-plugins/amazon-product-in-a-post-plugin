@@ -2,10 +2,10 @@
 /*
 Plugin Name: Amazon Product In a Post Plugin
 Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-product-in-a-post/
-Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or you will not get credit for product sales.
+Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post, page, custom post type or text widget by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or you will not get credit for product sales. Requires signup for an Amazon Affiliate Account and Product Advertising API Keys which are currently FREE from Amazon.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 3.5.1
+Version: 3.5.2
     Copyright (C) 2009-2013 Donald J. Fischer
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -87,8 +87,8 @@ Version: 3.5.1
 	$appuninstallall	= get_option('apipp_uninstall_all'); //Uninstall shortcodes in pages an posts
 	$aws_partner_id		= get_option('apipp_amazon_associateid'); //Amazon Partner ID 
 	$awsPageRequest 	= 1;
-	$aws_plugin_version = "3.5.1";
-	$aws_plugin_dbversion = '3.5.1';
+	$aws_plugin_version = "3.5.2";
+	$aws_plugin_dbversion = '3.5.2';
 	$amazonhiddenmsg 	= get_option('apipp_amazon_hiddenprice_message'); //Amazon Hidden Price Message
 	$amazonerrormsg 	= get_option('apipp_amazon_notavailable_message'); //Amazon Error No Product Message
 	$apipphookexcerpt 	= get_option('apipp_hook_excerpt'); //Hook the excerpt?
@@ -197,6 +197,12 @@ Version: 3.5.1
 	add_action('wp','add_appip_jquery'); //enqueue scripts
 	add_action('admin_head','aws_prodinpost_addadminhead',10); //add admin styles to admin head
 	//add_action('wp','aws_prodinpost_cartsetup', 1, 2); //Future Item
+	add_action( 'plugin_action_links_' . plugin_basename(__FILE__),'apipp_filter_plugin_actions' );
+	add_filter( 'plugin_row_meta',  'apipp_filter_plugin_links', 10, 2 );
+
+	function apipp_filter_plugin_actions($links){$new_links = array();$new_links[] = '<a href="admin.php?page=apipp-main-menu">Getting Started</a>';return array_merge($links,$new_links );}
+	function apipp_filter_plugin_links($links, $file){if ( $file == plugin_basename(__FILE__) ){$links[] = '<a href="admin.php?page=apipp-main-menu">Getting Started</a>';$links[] = '<a href="admin.php?page=apipp_plugin-shortcode">Shortcode Usage</a>';$links[] = '<a href="admin.php?page=apipp_plugin-faqs">FAQs</a>';$links[] = '<a target="_blank" href="http://fischercreativemedia.com/donations/">Donate</a>';}return $links;}
+
 	
 // Warnings Quickfix
 	if(get_option('apipp_hide_warnings_quickfix')==true){

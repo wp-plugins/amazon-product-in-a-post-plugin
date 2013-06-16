@@ -23,6 +23,8 @@ function amazon_product_shortcode_mini_function($atts, $content = ''){
 		'msg_outofstock' => 'Out of Stock',
 		'target' => '_blank',
 		'button_url' => '',
+		'container' => '',
+		'container_class' => 'amazon-element-wrapper',
 		'labels' => '',
 	);
 	
@@ -72,7 +74,7 @@ function amazon_product_shortcode_mini_function($atts, $content = ''){
 				foreach($resultarr as $result):
 					$currasin = $result['ASIN'];
 					if($result['NoData'] == '1'):
-						echo '<'.'!-- APPIP ERROR:nodata['.$result['Error'].']-->';
+						echo '<'.'!-- APPIP ERROR:nodata['.str_replace(']-'.'->',']->',$result['Error']).']-->';
 					else:
 						if(is_array($field)){
 							$fielda = $field;
@@ -82,6 +84,7 @@ function amazon_product_shortcode_mini_function($atts, $content = ''){
 						foreach($fielda as $fieldarr){
 							switch(strtolower($fieldarr)){
 								case 'title':
+									if ($showformat != '1'){$result["Title"] = str_replace('('.$result["Title"].')','',$result["Title"]);}
 									if(!isset($labels['title-wrap'][$arr_position]) && !isset($labels['title'][$arr_position])){
 										$labels['title'][$arr_position] = '<h2 class="appip-title"><a href="'.$result['URL'].'"'.$target.'>'. maybe_convert_encoding($result["Title"]).'</a></h2>';
 									}elseif(!isset($labels['title-wrap'][$arr_position]) && isset($labels['title'][$arr_position])){
@@ -122,24 +125,37 @@ function amazon_product_shortcode_mini_function($atts, $content = ''){
 								case 'price':
 								case 'new-price':
 								case 'new price':
-									if(isset($labels['price'][$arr_position])){
-										$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.$labels['price'][$arr_position].' </span>';
-									}elseif(isset($labels['new-price'][$arr_position])){
-										$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.$labels['new-price'][$arr_position].' </span>';
-									}elseif(isset($labels['new price'][$arr_position])){
-										$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.$labels['new price'][$arr_position].' </span>';
+									if("Kindle Edition" == $result["Binding"]){
+										if(isset($labels['price'][$arr_position])){
+											$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.$labels['price'][$arr_position].' </span>';
+										}elseif(isset($labels['new-price'][$arr_position])){
+											$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.$labels['new-price'][$arr_position].' </span>';
+										}elseif(isset($labels['new price'][$arr_position])){
+											$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.$labels['new price'][$arr_position].' </span>';
+										}else{
+											$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.'Kindle Edition:'.' </span>';
+										}
+										$retarr[$currasin][$fieldarr] = $labels['price-new'][$arr_position].' Check Amazon for Pricing <span class="instock">Digital Only</span>';
 									}else{
-										$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.'New From:'.' </span>';
-									}
-									if($result["LowestNewPrice"]=='Too low to display'){
-										$newPrice = 'Check Amazon For Pricing';
-									}else{
-										$newPrice = $result["LowestNewPrice"];
-									}
-									if($result["TotalNew"]>0){
-										$retarr[$currasin][$fieldarr] = $labels['price-new'][$arr_position].maybe_convert_encoding($newPrice).' <span class="instock">'.$msg_instock.'</span>';
-									}else{
-										$retarr[$currasin][$fieldarr] = $labels['price-new'][$arr_position].maybe_convert_encoding($newPrice).' <span class="outofstock">'.$msg_instock.'</span>';
+										if(isset($labels['price'][$arr_position])){
+											$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.$labels['price'][$arr_position].' </span>';
+										}elseif(isset($labels['new-price'][$arr_position])){
+											$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.$labels['new-price'][$arr_position].' </span>';
+										}elseif(isset($labels['new price'][$arr_position])){
+											$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.$labels['new price'][$arr_position].' </span>';
+										}else{
+											$labels['price-new'][$arr_position] = '<span class="appip-label label-'.$fieldarr.'">'.'New From:'.' </span>';
+										}
+										if($result["LowestNewPrice"]=='Too low to display'){
+											$newPrice = 'Check Amazon For Pricing';
+										}else{
+											$newPrice = $result["LowestNewPrice"];
+										}
+										if($result["TotalNew"]>0){
+											$retarr[$currasin][$fieldarr] = $labels['price-new'][$arr_position].maybe_convert_encoding($newPrice).' <span class="instock">'.$msg_instock.'</span>';
+										}else{
+											$retarr[$currasin][$fieldarr] = $labels['price-new'][$arr_position].maybe_convert_encoding($newPrice).' <span class="outofstock">'.$msg_instock.'</span>';
+										}
 									}
 									break;
 								case 'image':
@@ -201,9 +217,18 @@ function amazon_product_shortcode_mini_function($atts, $content = ''){
 					endif;
 					
 					$retarr = apply_filters('amazon_product_in_a_post_plugin_elements_filter',$retarr);
+					$wrap = str_replace(array('<','>'), array('',''),$container);
+					if($wrap != ''){
+						$thenewret[] = "<{$wrap} class='{$container_class}'>";
+					}	
 					foreach($retarr[$currasin] as $key=>$val){
-						$thenewret[] =  '<div class="amazon-element-'.$key.'">'.$val.'</div>';
+						if($key!=''){
+							$thenewret[] =  '<div class="amazon-element-'.$key.'">'.$val.'</div>';
+						}
 					}
+					if($wrap != ''){
+						$thenewret[] = "</{$wrap}>";
+					}	
 					$arr_position++;
 				endforeach;
 				if(is_array($thenewret)){

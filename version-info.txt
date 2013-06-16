@@ -1,4 +1,9 @@
 Version info:
+3.5.2	Fix to issue with Add New Amazon Post page not loading.
+	Fix to the Shortcode for amazon-elements.
+	Added a container parameter and container class parameter to the amazon-elements shortcode to make styling multiple asin's easier.
+	Fixed Readme.txt file for screenshots for WordPress repository. 
+
 3.5.1	Basic template integration (for future use - or if you are good at hooks and filters and can figure it out on your own - go ahead - the structure is there!)
 	Removed traces of Developer Keys at Amazon's request.
 	Added Amazon Elements shortcode to add bits and pieces of a product to a post - very handy for making a custom layout.
@@ -32,7 +37,7 @@ Version info:
 		If you want to add a .com item and you have the same partner id, public key, private key and want the features showing:
 		[AMAZONPRODUCTS asin="B0084IG8TM" features="1" locale="com"]
 		If you want to add a .com item and you have a different partner id, public key, private key and want the description showing but features not showing:
-		[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" locale="com" public_key="AKIAJDRNJ6OU527HKGXQ" private_key="Nz3FYyeVysc5yjcZwrIV3bhDti/OGyRHEYOWO005" partner_id="wordseen-20"]
+		[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" locale="com" public_key="AKIAJDRNJ6OU527HKFFQ" private_key="Nz3FYy99ysc5yjcZwrIV3bhDti/OGyRHEYOWO00A" partner_id="wordset-20"]
 		If you just want to use your same locale but want 2 items with no list price and features showing:
 		[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" features="1" listprice="0"]
 		If you just want 2 products with regular settings:

@@ -322,24 +322,49 @@ function GetAPPIPReturnValArray($Item,$Errors){
 			$newAmzPricing[$atype]['IsEligibleForSuperSaverShipping'] = $amzOffers['OfferListing']['IsEligibleForSuperSaverShipping'];
 		}
 	}
-	
+	if($appBinding =="Kindle Edition"){
+		/* Set pricing to 0 for Kindle Items (no data returned for Kindle Pricing in API as of 6/12/2013)*/
+		$appLowestUsedPrice 		= $newAmzPricing['Used']['Price'] = 0;
+		$appLowestRefurbishedPrice 	= $newAmzPricing['Refurbished']['Price'] = 0;
+		$appLowestCollectiblePrice 	= $newAmzPricing['Collectible']['Price'] = 0;
+		$appTotalCollectible = $appTotalRefurbished = $appTotalUsed = 0;
+	}
 	if($appTotalNew > 0){ 
 		$newAmzPricing['NewFrom']['List'] = $appListPrice;
-		$newAmzPricing['NewFrom']['Price'] = 'New from '.$appLowestNewPrice;
+		if(strpos($appLowestNewPrice,'Too low to display')!== false && isset($newAmzPricing['New']['Price'])){
+			$newAmzPricing['NewFrom']['Price'] = 'New from '.$newAmzPricing['New']['Price'];
+			$appLowestNewPrice = $newAmzPricing['New']['Price'];
+		}else{
+			$newAmzPricing['NewFrom']['Price'] = 'New from '.$appLowestNewPrice;
+		}
 	}
 	if($appTotalUsed > 0){ 
 		$newAmzPricing['UsedFrom']['List'] = $appListPrice;
-		$newAmzPricing['UsedFrom']['Price'] = 'Used from '.$appLowestUsedPrice;
+		if(strpos($appLowestUsedPrice,'Too low to display')!== false && isset($newAmzPricing['Used']['Price'])){
+			$newAmzPricing['UsedFrom']['Price'] = 'Used from '.$newAmzPricing['Used']['Price'];
+			$appLowestUsedPrice = $newAmzPricing['Used']['Price'];
+		}else{
+			$newAmzPricing['UsedFrom']['Price'] = 'Used from '.$appLowestUsedPrice;
+		}
 	}
 	if($appTotalRefurbished > 0){ 
 		$newAmzPricing['RefurbishedFrom']['List'] = $appListPrice;
-		$newAmzPricing['RefurbishedFrom']['Price'] = 'Refurbished from '.$appLowestRefurbishedPrice;
+		if($appLowestRefurbishedPrice == 'Too low to display' && isset($newAmzPricing['Refurbished']['Price'])){
+			$newAmzPricing['RefurbishedFrom']['Price'] = 'Refurbished from '.$newAmzPricing['Refurbished']['Price'];
+			$appLowestRefurbishedPrice = $newAmzPricing['Refurbished']['Price'];
+		}else{
+			$newAmzPricing['RefurbishedFrom']['Price'] = 'Refurbished from '.$appLowestRefurbishedPrice;
+		}
 	}
 	if($appTotalCollectible > 0){ 
 		$newAmzPricing['CollectibleFrom']['List'] = $appListPrice;
-		$newAmzPricing['CollectibleFrom']['Price'] = 'Collectible from '. $appLowestCollectiblePrice;
+		if($appLowestCollectiblePrice == 'Too low to display' && isset($newAmzPricing['Collectible']['Price'])){
+			$newAmzPricing['CollectibleFrom']['Price'] = 'Collectible from '. $newAmzPricing['Collectible']['Price'];
+			$appLowestCollectiblePrice = $newAmzPricing['Collectible']['Price'];
+		}else{
+			$newAmzPricing['CollectibleFrom']['Price'] = 'Collectible from '. $appLowestCollectiblePrice;
+		}
 	}
-	
 	if(!isset($ItemOffers['OfferListing']['Price'])){
 		$SalePrice = $ItemOffers['OfferListing']['Price'];
 	}else{
@@ -519,73 +544,6 @@ function GetAPPIPReturnValArray($Item,$Errors){
 function FormatSearchResult($Result){
 	//FormatSearchResult by Don Fischer
 	return; //not used at this time
-	$Item = $Result;
-	$Author = $Item["Author"];
-	$Binding = $Item["Binding"];
-	$EAN = $Item["EAN"];
-	$Edition = $Item["Edition"];
-	$Features = $Item["Feature"]; //array
-	$Languages = $Item["Languages"]["Language"]; //array
-	$ISBN = $Item["ISBN"];
-	$Label = $Item["Label"];
-	$ListPriceAmount = $Item["ListPrice"]["Amount"];
-	$ListPriceCurrencyCode = $Item["ListPrice"]["CurrencyCode"];
-	$ListPriceFormattedPrice = $Item["ListPrice"]["FormattedPrice"];
-	$Manufacturer = $Item["Manufacturer"];
-	$NumberOfItems = $Item["NumberOfItems"];
-	$NumberOfPages = $Item["NumberOfPages"];
-	$PackageDimensionsHeight = $Item["PackageDimensions"]["Height"]; //array
-	$PackageDimensionsLength = $Item["PackageDimensions"]["Length"]; //array
-	$PackageDimensionsWeight = $Item["PackageDimensions"]["Weight"]; //array
-	$PackageDimensionsWidth = $Item["PackageDimensions"]["Width"]; //array
-	$ProductGroup = $Item["ProductGroup"];
-	$ProductTypeName = $Item["ProductTypeName"];
-	$PublicationDate = $Item["PublicationDate"];
-	$Publisher = $Item["Publisher"];
-	$ReadingLevel = $Item["ReadingLevel"];
-	$ReleaseDate = $Item["ReleaseDate"];
-	$Studio = $Item["Studio"];
-	$Title = $Item["Title"];
-	
-	//shortcut keys
-	$Price = $ListPriceFormattedPrice . ' ' .$ListPriceCurrencyCode;
-	$PackageDimensions = ($PackageDimensionsLength["value"] / 100) .'in x ' . ($PackageDimensionsWidth["value"] / 100). 'in x '. ($PackageDimensionsHeight["value"] / 100) .'in';
-	$PackageWeight = ($PackageDimensionsWeight["value"] / 100).'lbs.';
-	$Pages = $NumberOfPages;
-	$RetVal = array(
-		'Author' => "{$Author}",
-		'Binding' => "{$Binding}",
-		'EAN' => "{$EAN}",
-		'Edition' => "{$Edition}",
-		'Features' => "{$Features}", 
-		'Languages' => "{$Languages}",
-		'ISBN' => "{$ISBN}",
-		'Label' => "{$Label}",
-		'ListPriceAmount' => "{$ListPriceAmount}",
-		'ListPriceCurrencyCode' => "{$ListPriceCurrencyCode}",
-		'ListPriceFormattedPice' => "{$ListPriceFormattedPrice}",
-		'Manufacturer' => "{$Manufacturer}",
-		'NumberOfItems' => "{$NumberOfItems}",
-		'ItemNumberOfPages' => "{$ItemNumberOfPages}",
-		'PackageDimensionsHeight' => "{$PackageDimensionsHeight}", 
-		'PackageDimensionsLength' => "{$PackageDimensionsLength}", 
-		'PackageDimensionsWeight' => "{$PackageDimensionsWeight}", 
-		'PackageDimensionsWidth' => "{$PackageDimensionsWidth}", 
-		'ProductGroup' => "{$ProductGroup}",
-		'ProductTypeName' => "{$ProductTypeName}",
-		'PublicationDate' => "{$PublicationDate}",
-		'Publisher' => "{$Publisher}",
-		'ReadingLevel' => "{$ReadingLevel}",
-		'ReleaseDate' => "{$ReleaseDate}",
-		'Studio' => "{$Studio}",
-		'Title' => "{$Title}",
-		'Price' => "{$Price}",
-		'PackageDimensions' => "{$PackageDimensions}",
-		'PackageWeight' => "{$PackageWeight}",
-		'Pages' => $Pages
-	);
-	if(WP_DEBUG){echo('<br/>WP_DEBUG:<br/>');print_r($RetVal);echo('<br/><br/>');}
-	return $RetVal;  
 } 
   
 if(!function_exists('aws_signed_request')){
@@ -622,7 +580,7 @@ if(!function_exists('aws_signed_request')){
 		$signature 							= base64_encode(aws_hash_hmac("sha256", $string_to_sign, $private_key, True));
 		$signature 							= str_replace("%7E", "~", rawurlencode($signature));
 		$request 							= "http://".$host.$uri."?".$canonicalized_query."&Signature=".$signature;
-		if(WP_DEBUG){echo('<br/>WP_DEBUG:<br/>');echo($request);echo('<br/><br/>');}   
+		//if(WP_DEBUG){echo('<br/>WP_DEBUG:<br/>');echo($request);echo('<br/><br/>');}   
 	//do request
 		global $wpdb;
 		$body = "";
@@ -656,7 +614,7 @@ if(!function_exists('aws_signed_request')){
 				$usecurl 	= 0;
 			}
 		}
-
+		
 		if (count($result) > 0){
 			if ($result[0]->Age <= 6001 && $result[0]->body != '' && $purge_cache == 0){ //that would be 60 min 1 seconds on MYSQL value
 				$pxml = appip_get_XML_structure($result[0]->body, $result[0]->Age);
@@ -678,7 +636,7 @@ if(!function_exists('aws_signed_request')){
 				}
 				$xbody = trim(addslashes($response));
 				if($xbody ==''){
-					if(WP_DEBUG){echo('<br/>WP_DEBUG:<br/>No Response Body from Amazon Request - Most likely does not support selected Request Method.<br/><br/>');} 
+					//if(WP_DEBUG){echo('<br/>WP_DEBUG:<br/>No Response Body from Amazon Request - Most likely does not support selected Request Method.<br/><br/>');} 
 					return false;
 				}
 				$updatesql ="INSERT IGNORE INTO {$wpdb->prefix}amazoncache (`URL`, `body`, `updated`) VALUES ('{$keyurl}', '{$xbody}', NOW()) ON DUPLICATE KEY UPDATE `body`='{$xbody}', `updated`=NOW();";
@@ -703,7 +661,7 @@ if(!function_exists('aws_signed_request')){
 			}
 			$xbody = trim(addslashes($response));
 			if($xbody ==''){
-				if(WP_DEBUG){echo('<br/>WP_DEBUG:<br/>No Response Body from Amazon Request - Most likely does not support selected Request Method.<br/><br/>');} 
+				//if(WP_DEBUG){('<br/>WP_DEBUG:<br/>No Response Body from Amazon Request - Most likely does not support selected Request Method.<br/><br/>');} 
 				return false;
 			}
 			$updatesql ="INSERT IGNORE INTO {$wpdb->prefix}amazoncache (`URL`, `body`, `updated`) VALUES ('{$keyurl}', '{$xbody}', NOW()) ON DUPLICATE KEY UPDATE `body`='$xbody', `updated`=NOW();";

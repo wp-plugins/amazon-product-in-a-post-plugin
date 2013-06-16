@@ -29,17 +29,28 @@ global $appipBulidBox;
 			global $post;
 			if(isset($_POST['post_category_count']) && $_POST['post_type'] == 'post' ){
 				$totalcategories = $_POST['post_category_count'];
-				for($i=0;$i<=$totalcategories;$i++){
-						$teampappcats[$i] = $_POST['post_category'.$i];
+				if($totalcategories != '0'){
+					for($i=0;$i<=$totalcategories;$i++){
+							$teampappcats[$i] = $_POST['post_category'.$i];
+					}
+					$post_array = array(
+						'post_author' 	=> $_POST['post_author'],
+					    'post_title' 	=> $_POST['post_title'],
+					    'post_status' 	=> $_POST['post_status'],
+					    'post_type' 	=> $_POST['post_type'],
+					    'post_content' 	=> $_POST['post_content'],
+					    'post_category' => $teampappcats,
+					);
+				}else{
+					$post_array = array(
+						'post_author' 	=> $_POST['post_author'],
+					    'post_title' 	=> $_POST['post_title'],
+					    'post_status' 	=> $_POST['post_status'],
+					    'post_type' 	=> $_POST['post_type'],
+					    'post_content' 	=> $_POST['post_content'],
+					    'post_category' => '',
+					);
 				}
-				$post_array = array(
-					'post_author' 	=> $_POST['post_author'],
-				    'post_title' 	=> $_POST['post_title'],
-				    'post_status' 	=> $_POST['post_status'],
-				    'post_type' 	=> $_POST['post_type'],
-				    'post_content' 	=> $_POST['post_content'],
-				    'post_category' => $teampappcats,
-				);
 				$createdpostid = wp_insert_post($post_array);
 			}else{
 				$post_array = array(
@@ -55,12 +66,15 @@ global $appipBulidBox;
 				$createdpostid = wp_insert_post($post_array,'false');
 			}
 			if($createdpostid!=''){
+				
 				$newpost = get_post($createdpostid);
 				ini_set('display_errors', 0);
 				amazonProductInAPostSavePostdata($createdpostid,$newpost);
 				header("Location: admin.php?page=apipp-add-new&appmsg=1");
+				exit();
 			}else{
 				header("Location: admin.php?page=apipp-add-new&appmsg=2");
+				exit();
 			}
 		}else{
 			add_action('save_post', 'amazonProductInAPostSavePostdata', 1, 2); // save the custom fields
@@ -84,7 +98,7 @@ global $appipBulidBox;
 			echo '<h2>Amazon Variables</h2>';
 			echo '$aws_plugin_version: '.$aws_plugin_version.'<br/>';
 			echo '$public_key: '. get_option('apipp_amazon_publickey').'<br/>'; 
-			echo '$private_key: '. get_option('apipp_amazon_secretkey').'<br/>'; 
+			//echo '$private_key: '. get_option('apipp_amazon_secretkey').'<br/>'; 
 			echo '$aws_partner_id: '. get_option('apipp_amazon_associateid').'<br/>';
 			echo '$apipphookexcerpt: '. get_option('apipp_hook_excerpt').'<br/>'; 
 			echo '$apipphookcontent: '.get_option('apipp_hook_content').'<br/>'; 
@@ -205,11 +219,10 @@ global $appipBulidBox;
 	  	add_submenu_page( 'apipp-main-menu', "Getting Started", "Getting Started", 'edit_posts' , 'apipp-main-menu', 'apipp_main_page');
 	  	add_submenu_page( 'apipp-main-menu', "{$fullname_apipp} Options", "Amazon PIP Options", 'manage_options' , "apipp_plugin_admin", 'apipp_options_add_subpage');
 		add_submenu_page( 'apipp-main-menu', 'Shortcode Usage', 'Shortcode Usage', 'manage_options', 'apipp_plugin-shortcode', 'apipp_shortcode_help_page' );
-		add_submenu_page( 'apipp-main-menu', 'FAQs/Help', 'FAQs/Help', 'manage_options', $shortname_apipp.'_plugin-faqs', 'apipp_options_faq_page' );
+		add_submenu_page( 'apipp-main-menu', 'FAQs/Help', 'FAQs/Help', 'manage_options', 'apipp_plugin-faqs', 'apipp_options_faq_page' );
 	  	add_submenu_page( 'apipp-main-menu', "Product Cache", "Product Cache", 'edit_posts' , "apipp-cache-page", 'apipp_cache_page');
 	  	add_submenu_page( 'apipp-main-menu', "New Amazon Post", "New Amazon Post", 'edit_posts' , "apipp-add-new", 'apipp_add_new_post');
-		//add_submenu_page( 'apipp-main-menu', 'Layout Styles', 'Layout Styles', 'manage_options', 'appip-layout-styles', 'apipp_templates');
-	  	//add_submenu_page('apipp-main-menu', 'New Product Post', 'New Product Post', 'edit_posts', 'apipp-add-new', 'apipp_add_new_post');
+		//add_submenu_page( 'apipp-main-menu', 'Layout Styles', 'Layout Styles', 'manage_options', 'appip-layout-styles', 'apipp_templates');//future
 	}
 
 function apipp_cache_page(){
@@ -644,88 +657,89 @@ function apipp_options_faq_page(){
 		//noting yet
 	}
 	
-	function apipp_add_new_post(){
+function apipp_add_new_post(){
 	global $user_ID;
 	global $current_user;
 	get_currentuserinfo();
     $myuserpost = $current_user->ID;
-		echo '<div class="wrap"><div id="icon-amazon" class="icon32"><br /></div><h2>Add New Amazon Product Post</h2>';
-		if($_GET['appmsg']=='1'){	echo '<div style="background-color: rgb(255, 251, 204);" id="message" class="updated fade below-h2"><p><b>Product post has been saved. To edit, use the standard Post Edit options.</b></p></div>';}
-		echo '<br />This function will allow you to add a new post for an Amazon Product - no need to create a post then add the ASIN.<br />Once you add a Product Post, you can edit the information with the normal Post Edit options.<br />';
-		?>	<form method="post" action="">
-				<input type="hidden" name="amazon-product-isactive" id="amazon-product-isactive" value="1" />
-				<input type="hidden" name="post_save_type_apipp" id="post_save_type_apipp" value="1" />
-				<input type="hidden" name="post_author" id="post_author" value="<?php echo $myuserpost;?>" />
-				<input type="hidden" name="amazon-product-content-hook-override" id="amazon-product-content-hook-override" value="1" />
-				<div align="left">
-					<table border="0" cellpadding="2" cellspacing="0" class="apip-new-pppy">
-						<tr>
-							<td align="left" valign="top">Title</td>
-							<td align="left"><input type="text" name="post_title" size="65" /></td>
-						</tr>
-						<tr>
-							<td align="left" valign="top">Post Status</td>
-							<td align="left"><select size="1" name="post_status" >
-							<option selected>draft</option>
-							<option>publish</option>
-							<option>private</option>
-							</select></td>
-						</tr>
-						<tr>
-							<td align="left" valign="top">Post Type</td>
-							<td align="left">
-							<?php
-								$ptypes = get_post_types();
-								$ptypeHTML = '<div class="apip-posttypes">';
-								foreach($ptypes as $ptype){
-									if($ptype != 'nav_menu_item' && $ptype != 'attachment' && $ptype != 'revision'){
-										if($ptype == 'post'){$addlpaaiptxt = ' checked="checked"';}else{$addlpaaiptxt = '';}
-								    	$ptypeHTML .= '<div class="apip-ptype"><label><input class="apip-ptypecb" group="appiptypes" type="radio" name="post_type" value="'.$ptype.'"'.$addlpaaiptxt.' /> '.$ptype.'</label></div>';
-									}
-								}
-								$ptypeHTML .= '</div>';
-								echo $ptypeHTML;
-							?>
-							</td>
-						</tr>
-						<tr>
-							<td align="left" valign="top">Amazon Product ASIN Number</td>
-							<td align="left"><input type="text" name="amazon-product-single-asin" size="29" /> 
-							(may also be called ISBN-10)</td>
-						</tr>
-						<tr class="apip-extra-pad-bot">
-							<td align="left" valign="top">Post Content</td>
-							<td align="left">
-							<textarea rows="11" name="post_content" id="post_content_app" cols="56"></textarea></td>
-						</tr>
-						<tr class="apip-extra-pad-bot">
-							<td align="left" valign="top">Product Location</td>
-							<td align="left">
-					&nbsp;&nbsp;<input type="radio" name="amazon-product-content-location" value="1"  checked /> Above Post Content - <i>Default - Product will be first then post text</i><br />
-					&nbsp;&nbsp;<input type="radio" name="amazon-product-content-location" value="3" /> Below Post Content - <i>Post text will be first then the Product</i><br />
-					&nbsp;&nbsp;<input type="radio" name="amazon-product-content-location" value="2" /> Post Text becomes Description - <i>Post text will become part of the Product layout</i><br />
-			</td>
-						</tr>
-						<tr class="apip-extra-pad-bot">
-							<td align="left" valign="top">Post Category</td>
-							<td align="left"><?php 
-									$categories = get_categories('hide_empty=0');	
-									$ii=0;
-									foreach($categories as $cat) {
-										echo '&nbsp;&nbsp;<input type="checkbox" name="post_category'.$ii,'" value="' . $cat->cat_ID . '" /> ' . $cat->cat_name . '<br />';
-										$ii=$ii+1;
-									} 
-								 ?>
-									<input type="hidden" name="post_category_count" value="<?php echo $ii-1;?>" />
-							</td>
-						</tr>
-						<tr class="apip-extra-pad-bot apip-extra-pad-top">
-							<td align="left" valign="top">&nbsp;</td>
-							<td align="left">
-							<input type="submit" value="Create Post" name="createpost" /></td>
-						</tr>
-					</table>
-				</div>
-			</form>
-			</div>
-		<?php }
+	echo '<div class="wrap"><div id="icon-amazon" class="icon32"><br /></div><h2>Add New Amazon Product Post</h2>';
+	if($_GET['appmsg']=='1'){	echo '<div style="background-color: rgb(255, 251, 204);" id="message" class="updated fade below-h2"><p><b>Product post has been saved. To edit, use the standard Post Edit options.</b></p></div>';}
+	echo '<br />This function will allow you to add a new post for an Amazon Product - no need to create a post then add the ASIN.<br />Once you add a Product Post, you can edit the information with the normal Post Edit options.<br />';
+	?><form method="post" action="">
+		<input type="hidden" name="amazon-product-isactive" id="amazon-product-isactive" value="1" />
+		<input type="hidden" name="post_save_type_apipp" id="post_save_type_apipp" value="1" />
+		<input type="hidden" name="post_author" id="post_author" value="<?php echo $myuserpost;?>" />
+		<input type="hidden" name="amazon-product-content-hook-override" id="amazon-product-content-hook-override" value="2" />
+		<div align="left">
+			<table border="0" cellpadding="2" cellspacing="0" class="apip-new-pppy">
+				<tr>
+					<td align="left" valign="top">Title</td>
+					<td align="left"><input type="text" name="post_title" size="65" /></td>
+				</tr>
+				<tr>
+					<td align="left" valign="top">Post Status</td>
+					<td align="left"><select size="1" name="post_status" >
+					<option selected>draft</option>
+					<option>publish</option>
+					<option>private</option>
+					</select></td>
+				</tr>
+				<tr>
+					<td align="left" valign="top">Post Type</td>
+					<td align="left">
+					<?php
+						$ptypes = get_post_types();
+						$ptypeHTML = '<div class="apip-posttypes">';
+						foreach($ptypes as $ptype){
+							if($ptype != 'nav_menu_item' && $ptype != 'attachment' && $ptype != 'revision'){
+								if($ptype == 'post'){$addlpaaiptxt = ' checked="checked"';}else{$addlpaaiptxt = '';}
+						    	$ptypeHTML .= '<div class="apip-ptype"><label><input class="apip-ptypecb" group="appiptypes" type="radio" name="post_type" value="'.$ptype.'"'.$addlpaaiptxt.' /> '.$ptype.'</label></div>';
+							}
+						}
+						$ptypeHTML .= '</div>';
+						echo $ptypeHTML;
+					?>
+					</td>
+				</tr>
+				<tr>
+					<td align="left" valign="top">Amazon Product ASIN Number</td>
+					<td align="left"><input type="text" name="amazon-product-single-asin" size="29" /> 
+					(may also be called ISBN-10)</td>
+				</tr>
+				<tr class="apip-extra-pad-bot">
+					<td align="left" valign="top">Post Content</td>
+					<td align="left">
+					<textarea rows="11" name="post_content" id="post_content_app" cols="56"></textarea></td>
+				</tr>
+				<tr class="apip-extra-pad-bot">
+					<td align="left" valign="top">Product Location</td>
+					<td align="left">
+			&nbsp;&nbsp;<input type="radio" name="amazon-product-content-location" value="1"  checked /> Above Post Content - <i>Default - Product will be first then post text</i><br />
+			&nbsp;&nbsp;<input type="radio" name="amazon-product-content-location" value="3" /> Below Post Content - <i>Post text will be first then the Product</i><br />
+			&nbsp;&nbsp;<input type="radio" name="amazon-product-content-location" value="2" /> Post Text becomes Description - <i>Post text will become part of the Product layout</i><br />
+	</td>
+				</tr>
+				<tr class="apip-extra-pad-bot">
+					<td align="left" valign="top">Post Category</td>
+					<td align="left">(currently only post categories supported)<br/><?php 
+							$categories = get_categories('hide_empty=0');	
+							$ii=0;
+							foreach($categories as $cat) {
+								echo '&nbsp;&nbsp;<input type="checkbox" name="post_category'.$ii,'" value="' . $cat->cat_ID . '" /> ' . $cat->cat_name . '<br />';
+								$ii=$ii+1;
+							} 
+						 ?>
+							<input type="hidden" name="post_category_count" value="<?php echo $ii-1;?>" />
+					</td>
+				</tr>
+				<tr class="apip-extra-pad-bot apip-extra-pad-top">
+					<td align="left" valign="top">&nbsp;</td>
+					<td align="left">
+					<input type="submit" value="Create Post" name="createpost" /></td>
+				</tr>
+			</table>
+		</div>
+	</form>
+	</div>
+<?php }
+	
