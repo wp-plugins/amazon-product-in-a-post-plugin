@@ -34,10 +34,15 @@ function apipp_parse_request($wp) {
 		header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 		print($amazonStylesToUse);
 		exit;
-	}elseif(array_key_exists('appip-cache-id', $wp->query_vars) && $wp->query_vars['appip-cache-id'] != ''){
+	}elseif(array_key_exists('appip-cache-id', $wp->query_vars) && $wp->query_vars['appip-cache-id'] != '' && (int)$wp->query_vars['appip-cache-id'] >= 0){
 		if(array_key_exists('appip-cache-del', $wp->query_vars) && $wp->query_vars['appip-cache-del'] == 'dodel'){
 			global $wpdb;
-			$tempswe = $wpdb->query("DELETE FROM {$wpdb->prefix}amazoncache WHERE Cache_id ='{$wp->query_vars['appip-cache-id']}' LIMIT 1;");
+			$cacheid = (int) esc_sql($wp->query_vars['appip-cache-id']);
+			if($cacheid == 0){
+				$tempswe = $wpdb->query("DELETE FROM {$wpdb->prefix}amazoncache;");
+			}else{
+				$tempswe = $wpdb->query("DELETE FROM {$wpdb->prefix}amazoncache WHERE Cache_id ='{$cacheid}' LIMIT 1;");
+			}
 			if($tempswe){
 				echo 'deleted';
 			}else{

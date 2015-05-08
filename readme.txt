@@ -2,16 +2,16 @@
 Contributors: prophecy2040
 Donate link: http://www.fischercreativemedia.com/donations/
 Tags: Amazon, Affiliate, Product, Products, Post, Page, Custom Post Type, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode, FAQs, Store, eCommerce, Kindle
-Requires at least: 3.5
-Tested up to: 4.0
+Requires at least: 4.0
+Tested up to: 4.2.2
 Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Add formatted Amazon Products to any page by using just the Amazon ASIN. Great for monetizing your posts. Uses Amazon Product Advertising Keys (FREE)
+Add formatted Amazon Products to any page or post by using Amazon ASIN. Great for monetizing your site. Uses Amazon Product Advertising Keys (FREE)
 
 == Description ==
-**NOTE:** Due to changes in Amazon's Product Advertising API Terms of Use, this plugin requires you have an AWS Access Key ID and Secret Access Key of your own to use. See Plugin FAQs for links to sign up.
+Amazon's Product Advertising API Terms of Use requires you have an AWS Access Key ID and Secret Access Key of your own to use. See Plugin FAQs for links to sign up.
 
 Amazon Product In a Post Plugin is used to to quickly add a formatted Amazon Product/Item to a post or page by using just the Amazon product ASIN (also known as the ISBN-10).
 
@@ -27,9 +27,9 @@ What can you use it for? With this plugin you can:
 If you have an Amazon Affiliate account and you don't think the available Amazon widgets are that great or are what you need, then this plugin might be for you.
 
 **How it Works:**
-The plugin uses the newly revised (and re-named) Amazon Product Advertising API.
+The plugin uses the Amazon Product Advertising API.
 
-To use the plugin, you must have an 1). an Amazon Affiliate Account, and 2). Amazon Product Advertising API keys. You can sign up here if you do not have them - it is free and not extremely difficulty (takes about 15 total for both). Once you have an account, install the plugin, then enter your Amazon Associate ID in the plugin options page. Then enter you API keys. You are now ready to start adding products to your post!
+To use the plugin, you must have an 1). an Amazon Affiliate Account, and 2). Amazon Product Advertising API keys (Root Keys Only). You can sign up here if you do not have them - it is free and not extremely difficulty (takes about 15 total for both). Once you have an account, install the plugin, then enter your Amazon Associate ID in the plugin options page. Then enter you API keys. You are now ready to start adding products to your post!
 
 *PLEASE NOTE:* If you DO NOT add your custom Associate ID, you WILL NOT get credit for any purchases made from your product posts - so don't set up products on a live site unless you enter that first - or you may lose out on some referral $$.
 
@@ -53,7 +53,7 @@ To use the plugin, you must have an 1). an Amazon Affiliate Account, and 2). Ama
 
 After you install the plugin, you need to set up your Amazon Affiliate/Associate ID in the Options panel located in the AMAZON PIP menu under AMAZON PIP OPTIONS. 
 
-An AWS Access Key ID and Secret Access Key REQUIRED. There is no longer built in keys by default. This change is due to the Amazon Terms of Use agreement. 
+An AWS Access Key ID and Secret Access Key REQUIRED. You MUST use the ROOT keys and not the User or Group Keys that Amazon recommends. 
 
 No additional adjustments are needed unless you want to configure your own CSS styles. Styles can be adjusted or removed in the Options Panel as well.
 
@@ -133,6 +133,11 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Excellent question! The plugin is provided free to the public - you can use it however you like - where ever you like - you can even change it however you like. Should you decide that the plugin has been a great help and want to donate to our plugin development fund, you may do so [here](http://fischercreativemedia.com/wordpress-plugins/donate/ "here").
 
 == Changelog ==
+= 3.5.3 =
+* Security fix to prevent SQL injection. Thanks to jamie@jamieakhtar.com for pointing out the vulnerability.
+* Changed style loading to be dynamic via ajax call.
+* Made styles loadable though theme file if desired by user (so no dynamic load is required).
+* Added framework for Contextual Help (help text coming soon)
 
 = 3.5.2 =
 * Fix to issue with Add New Amazon Post page not loading.
@@ -234,15 +239,6 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 = 1.0 =
 * Plugin Release (9/12/2009)
 == Upgrade Notice ==
+= 3.5.3 =
+* Fixes SQL injection vulnerability and fixes a few bugs. No new features added.
 
-= 3.5.2 =
-* Fix to issue with Add New Amazon Post page not loading.
-* Fix to the Shortcode for amazon-elements.
-* Added a container parameter and container class parameter to the amazon-elements shortcode to make styling multiple ASINs easier.
-* Fixed Readme.txt file for screenshots for WordPress repository. 
-
-= 3.5.1 =
-* Adds many new features, fixes several bugs and implements some mandatory Amazon Affiliate Terms of Use changes.
-
-= 3.1.0 =
-* 3.0.0 up to 3.1.0 where development versions. Figured I would just up the version to match WordPress version after this point.

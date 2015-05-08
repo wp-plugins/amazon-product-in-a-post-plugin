@@ -5,8 +5,8 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post, page, custom post type or text widget by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or you will not get credit for product sales. Requires signup for an Amazon Affiliate Account and Product Advertising API Keys which are currently FREE from Amazon.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 3.5.2
-    Copyright (C) 2009-2013 Donald J. Fischer
+Version: 3.5.3
+    Copyright (C) 2009-2015 Donald J. Fischer
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
@@ -87,8 +87,8 @@ Version: 3.5.2
 	$appuninstallall	= get_option('apipp_uninstall_all'); //Uninstall shortcodes in pages an posts
 	$aws_partner_id		= get_option('apipp_amazon_associateid'); //Amazon Partner ID 
 	$awsPageRequest 	= 1;
-	$aws_plugin_version = "3.5.2";
-	$aws_plugin_dbversion = '3.5.2';
+	$aws_plugin_version = "3.5.3";
+	$aws_plugin_dbversion = '3.5.3';
 	$amazonhiddenmsg 	= get_option('apipp_amazon_hiddenprice_message'); //Amazon Hidden Price Message
 	$amazonerrormsg 	= get_option('apipp_amazon_notavailable_message'); //Amazon Error No Product Message
 	$apipphookexcerpt 	= get_option('apipp_hook_excerpt'); //Hook the excerpt?
@@ -141,8 +141,8 @@ Version: 3.5.2
 	// Change encoding if needed via GET -  use http://yoursite.com/?resetenc=UTF-8 or http://yoursite.com/?resetenc=ISO-8859-1 - this will be the mode you want the text OUTPUT as.
 	if(isset($_GET['resetenc'])){
 		if(in_array(strtoupper($_GET['resetenc']),$validEncModes)){
-			update_option('appip_encodemode',strtoupper($_GET['resetenc']));
-			$encodemode = strtoupper($_GET['resetenc']);
+			update_option('appip_encodemode',strtoupper(esc_attr($_GET['resetenc'])));
+			$encodemode = strtoupper(esc_attr($_GET['resetenc']));
 		}
 	}
 	if($apippopennewwindow==true){
@@ -193,7 +193,7 @@ Version: 3.5.2
 // Filters & Hooks
 	add_filter('the_content', 'aws_prodinpost_filter_content', 10); //hook content - we will filter the override after
 	add_filter('the_excerpt', 'aws_prodinpost_filter_excerpt', 10); //hook excerpt - we will filter the override after 
-	add_action('wp_head','aws_prodinpost_addhead',10); //add styles to head
+	//add_action('wp_head','aws_prodinpost_addhead',10); //add styles to head
 	add_action('wp','add_appip_jquery'); //enqueue scripts
 	add_action('admin_head','aws_prodinpost_addadminhead',10); //add admin styles to admin head
 	//add_action('wp','aws_prodinpost_cartsetup', 1, 2); //Future Item
@@ -228,9 +228,7 @@ Version: 3.5.2
 		update_option("apipp_product_styles_default_version","1.9");
 		//add the new element style to their custom ones - so at least it has the default functionality. They can change it after if they like
 		$apipp_product_styles_cust_temp = get_option("apipp_product_styles");
- 		if($apipp_product_styles_cust_temp!=''){
- 			update_option("apipp_product_styles",$apipp_product_styles_cust_temp."\n".".amazon-manufacturer{color : #666;font-size : 12px;}"."\n".".amazon-ESRB{color : #666;font-size : 12px;}"."\n".".amazon-feature{color : #666;font-size : 12px;}"."\n".".amazon-platform{color : #666;font-size : 12px;}"."\n".".amazon-system{color : #666;font-size : 12px;}"."\n");
- 		}
+ 		if($apipp_product_styles_cust_temp!=''){update_option("apipp_product_styles",$apipp_product_styles_cust_temp."\n".".amazon-manufacturer{color : #666;font-size : 12px;}"."\n".".amazon-ESRB{color : #666;font-size : 12px;}"."\n".".amazon-feature{color : #666;font-size : 12px;}"."\n".".amazon-platform{color : #666;font-size : 12px;}"."\n".".amazon-system{color : #666;font-size : 12px;}"."\n");}
 		if( get_option("apipp_amazon_notavailable_message") == ''){update_option("apipp_amazon_notavailable_message","This item is may not be available in your area. Please click the image or title of product to check pricing & availability.");} //default message
 		if( get_option("apipp_amazon_hiddenprice_message") == ''){update_option("apipp_amazon_hiddenprice_message","Price Not Listed");} //default message - done
 		if( get_option("apipp_hook_content") == ''){update_option("apipp_hook_content","1");} //default is yes - done

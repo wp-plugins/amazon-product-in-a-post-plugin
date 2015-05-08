@@ -554,19 +554,71 @@ if(!function_exists('aws_prodinpost_filter_content')){
 	  echo '<link rel="stylesheet" href="'.plugins_url('/css/amazon-product-in-a-post-styles-icons.css',dirname(__FILE__)).'" type="text/css" media="screen" />'."\n";
 	}
 	
-	function aws_prodinpost_addhead(){
-		global $aws_plugin_version;
-		$amazonStylesToUseMine = get_option("apipp_product_styles_mine"); //is box checked?
-		echo '<'.'!-- Amazon Product In a Post Plugin Styles & Scripts - Version '.$aws_plugin_version.' -->'."\n";
-		if($amazonStylesToUseMine=='true'){ //use there styles
-			echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?apipp_style=custom" type="text/css" media="screen" />'."\n";
-		}else{ //use default styles
-			echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?apipp_style=default" type="text/css" media="screen" />'."\n";
-		}
-		echo '<link rel="stylesheet" href="'.plugins_url('/css/amazon-lightbox.css',dirname(__FILE__)).'" type="text/css" media="screen" />'."\n";
-		echo '<'.'!-- End Amazon Product In a Post Plugin Styles & Scripts-->'."\n";
+/**
+ * Add Styles to HTML Head.
+ *
+ * Echos the content to the head.
+ *
+ * @depricated 3.5.3 Replaced with Ajax Call for faster action
+ * @since 1.8
+ *
+ * @echo stylesheet links.
+ */
+function aws_prodinpost_addhead(){
+	global $aws_plugin_version;
+	$amazonStylesToUseMine = get_option("apipp_product_styles_mine"); //is box checked?
+	echo '<'.'!-- Amazon Product In a Post Plugin Styles & Scripts - Version '.$aws_plugin_version.' -->'."\n";
+	if($amazonStylesToUseMine=='true'){ //use there styles
+		echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?apipp_style=custom" type="text/css" media="screen" />'."\n";
+	}else{ //use default styles
+		echo '<link rel="stylesheet" href="'.get_bloginfo('url').'/index.php?apipp_style=default" type="text/css" media="screen" />'."\n";
 	}
+	echo '<link rel="stylesheet" href="'.plugins_url('/css/amazon-lightbox.css',dirname(__FILE__)).'" type="text/css" media="screen" />'."\n";
+	echo '<'.'!-- End Amazon Product In a Post Plugin Styles & Scripts-->'."\n";
+}
 	
+/**
+ * Enqueue styles for plugin.
+ * Replaces previous function aws_prodinpost_addhead().
+ *
+ * @since 3.5.3
+ *
+ * @return none.
+ */
+function appip_addhead_new_ajax(){
+	if(file_exists(get_stylesheet_directory().'/appip-styles.css')){
+		wp_enqueue_style('appip-theme-styles',get_stylesheet_directory_uri().'/appip-styles.css',array(),null);
+	}elseif(file_exists(get_stylesheet_directory().'/css/appip-styles.css')){
+		wp_enqueue_style('appip-theme-styles',get_stylesheet_directory_uri().'/css/appip-styles.css',array(),null);
+	}else{
+		$ajax_nonce = wp_create_nonce( 'appip_style_verify' );
+		wp_enqueue_style('appip-dynamic-styles',admin_url('admin-ajax.php').'?action=appip_dynaminc_css_custom&nonce='.$ajax_nonce,array(),null);
+	}
+	wp_enqueue_style('appip-lightbox', plugins_url().'/amazon-product-in-a-post-plugin/css/amazon-lightbox.css', array(),null);
+}
+add_action('wp_enqueue_scripts', 'appip_addhead_new_ajax',10);
+
+/**
+ * Dynamic style creation. Replaces old styles layout which is very slow on large sites.
+ *
+ * Prints CSS styles out in the browser dynamically.
+ *
+ * @since 3.5.3
+ *
+ * @echo css values stored in DB.
+ * @return none.
+ */
+function appip_dynaminc_css_custom() {
+	check_ajax_referer( 'appip_style_verify', 'nonce', true );  
+	$usemine    = get_option('apipp_product_styles_mine', false);
+	$data       = $usemine ? get_option('apipp_product_styles', '') : get_option('apipp_product_styles_default', '') ;
+	echo $data;
+	exit;
+}
+add_action('wp_ajax_appip_dynaminc_css_custom', 'appip_dynaminc_css_custom');
+add_action('wp_ajax_nopriv_appip_dynaminc_css_custom', 'appip_dynaminc_css_custom');
+
+
 	function add_appip_jquery(){
 		wp_register_script('appip-amazonlightbox', plugins_url('/js/amazon-lightbox.js',dirname(__FILE__)));
 		wp_enqueue_script('jquery'); 
