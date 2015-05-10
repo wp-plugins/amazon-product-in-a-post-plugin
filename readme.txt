@@ -133,6 +133,13 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Excellent question! The plugin is provided free to the public - you can use it however you like - where ever you like - you can even change it however you like. Should you decide that the plugin has been a great help and want to donate to our plugin development fund, you may do so [here](http://fischercreativemedia.com/wordpress-plugins/donate/ "here").
 
 == Changelog ==
+= 3.5.4 =
+* Fix "New Amazon Post" functionality dues to mis-named functions between versions.
+* Added Options to turn certain features on and off in the MetaBox options.
+* Fixed jQuery for admin - add "New Amazon Post" functionality.
+* Fixed German Limited Translations issue.
+* Updated Caching to not poll the API for any product that is already in the cache - even if it is in a separate call not related to that call.
+
 = 3.5.3 =
 * Security fix to prevent SQL injection. Thanks to jamie@jamieakhtar.com for pointing out the vulnerability.
 * Changed style loading to be dynamic via ajax call.
@@ -238,7 +245,8 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Minor Fixes/Spelling Error corrections & code cleanup to prep for WordPress hosting of Plugin. (9/14/2009)
 = 1.0 =
 * Plugin Release (9/12/2009)
+
 == Upgrade Notice ==
-= 3.5.3 =
-* Fixes SQL injection vulnerability and fixes a few bugs. No new features added.
+= 3.5.4 =
+* Minor Bug Fixes for "New Amazon" Post feature and ajax, plus added some metabox features and several more filters.
 

@@ -1,4 +1,13 @@
 Version info:
+3.5.4	Fix "New Amazon Post" functionality dues to mis-named functions between versions.
+	Added Options to turn certain features on and off in the MetaBox options.
+	Fixed jQuery for admin - add "New Amazon Post" functionality.
+	
+3.5.3	Fix potential SQL Injection scripting.
+	Changed style loading to be dynamic via ajax call.
+	Made styles loadable though theme file if desired by user (so no dynamic load is required).
+	Added framework for Contextual Help (help text coming soon)
+
 3.5.2	Fix to issue with Add New Amazon Post page not loading.
 	Fix to the Shortcode for amazon-elements.
 	Added a container parameter and container class parameter to the amazon-elements shortcode to make styling multiple asin's easier.

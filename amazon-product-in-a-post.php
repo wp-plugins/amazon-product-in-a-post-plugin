@@ -5,7 +5,7 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post, page, custom post type or text widget by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or you will not get credit for product sales. Requires signup for an Amazon Affiliate Account and Product Advertising API Keys which are currently FREE from Amazon.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 3.5.3
+Version: 3.5.4
     Copyright (C) 2009-2015 Donald J. Fischer
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -87,8 +87,8 @@ Version: 3.5.3
 	$appuninstallall	= get_option('apipp_uninstall_all'); //Uninstall shortcodes in pages an posts
 	$aws_partner_id		= get_option('apipp_amazon_associateid'); //Amazon Partner ID 
 	$awsPageRequest 	= 1;
-	$aws_plugin_version = "3.5.3";
-	$aws_plugin_dbversion = '3.5.3';
+	$aws_plugin_version = "3.5.4";
+	$aws_plugin_dbversion = '3.5.4';
 	$amazonhiddenmsg 	= get_option('apipp_amazon_hiddenprice_message'); //Amazon Hidden Price Message
 	$amazonerrormsg 	= get_option('apipp_amazon_notavailable_message'); //Amazon Error No Product Message
 	$apipphookexcerpt 	= get_option('apipp_hook_excerpt'); //Hook the excerpt?
@@ -191,29 +191,30 @@ Version: 3.5.3
 	}
 
 // Filters & Hooks
-	add_filter('the_content', 'aws_prodinpost_filter_content', 10); //hook content - we will filter the override after
-	add_filter('the_excerpt', 'aws_prodinpost_filter_excerpt', 10); //hook excerpt - we will filter the override after 
 	//add_action('wp_head','aws_prodinpost_addhead',10); //add styles to head
-	add_action('wp','add_appip_jquery'); //enqueue scripts
-	add_action('admin_head','aws_prodinpost_addadminhead',10); //add admin styles to admin head
 	//add_action('wp','aws_prodinpost_cartsetup', 1, 2); //Future Item
-	add_action( 'plugin_action_links_' . plugin_basename(__FILE__),'apipp_filter_plugin_actions' );
+	add_filter( 'the_content', 'aws_prodinpost_filter_content', 10); //hook content - we will filter the override after
+	add_filter( 'the_excerpt', 'aws_prodinpost_filter_excerpt', 10); //hook excerpt - we will filter the override after 
 	add_filter( 'plugin_row_meta',  'apipp_filter_plugin_links', 10, 2 );
+	
+	add_action( 'wp','add_appip_jquery'); //enqueue scripts
+	add_action( 'admin_head','aws_prodinpost_addadminhead',10); //add admin styles to admin head
+	add_action( 'plugin_action_links_' . plugin_basename(__FILE__),'apipp_filter_plugin_actions' );
 
 	function apipp_filter_plugin_actions($links){$new_links = array();$new_links[] = '<a href="admin.php?page=apipp-main-menu">Getting Started</a>';return array_merge($links,$new_links );}
 	function apipp_filter_plugin_links($links, $file){if ( $file == plugin_basename(__FILE__) ){$links[] = '<a href="admin.php?page=apipp-main-menu">Getting Started</a>';$links[] = '<a href="admin.php?page=apipp_plugin-shortcode">Shortcode Usage</a>';$links[] = '<a href="admin.php?page=apipp_plugin-faqs">FAQs</a>';$links[] = '<a target="_blank" href="http://fischercreativemedia.com/donations/">Donate</a>';}return $links;}
 
 	
 // Warnings Quickfix
-	if(get_option('apipp_hide_warnings_quickfix')==true){
+	if(get_option('apipp_hide_warnings_quickfix') == true){
 		 ini_set("display_errors", 0); //turns off error display
 	}
 
 // Includes
 	require_once("inc/amazon-product-in-a-post-activation.php"); 		//Install and Uninstall hooks
 	require_once("inc/amazon-product-in-a-post-functions.php"); 		//Functions
-	require_once("inc/sha256.inc.php"); 								//required for php4
-	require_once("inc/aws_signed_request.php"); 						//major workhorse for plugin
+	require_once("inc/amazon-product-in-a-post-sha256.inc.php"); 		//required for php4
+	require_once("inc/amazon-product-in-a-post-aws-signed-request.php");//major workhorse for plugin
 	require_once("inc/amazon-product-in-a-post-tools.php"); 			//edit box for plugin
 	require_once("inc/amazon-product-in-a-post-options.php"); 			//admin options for plugin
 	require_once("inc/amazon-product-in-a-post-translations.php"); 		//translations for plugin
@@ -223,7 +224,7 @@ Version: 3.5.3
 
 	$thisstyleversion	=	get_option('apipp_product_styles_default_version');
 	//upgrade check. Lets me add/change the default style etc to fix/add new items during updrages.
-	if($thisstyleversion != "1.9" || get_option("apipp_product_styles_default")==''){
+	if($thisstyleversion != "1.9" || get_option("apipp_product_styles_default") == ''){
 		if(get_option("apipp_product_styles_default")==''){update_option("apipp_product_styles_default",$thedefaultapippstyle);}
 		update_option("apipp_product_styles_default_version","1.9");
 		//add the new element style to their custom ones - so at least it has the default functionality. They can change it after if they like
@@ -236,11 +237,18 @@ Version: 3.5.3
 		if( get_option("apipp_open_new_window") == ''){update_option('apipp_open_new_window',"0");} //default is no - newoption added at 1.6 - done
 	}
 
-add_action('admin_menu', 'llkl_js_libs'); 
-function llkl_js_libs() {
-	if ( $_GET['page'] == "appip-layout-styles" ) {
+function appip_admin_scripts($hook) {
+	if(is_admin()){
+		wp_enqueue_style( 'amazon-plugin-admin-styles',plugins_url('/css/amazon-admin.css',__FILE__),null,'13-08-24');
+	}
+	if ( $hook == "amazon-product_page_appip-layout-styles" ) {
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('jquery-ui-core');
 		wp_enqueue_script('jquery-ui-sortable');
+	}elseif("amazon-product_page_apipp-add-new" == $hook){
+		wp_enqueue_script('amazon-plugin-admin',plugins_url('/js/amazon-admin.js',__FILE__),array('jquery-ui-tooltip'),'13-08-24');
+	}elseif( $hook == "post.php" || $hook == "post-new.php" || $hook == "edit.php"  ){
+		wp_enqueue_script('amazon-plugin-admin',plugins_url('/js/amazon-admin.js',__FILE__),array('jquery-ui-tooltip'),'13-08-24');
 	}
 }
+add_action( 'admin_enqueue_scripts', 'appip_admin_scripts' );

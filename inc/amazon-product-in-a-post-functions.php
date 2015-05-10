@@ -60,6 +60,7 @@ if(!function_exists('getSingleAmazonProduct')){
 			if($manual_partner_id == ''){$manual_partner_id = 'wolvid-20';} //have to give it some user id or it will fail.
 			$description			= isset($manual_array['desc'])? $manual_array['desc'] : 1 ;
 			$show_list				= isset($manual_array['listprice'])? $manual_array['listprice'] : 1 ;
+			$show_used				= isset($manual_array['used_price'])? $manual_array['used_price'] : 1 ;
 			$show_format			= isset($manual_array['showformat'])? $manual_array['showformat'] : 1 ;
 			$show_features			= isset($manual_array['features'])? $manual_array['features'] : 0 ;
 			$show_gallery			= isset($manual_array['gallery'])? $manual_array['gallery'] : 0 ;
@@ -208,29 +209,33 @@ if(!function_exists('getSingleAmazonProduct')){
 								$returnval .= '				</div>'."\n";
 								$returnval .= '				<div class="amazon-buying">'."\n";
 								if($replace_title!=''){$title = $replace_title;}else{$title = maybe_convert_encoding($result["Title"]);}
-								$returnval .= '					<h2 class="amazon-asin-title"><a href="' . $result['URL'] . '" '. $apippnewwindowhtml .'><span class="asin-title">'.$title.'</span></a></h2>'."\n";
+								if(strtolower($title) != 'null'){ 
+									$returnval .= '					<h2 class="amazon-asin-title"><a href="' . $result['URL'] . '" '. $apippnewwindowhtml .'><span class="asin-title">'.$title.'</span></a></h2>'."\n";
+								}
 								if($result["Department"]=='Video Games' || $result["ProductGroup"]=='Video Games'){
-									$returnval .= '					<span class="amazon-manufacturer"><span class="appip-label">'.$appip_text_manufacturer.':</span> '.maybe_convert_encoding($result["Manufacturer"]).'</span><br />'."\n";
-									$returnval .= '					<span class="amazon-ESRB"><span class="appip-label">'.$appip_text_ESRBAgeRating.':</span> '.maybe_convert_encoding($result["ESRBAgeRating"]).'</span><br />'."\n";
-									$returnval .= '					<span class="amazon-platform"><span class="appip-label">'.$appip_text_platform.':</span> '.maybe_convert_encoding($result["Platform"]).'</span><br />'."\n";
-									$returnval .= '					<span class="amazon-system"><span class="appip-label">'.$appip_text_genre.':</span> '.maybe_convert_encoding($result["Genre"]).'</span><br />'."\n";
+									$returnval .= '					<span class="amazon-manufacturer"><span class="appip-label">'.($appip_text_manufacturer != '' ? $appip_text_manufacturer .':' : '').'</span> '.maybe_convert_encoding($result["Manufacturer"]).'</span><br />'."\n";
+									$returnval .= '					<span class="amazon-ESRB"><span class="appip-label">'.($appip_text_ESRBAgeRating != '' ? $appip_text_ESRBAgeRating .':' : '').'</span> '.maybe_convert_encoding($result["ESRBAgeRating"]).'</span><br />'."\n";
+									$returnval .= '					<span class="amazon-platform"><span class="appip-label">'.($appip_text_platform != '' ? $appip_text_platform .':' : '').'</span> '.maybe_convert_encoding($result["Platform"]).'</span><br />'."\n";
+									$returnval .= '					<span class="amazon-system"><span class="appip-label">'.($appip_text_genre != '' ? $appip_text_genre .':' : '').'</span> '.maybe_convert_encoding($result["Genre"]).'</span><br />'."\n";
 									if($show_features != 0){
-										$returnval .= '					<span class="amazon-feature"><span class="appip-label">'.$appip_text_feature.':</span> '.maybe_convert_encoding($result["Feature"]).'</span><br />'."\n";
+										$returnval .= '					<span class="amazon-feature"><span class="appip-label">'.($appip_text_feature != '' ? $appip_text_feature .':' : '').'</span> '.maybe_convert_encoding($result["Feature"]).'</span><br />'."\n";
 									}							
 								}elseif($show_features != 0 && $result["Feature"] != ''){
-									$returnval .= '					<span class="amazon-feature"><span class="appip-label">'.$appip_text_feature.':</span> '.maybe_convert_encoding($result["Feature"]).'</span><br />'."\n";
+									$returnval .= '					<span class="amazon-feature"><span class="appip-label">'.($appip_text_feature != '' ? $appip_text_feature .':' : '').'</span> '.maybe_convert_encoding($result["Feature"]).'</span><br />'."\n";
 								}
-								if(trim($result["Author"])!=''){
-								$returnval .= '					<span class="amazon-author">'.$appip_text_author.':</span> '.maybe_convert_encoding($result["Author"]).'</span><br />'."\n";
-								}
-								if(trim($result["Director"])!=''){
-								$returnval .= '					<span class="amazon-director-label">'.$appip_text_director.': </span><span class="amazon-director">'.maybe_convert_encoding($result["Director"]).'</span><br />'."\n";
-								}
-								if(trim($result["Actor"])!=''){
-								$returnval .= '					<span class="amazon-starring-label">'.$appip_text_starring.': </span><span class="amazon-starring">'.maybe_convert_encoding($result["Actor"]).'</span><br />'."\n";
-								}
-								if(trim($result["AudienceRating"])!=''){
-								$returnval .= '					<span class="amazon-rating-label">Rating: </span><span class="amazon-rating">'.$result["AudienceRating"].'</span><br />'."\n";
+								if($show_features != 0){
+									if(trim($result["Author"])!=''){
+										$returnval .= '					<span class="amazon-author">'.($appip_text_author != '' ? $appip_text_author .': ': '').'</span> '.maybe_convert_encoding($result["Author"]).'</span><br />'."\n";
+									}
+									if(trim($result["Director"])!=''){
+										$returnval .= '					<span class="amazon-director-label">'.($appip_text_director != '' ? $appip_text_director .': ' : '').' </span><span class="amazon-director">'.maybe_convert_encoding($result["Director"]).'</span><br />'."\n";
+									}
+									if(trim($result["Actor"])!=''){
+										$returnval .= '					<span class="amazon-starring-label">'.($appip_text_starring != '' ? $appip_text_starring.': ' : '').'</span><span class="amazon-starring">'.maybe_convert_encoding($result["Actor"]).'</span><br />'."\n";
+									}
+									if(trim($result["AudienceRating"])!=''){
+										$returnval .= '					<span class="amazon-rating-label">Rating: </span><span class="amazon-rating">'.$result["AudienceRating"].'</span><br />'."\n";
+									}
 								}
 								$returnval .= '				</div>'."\n";
 								if(!empty($result["ItemDesc"]) && $description == 1){
@@ -252,12 +257,12 @@ if(!function_exists('getSingleAmazonProduct')){
 								if($show_list == 1){
 									If($result["PriceHidden"]== '1' ){
 										$returnval .= '						<tr>'."\n";
-										$returnval .= '							<td class="amazon-list-price-label">'.$appip_text_listprice.':</td>'."\n";
+										$returnval .= '							<td class="amazon-list-price-label">'.($appip_text_listprice != '' ? $appip_text_listprice .':' : '').'</td>'."\n";
 										$returnval .= '							<td class="amazon-list-price-label">'.$amazonhiddenmsg.'</td>'."\n";
 										$returnval .= '						</tr>'."\n"; 
 									}elseif($result["ListPrice"]!= '0'){
 										$returnval .= '						<tr>'."\n";
-										$returnval .= '							<td class="amazon-list-price-label">'.$appip_text_listprice.':</td>'."\n";
+										$returnval .= '							<td class="amazon-list-price-label">'.($appip_text_listprice != '' ? $appip_text_listprice .':' : '').'</td>'."\n";
 										$returnval .= '							<td class="amazon-list-price">'.  maybe_convert_encoding($result["ListPrice"]) .'</td>'."\n";
 										$returnval .= '						</tr>'."\n";
 									}
@@ -275,7 +280,7 @@ if(!function_exists('getSingleAmazonProduct')){
 											$newPrice = $result["LowestNewPrice"];
 										}
 										$returnval .= '						<tr>'."\n";
-										$returnval .= '							<td class="amazon-new-label">'.$appip_text_newfrom.':</td>'."\n";
+										$returnval .= '							<td class="amazon-new-label">'.($appip_text_newfrom != '' ? $appip_text_newfrom .':' : '').'</td>'."\n";
 										if($result["TotalNew"]>0){
 											$returnval .= '							<td class="amazon-new">'. maybe_convert_encoding($newPrice ).' <span class="instock">'.$appip_text_instock.'</span></td>'."\n";
 										}else{
@@ -284,27 +289,29 @@ if(!function_exists('getSingleAmazonProduct')){
 										$returnval .= '						</tr>'."\n";
 									}
 								}
-								if(isset($result["LowestUsedPrice"]) && $result["Binding"] != 'Kindle Edition'){
-									$returnval .= '						<tr>'."\n";
-									$returnval .= '							<td class="amazon-used-label">'.$appip_text_usedfrom.':</td>'."\n";
-									if($result["TotalUsed"] > 0){
-										$returnval .= '						<td class="amazon-used">'. maybe_convert_encoding($result["LowestUsedPrice"]) .' <span class="instock">'.$appip_text_instock.'</span></td>'."\n";
-									}else{
-										if($result["LowestUsedPrice"] == '' || $result["LowestUsedPrice"] =="0"){
-											$usedfix = '';
+								if($show_used == 1){
+									if(isset($result["LowestUsedPrice"]) && $result["Binding"] != 'Kindle Edition'){
+										$returnval .= '						<tr>'."\n";
+										$returnval .= '							<td class="amazon-used-label">'.($appip_text_usedfrom != '' ? $appip_text_usedfrom .':' : '').'</td>'."\n";
+										if($result["TotalUsed"] > 0){
+											$returnval .= '						<td class="amazon-used">'. maybe_convert_encoding($result["LowestUsedPrice"]) .' <span class="instock">'.$appip_text_instock.'</span></td>'."\n";
 										}else{
-											$usedfix = maybe_convert_encoding($result["LowestUsedPrice"]);
+											if($result["LowestUsedPrice"] == '' || $result["LowestUsedPrice"] =="0"){
+												$usedfix = '';
+											}else{
+												$usedfix = maybe_convert_encoding($result["LowestUsedPrice"]);
+											}
+											$returnval .= '						<td class="amazon-new">'. $usedfix . ' <span class="outofstock">'.$appip_text_outofstock.'</span></td>'."\n";
 										}
-										$returnval .= '						<td class="amazon-new">'. $usedfix . ' <span class="outofstock">'.$appip_text_outofstock.'</span></td>'."\n";
+										$returnval .= '						</tr>'."\n";
 									}
-									$returnval .= '						</tr>'."\n";
 								}
 								$returnval .= '						<tr>'."\n";
 								$returnval .= '							<td valign="top" colspan="2">'."\n";
 								$returnval .= '								<div class="amazon-dates">'."\n";
 								if($result["ReleaseDate"] != ''){	
 									$nowdatestt = strtotime(date("Y-m-d",time()));
-									$nowminustt = strtotime("-180 days");
+									$nowminustt = strtotime("-60 days");
 									$reldatestt = strtotime($result["ReleaseDate"]);
 									if($reldatestt > $nowdatestt){
 								$returnval .= '									<span class="amazon-preorder"><br />'.$appip_text_releasedon.' '.date("F j, Y", strtotime($result["ReleaseDate"])).'.</span>'."\n";
@@ -319,7 +326,7 @@ if(!function_exists('getSingleAmazonProduct')){
 								$returnval .= '								</div>'."\n";
 								$returnval .= '							</td>'."\n";
 								$returnval .= '						</tr>'."\n";
-								If(!isset($result["LowestUsedPrice"]) && !isset($result["LowestNewPrice"]) && !isset($result["ListPrice"])){
+								if(!isset($result["LowestUsedPrice"]) && !isset($result["LowestNewPrice"]) && !isset($result["ListPrice"])){
 									$returnval .= '						<tr>'."\n";
 									$returnval .= '							<td class="amazon-price-save-label" colspan="2">'.$appip_text_notavalarea.'</td>'."\n";
 									$returnval .= '						</tr>'."\n";
@@ -360,7 +367,14 @@ if(!function_exists('awsImageGrabber')){
 		}
 	}
 }
-	
+/*
+To filter labels:
+add_filter('appip_text_newfrom', '_clear_appip_text');
+function _clear_appip_text($val=''){
+	return 'Your Text Label Here';
+}
+*/
+
 if(!function_exists('awsImageGrabberURL')){
 	//Amazon Product Image from ASIN function - Returns URL only
 	function awsImageGrabberURL($asin, $size="M"){
@@ -405,13 +419,33 @@ if(!function_exists('awsImageURLModify')){
 if(!function_exists('aws_prodinpost_filter_excerpt')){
 	function aws_prodinpost_filter_excerpt($text){
 		global $post,$apipphookexcerpt;
-		$ActiveProdPostAWS = get_post_meta($post->ID,'amazon-product-isactive',true);
-		$singleProdPostAWS = get_post_meta($post->ID,'amazon-product-single-asin',true);
-		$AWSPostLoc = get_post_meta($post->ID,'amazon-product-content-location',true);
-		$apippExcerptHookOverride = get_post_meta($post->ID,'amazon-product-excerpt-hook-override',true);
-		$apippShowSingularonly = '0';
-		if(get_option('appip_show_single_only')=='1'){$apippShowSingularonly = '1';}
-		$apippShowSingularonly2 = get_post_meta($post->ID,'amazon-product-singular-only',true);
+		$ActiveProdPostAWS 			= get_post_meta($post->ID,'amazon-product-isactive',true);
+		$singleProdPostAWS 			= get_post_meta($post->ID,'amazon-product-single-asin',true);
+		$AWSPostLoc 				= get_post_meta($post->ID,'amazon-product-content-location',true);
+		$apippExcerptHookOverride 	= get_post_meta($post->ID,'amazon-product-excerpt-hook-override',true);
+		$apippShowSingularonly 		= get_option('appip_show_single_only')=='1' ? '1' : '0';
+		$apippShowSingularonly2 	= get_post_meta($post->ID,'amazon-product-singular-only',true);
+		$showFormat					= get_post_meta($post->ID,'amazon-product-show-format',true);
+		$showDesc 					= get_post_meta($post->ID,'amazon-product-amazon-desc',true);
+		$showGallery 				= get_post_meta($post->ID,'amazon-product-show-gallery',true);
+		$showFeatures 				= get_post_meta($post->ID,'amazon-product-show-features',true);
+		$showList 					= get_post_meta($post->ID,'amazon-product-show-list-price',true);
+		$showUsed 					= get_post_meta($post->ID,'amazon-product-show-used-price',true);
+		$showSaved 					= get_post_meta($post->ID,'amazon-product-show-saved-amt',true);
+		$showTimestamp 				= get_post_meta($post->ID,'amazon-product-timestamp',true);
+		$newTitle 					= get_post_meta($post->ID,'amazon-product-new-title',true);
+		$manualArray = array(
+			'desc' 			=> $showDesc,
+			'listprice' 	=> $showList,
+			'showformat' 	=> $showFormat,
+			'features' 		=> $showFeatures ,
+			'used_price' 	=> $showUsed,
+			'saved_amt'		=> $showSaved,
+			'timestamp' 	=> $showTimestamp,
+			'gallery' 		=> $showGallery,
+			'replace_title' => $newTitle
+		);
+		//print_r($manualArray);
 		if($apippShowSingularonly2=='1'){$apippShowSingularonly = '1';}
 		if(($apipphookexcerpt==true && $apippExcerptHookOverride!='3')){ //if options say to show it, show it
 			//replace short tag here. Handle a bit different than content so they get stripped if they don't want to hook excerpt we don't want to show the [AMAZON-PRODUCT=XXXXXXXX] tag in the excerpt text!
@@ -434,11 +468,11 @@ if(!function_exists('aws_prodinpost_filter_excerpt')){
 			if($apippShowSingularonly=='1'){
 			  	if(is_singular()&& ($singleProdPostAWS!='' && $ActiveProdPostAWS!='')){
 			  		if($AWSPostLoc=='2'){
-			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text);
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text,0,$manualArray);
 			  		}elseif($AWSPostLoc=='3'){
-			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'');
+			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'',0,$manualArray);
 			  		}else{
-			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'').'<br />'.$text;
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'',0,$manualArray).'<br />'.$text;
 			  		}
 			  		return $theproduct;
 			  	} else {
@@ -447,11 +481,11 @@ if(!function_exists('aws_prodinpost_filter_excerpt')){
 			}else{
 			  	if($singleProdPostAWS!='' && $ActiveProdPostAWS!=''){
 			  		if($AWSPostLoc=='2'){
-			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text);
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text,0,$manualArray);
 			  		}elseif($AWSPostLoc=='3'){
-			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'');
+			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'',0,$manualArray);
 			  		}else{
-			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'').'<br />'.$text;
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'',0,$manualArray).'<br />'.$text;
 			  		}
 			  		return $theproduct;
 			  	} else {
@@ -480,11 +514,35 @@ if(!function_exists('aws_prodinpost_filter_excerpt')){
 if(!function_exists('aws_prodinpost_filter_content')){
 	function aws_prodinpost_filter_content($text){
 		global $post,$apipphookcontent;
-		$ActiveProdPostAWS = get_post_meta($post->ID,'amazon-product-isactive',true);
-		$singleProdPostAWS = get_post_meta($post->ID,'amazon-product-single-asin',true);
-		$AWSPostLoc = get_post_meta($post->ID,'amazon-product-content-location',true);
-		$apippContentHookOverride = get_post_meta($post->ID,'amazon-product-content-hook-override',true);
-		$apippShowSingularonly = get_post_meta($post->ID,'amazon-product-singular-only',true);
+		$ActiveProdPostAWS 			= get_post_meta($post->ID,'amazon-product-isactive',true);
+		$singleProdPostAWS 			= get_post_meta($post->ID,'amazon-product-single-asin',true);
+		$AWSPostLoc 				= get_post_meta($post->ID,'amazon-product-content-location',true);
+		$apippContentHookOverride 	= get_post_meta($post->ID,'amazon-product-content-hook-override',true);
+		$apippShowSingularonly 		= get_post_meta($post->ID,'amazon-product-singular-only',true);
+		$showFormat					= get_post_meta($post->ID,'amazon-product-show-format',true);
+		$showDesc 					= get_post_meta($post->ID,'amazon-product-amazon-desc',true);
+		$showGallery 				= get_post_meta($post->ID,'amazon-product-show-gallery',true);
+		$showFeatures 				= get_post_meta($post->ID,'amazon-product-show-features',true);
+		$newWindow 					= get_post_meta($post->ID,'amazon-product-newwindow',true);
+		$showList 					= get_post_meta($post->ID,'amazon-product-show-list-price',true);
+		$showUsed 					= get_post_meta($post->ID,'amazon-product-show-used-price',true);
+		$showSaved 					= get_post_meta($post->ID,'amazon-product-show-saved-amt',true);
+		$showTimestamp 				= get_post_meta($post->ID,'amazon-product-timestamp',true);
+		$newTitle 					= get_post_meta($post->ID,'amazon-product-new-title',true);
+		$newWindow					= $newWindow == '2' ? 1 : 0;
+		
+		$manualArray = array(
+			'desc' 			=> $showDesc,
+			'listprice' 	=> $showList,
+			'showformat' 	=> $showFormat,
+			'features' 		=> $showFeatures ,
+			'used_price' 	=> $showUsed,
+			'saved_amt'		=> $showSaved,
+			'timestamp' 	=> $showTimestamp,
+			'gallery' 		=> $showGallery,
+			'replace_title' => $newTitle,
+			'newwindow' 	=> $newWindow
+		);
 		if ( stristr( $text, '[AMAZONPRODUCT' )) {
 			$search = "@(?:<p>)*\s*\[AMAZONPRODUCT\s*=\s*(.+|^\+)\]\s*(?:</p>)*@i"; 
 			if	(preg_match_all($search, $text, $matches)) {
@@ -514,13 +572,13 @@ if(!function_exists('aws_prodinpost_filter_content')){
 			  	if($singleProdPostAWS!='' && $ActiveProdPostAWS!=''){
 			  		if($AWSPostLoc=='2'){
 			  			//Post Content is the description
-			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text);
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text,0,$manualArray);
 			  		}elseif($AWSPostLoc=='3'){
 			  			//Post Content before product
-			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'');
+			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'',0,$manualArray);
 			  		}else{
 			  			//Post Content after product - default
-			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'').'<br />'.$text;
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'',0,$manualArray).'<br />'.$text;
 			  		}
 			  		return $theproduct;
 			  	} else {
@@ -532,13 +590,13 @@ if(!function_exists('aws_prodinpost_filter_content')){
 			  	if($singleProdPostAWS!='' && $ActiveProdPostAWS!=''){
 			  		if($AWSPostLoc=='2'){
 			  			//Post Content is the description
-			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text);
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,$text,0,$manualArray);
 			  		}elseif($AWSPostLoc=='3'){
 			  			//Post Content before product
-			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'');
+			  			$theproduct = $text.'<br />'.getSingleAmazonProduct($singleProdPostAWS,'',0,$manualArray);
 			  		}else{
 			  			//Post Content after product - default
-			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'').'<br />'.$text;
+			  			$theproduct = getSingleAmazonProduct($singleProdPostAWS,'',0,$manualArray).'<br />'.$text;
 			  		}
 			  		return $theproduct;
 			  	} else {
@@ -618,11 +676,14 @@ function appip_dynaminc_css_custom() {
 add_action('wp_ajax_appip_dynaminc_css_custom', 'appip_dynaminc_css_custom');
 add_action('wp_ajax_nopriv_appip_dynaminc_css_custom', 'appip_dynaminc_css_custom');
 
-
-	function add_appip_jquery(){
-		wp_register_script('appip-amazonlightbox', plugins_url('/js/amazon-lightbox.js',dirname(__FILE__)));
-		wp_enqueue_script('jquery'); 
-		wp_enqueue_script('appip-amazonlightbox'); 
+function add_appip_jquery(){
+	wp_register_script('appip-amazonlightbox', plugins_url('/js/amazon-lightbox.js',dirname(__FILE__)));
+	wp_enqueue_script('jquery'); 
+	wp_enqueue_script('appip-amazonlightbox'); 
+	if(!is_admin()){
+		wp_enqueue_style( 'amazon-plugin-frontend-styles',plugins_url('/css/amazon-frontend.css',dirname(__FILE__)),null,'13-08-24');
+		wp_enqueue_script('amazon-plugin-frontend-script',plugins_url('/js/amazon-frontend.js',dirname(__FILE__)),array('jquery-ui-tooltip'),'13-08-24');
 	}
+}
 	
 	

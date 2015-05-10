@@ -3,16 +3,41 @@
 global $appipBulidBox;
 //ACTIONS
 	add_action( 'init', 'apipp_parse_new',100); 
-	add_action( 'admin_menu', create_function("$appipBulidBox","if( function_exists( 'add_meta_box' ))add_meta_box( 'amazonProductInAPostBox1', __( 'Amazon Product In a Post Settings', 'amazon-product-in-a-post-plugin' ), 'amazonProductInAPostBox1', 'post', 'normal', 'high' );"));
-	add_action( 'admin_menu', create_function("$appipBulidBox","if( function_exists( 'add_meta_box' ))add_meta_box( 'amazonProductInAPostBox1', __( 'Amazon Product In a Post Settings', 'amazon-product-in-a-post-plugin' ), 'amazonProductInAPostBox1', 'page', 'normal', 'high' );"));
+	//add_action( 'admin_menu', create_function("$appipBulidBox","if( function_exists( 'add_meta_box' ))add_meta_box( 'amazonProductInAPostBox1', __( 'Amazon Product In a Post Settings', 'amazon-product-in-a-post-plugin' ), 'amazonProductInAPostBox1', 'post', 'normal', 'high' );"));
+	//add_action( 'admin_menu', create_function("$appipBulidBox","if( function_exists( 'add_meta_box' ))add_meta_box( 'amazonProductInAPostBox1', __( 'Amazon Product In a Post Settings', 'amazon-product-in-a-post-plugin' ), 'amazonProductInAPostBox1', 'page', 'normal', 'high' );"));
 	add_action( 'admin_menu', 'apipp_plugin_menu');
 	add_action( 'network_admin_notices', 'appip_warning_notice');
 	add_action( 'admin_notices', 'appip_warning_notice');
 	add_filter( 'contextual_help', 'appip_plugin_help', 10, 3);
 
-	
-	
 //FUNCTIONS
+	function add_appip_meta_posttype_support($posttypes = array()){
+		if( function_exists( 'add_meta_box' ) && function_exists( 'amazonProductInAPostBox1' )){
+			if(is_array($posttypes) && !empty($posttypes)){
+				foreach($posttypes as $key => $type){
+					add_meta_box( 'amazonProductInAPostBox_'.$type, __( 'Amazon Product In a Post Settings', 'amazon-product-in-a-post-plugin' ), 'amazonProductInAPostBox1', $type , 'normal', 'high' );
+				}
+			}
+		}
+	}
+	function appip_post_type_support(){
+		add_appip_meta_posttype_support(array('page','post'));	
+	}
+	add_filter( 'admin_menu', 'appip_post_type_support');
+	
+	function appip_post_type_support_product(){
+		add_appip_meta_posttype_support(array('product'));	
+	}
+	add_filter( 'admin_menu', 'appip_post_type_support_product');
+	
+	/*
+	to add your own type add via filters:
+		function appip_post_type_support_product(){
+			add_appip_meta_posttype_support(array('product'));	
+		}
+		add_filter( 'admin_menu', 'appip_post_type_support_product');
+	*/
+	
 	function appip_plugin_help($contextual_help, $screen_id, $screen) {
 		$plugin_donate = 0;
 		switch($screen_id){
@@ -142,6 +167,17 @@ global $appipBulidBox;
 		if(isset($_GET['appip_debug']) && ($_GET['appip_debug'] == get_option('apipp_amazon_debugkey') && get_option('apipp_amazon_debugkey') !='')){
 			global $wpdb;
 			global $aws_plugin_version;
+			$debugkey = get_option('apipp_amazon_debugkey');
+			$siteKey = get_bloginfo('url').'/?appip_debug='.$debugkey;
+			$addlCheck = md5($siteKey);
+			$checkok = false;
+			if(isset($_GET['keycheck']) && $_GET['keycheck'] == $addlCheck){
+				$checkok = true;
+			}
+			if(!$checkok){
+				wp_die('No Permission','You do not have permission to access this page.');	
+				exit;
+			}
 			echo '<h1>Amazon Plugin Debug</h1>';
 			$checksql= "SELECT Body, ( NOW() - Updated ) as Age FROM ".$wpdb->prefix."amazoncache ORDER BY Updated DESC;";
 			$result = $wpdb->get_results($checksql);
@@ -224,7 +260,7 @@ global $appipBulidBox;
 		if($appaffidO == ''){ echo $noaffidmsg;}
 		echo '<p><input type="checkbox" name="amazon-product-isactive" value="1" '.$menuhide.' /> <label for="amazon-product-isactive"><strong>' . __("Product is Active?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if checked the product will be live','amazon-product-in-a-post-plugin').'</em></p>';
 		echo '<p><label for="amazon-product-single-asin"><strong>'.__("Amazon Product ASIN (ISBN-10)", 'amazon-product-in-a-post-plugin' ).'</strong></label><br /><input type="text" name="amazon-product-single-asin" id="amazon-product-single-asin" size="25" value="'. $appASIN . '" /><em>'. __('You will need to get this from <a href="http://amazon.com/">Amazon.com</a>','amazon-product-in-a-post-plugin').'</em></p>';
-		echo '<p><label for="amazon-product-new-title"><strong>'.__("Replace Amazon Title With Below Title:", 'amazon-product-in-a-post-plugin' ).'</strong></label> <em>'. __('Optional. No HTML, plain text only. Use this if you want your own title to show instead of Amazon\'s title.','amazon-product-in-a-post-plugin').'</em><input type="text" class="amazon-product-new-title" name="amazon-product-new-title" id="amazon-product-new-title" size="35" value="'. $appipnewtitle. '" /></p>';
+		echo '<p><label for="amazon-product-new-title"><strong>'.__("Replace Amazon Title With Below Title:", 'amazon-product-in-a-post-plugin' ).'</strong></label> <em>'. __('Optional. To hide title all together, type "null". No HTML, plain text only. Use this if you want your own title to show instead of Amazon\'s title.','amazon-product-in-a-post-plugin').'</em><input type="text" class="amazon-product-new-title" name="amazon-product-new-title" id="amazon-product-new-title" size="35" value="'. $appipnewtitle. '" /></p>';
 		echo '<input type="hidden" name="amazonpipp_noncename" id="amazonpipp_noncename" value="' . $appnoonce . '" /><input type="hidden" name="post_save_type_apipp" id="post_save_type_apipp" value="1" />';
 		echo '<p><input type="checkbox" name="amazon-product-content-hook-override" value="2" '.$hookcontent.' /> <label for="amazon-product-content-hook-override"><strong>' . __("Hook into Content?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('Product will show when full content is used (when <code>the_content()</code> template tag). On by default.','amazon-product-in-a-post-plugin').'</em></p>';
 		echo '<p><input type="checkbox" name="amazon-product-excerpt-hook-override" value="2" '.$hookexcerpt.' /> <label for="amazon-product-excerpt-hook-override"><strong>' . __("Hook into Excerpt?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('Product will show when partial excerpt content is used(when <code>the_excerpt()</code> is used. Off by default.','amazon-product-in-a-post-plugin').'</em></p>';
@@ -241,8 +277,8 @@ global $appipBulidBox;
 		echo '<p><input type="checkbox" name="amazon-product-show-features" value="1" '.$amazonfeatures.' /> <label for="amazon-product-show-features"><strong>' . __("Show Amazon Features?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em></p>';
 		echo '<p><input type="checkbox" name="amazon-product-show-used-price" value="1" '.$amazonused.' /> <label for="amazon-product-show-used-price"><strong>' . __("Show Amazon Used Price?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em></p>';
 		echo '<p><input type="checkbox" name="amazon-product-show-list-price" value="1" '.$amazonlist.' /> <label for="amazon-product-show-list-price"><strong>' . __("Show Amazon List Price?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em></p>';
-		echo '<p><input type="checkbox" name="amazon-product-show-saved-amt" value="1" '.$amazonsaved.' /> <label for="amazon-product-show-saved-amt"><strong>' . __("Show Saved Amount?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em></p>';
-		echo '<p><input type="checkbox" name="amazon-product-timestamp" value="1" '.$amazontstamp.' /> <label for="amazon-product-show-timestamp"><strong>' . __("Show Price Timestamp?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('for example:','amazon-product-in-a-post-plugin').'</em>'.__('<div class="appip-em-sample">&nbsp;&nbsp;Amazon.com Price: $32.77 (as of 01/07/2008 14:11 PST - <span class="appip-tos-price-cache-notice-tooltip" title="">Details</span>)<br/>&nbsp;&nbsp;Amazon.com Price: $32.77 (as of 14:11 PST - <span class="appip-tos-price-cache-notice-tooltip" title="">More info</span>)</div>','amazon-product-in-a-post-plugin').'</p>';
+		//echo '<p><input type="checkbox" name="amazon-product-show-saved-amt" value="1" '.$amazonsaved.' /> <label for="amazon-product-show-saved-amt"><strong>' . __("Show Saved Amount?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em></p>';
+		//echo '<p><input type="checkbox" name="amazon-product-timestamp" value="1" '.$amazontstamp.' /> <label for="amazon-product-show-timestamp"><strong>' . __("Show Price Timestamp?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('for example:','amazon-product-in-a-post-plugin').'</em>'.__('<div class="appip-em-sample">&nbsp;&nbsp;Amazon.com Price: $32.77 (as of 01/07/2008 14:11 PST - <span class="appip-tos-price-cache-notice-tooltip" title="">Details</span>)<br/>&nbsp;&nbsp;Amazon.com Price: $32.77 (as of 14:11 PST - <span class="appip-tos-price-cache-notice-tooltip" title="">More info</span>)</div>','amazon-product-in-a-post-plugin').'</p>';
 		echo '<span style="display:none;" class="appip-tos-price-cache-notice">'. __('Product prices and availability are accurate as of the date/time indicated and are subject to change. Any price and availability information displayed on amazon.'.$aws_partner_locale.' at the time of purchase will apply to the purchase of this product.','amazon-product-in-a-post-plugin').'</span>';
 		echo '<div style="clear:both;"></div>';
 	}
@@ -264,8 +300,8 @@ global $appipBulidBox;
 		$mydata['amazon-product-show-features'] 			= isset($_POST['amazon-product-show-features']) ? sanitize_text_field($_POST['amazon-product-show-features']) : '0';
 		$mydata['amazon-product-show-list-price'] 			= isset($_POST['amazon-product-show-list-price']) ? sanitize_text_field($_POST['amazon-product-show-list-price']) : '0';
 		$mydata['amazon-product-show-used-price'] 			= isset($_POST['amazon-product-show-used-price']) ? sanitize_text_field($_POST['amazon-product-show-used-price']) : '0';
-		$mydata['amazon-product-show-saved-amt'] 			= isset($_POST['amazon-product-show-saved-amt']) ? sanitize_text_field($_POST['amazon-product-show-saved-amt']) : '0';
-		$mydata['amazon-product-timestamp'] 				= isset($_POST['amazon-product-timestamp']) ? sanitize_text_field($_POST['amazon-product-timestamp']) : '0';
+		//$mydata['amazon-product-show-saved-amt'] 			= isset($_POST['amazon-product-show-saved-amt']) ? sanitize_text_field($_POST['amazon-product-show-saved-amt']) : '0';
+		//$mydata['amazon-product-timestamp'] 				= isset($_POST['amazon-product-timestamp']) ? sanitize_text_field($_POST['amazon-product-timestamp']) : '0';
 		$mydata['amazon-product-new-title'] 				= isset($_POST['amazon-product-new-title']) ? sanitize_text_field($_POST['amazon-product-new-title']): '';
 		
 		if($mydata['amazon-product-isactive']=='' && $mydata['amazon-product-single-asin']==""){$mydata['amazon-product-content-location']='';}
@@ -302,8 +338,8 @@ global $appipBulidBox;
 		$mydata['amazon-product-show-features']			= sanitize_text_field($post['amazon-product-show-features']);
 		$mydata['amazon-product-show-list-price']		= sanitize_text_field($post['amazon-product-show-list-price']);
 		$mydata['amazon-product-show-used-price']		= sanitize_text_field($post['amazon-product-show-used-price']);
-		$mydata['amazon-product-show-saved-amt']		= sanitize_text_field($post['amazon-product-show-saved-amt']);
-		$mydata['amazon-product-timestamp'] 			= sanitize_text_field($post['amazon-product-timestamp']);
+		//$mydata['amazon-product-show-saved-amt']		= sanitize_text_field($post['amazon-product-show-saved-amt']);
+		//$mydata['amazon-product-timestamp'] 			= sanitize_text_field($post['amazon-product-timestamp']);
 		$mydata['amazon-product-new-title'] 			= sanitize_text_field($post['amazon-product-new-title']);
 		
 		if($mydata['amazon-product-isactive']=='' && $mydata['amazon-product-single-asin']==""){$mydata['amazon-product-content-location']='';}
@@ -334,7 +370,7 @@ global $appipBulidBox;
 		add_submenu_page( 'apipp-main-menu', __("FAQs/Help", 'amazon-product-in-a-post-plugin'), __('FAQs/Help', 'amazon-product-in-a-post-plugin'), 'manage_options', 'apipp_plugin-faqs', 'apipp_options_faq_page' );
 	  	add_submenu_page( 'apipp-main-menu', __("Product Cache", 'amazon-product-in-a-post-plugin'), __("Product Cache", 'amazon-product-in-a-post-plugin'), 'edit_posts' , "apipp-cache-page", 'apipp_cache_page');
 	  	add_submenu_page( 'apipp-main-menu', __("New Amazon Post", 'amazon-product-in-a-post-plugin'), __("New Amazon Post", 'amazon-product-in-a-post-plugin'), 'edit_posts' , "apipp-add-new", 'apipp_add_new_post'); //amazon-product_page_apipp-add-new
-		//add_submenu_page( 'apipp-main-menu', 'Layout Styles', 'Layout Styles', 'manage_options', 'appip-layout-styles', 'apipp_templates');
+		add_submenu_page( 'apipp-main-menu', __('Layout Styles', 'amazon-product-in-a-post-plugin'), __('Layout Styles', 'amazon-product-in-a-post-plugin'), 'manage_options', 'appip-layout-styles', 'apipp_templates');
 	}
 
 function apipp_cache_page(){
@@ -397,26 +433,26 @@ function apipp_cache_page(){
 		</script>
 	';
 	echo '<div class="wrap">';
-	echo '<div id="icon-amazon" class="icon32"><br /></div><h2>'.__('Amazon Product In A Post CACHE', 'amazon-product-in-a-post-plugin').'</h2>';
+	echo '<h2>'.__('Amazon Product In A Post CACHE', 'amazon-product-in-a-post-plugin').'</h2>';
 		if(isset($_GET['appmsg']) && $_GET['appmsg']=='1'){	echo '<div style="background-color: rgb(255, 251, 204);" id="message" class="updated fade below-h2"><p><b>'.__('Product post has been saved. To edit, use the standard Post Edit options.', 'amazon-product-in-a-post-plugin').'</b></p></div>';}
-	echo '	<div class="wrapper"><br />';
+	echo '	<div class="wrapper">';
 	$checksql= "SELECT body,Cache_id,URL,updated,( NOW() - Updated )as Age FROM ".$wpdb->prefix."amazoncache ORDER BY Updated DESC;";
 	$result = $wpdb->get_results($checksql);
+	echo '<p>'.__('The product cache is stored for 60 minutes and then deleted automatically. To refetch a product, delete the cache and it will be updared on the next product load.', 'amazon-product-in-a-post-plugin').'</p>';
 	echo '<br/>';
-	echo '<h3>'.__('Amazon Product in a Post Plugin CACHE', 'amazon-product-in-a-post-plugin').'</h3>';
 	echo '<div style="text-align:right;margin:15px"><a href="#" class="button appip-cache-del button-primary" id="appip-cache-0">'.__('Delete Cache For ALL Products', 'amazon-product-in-a-post-plugin').'</a></div>';
 	echo '<table class="wp-list-table widefat fixed" cellspacing="0">';
-	echo '<thead><tr><th class="manage-column" style="width:75px;">'.__('Cache ID', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column">'.__('Unique Call UI', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column" style="width:150px;">'.__('Last Updated', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column" style="width:100px;"></th></tr></thead>';
-	echo '<tfoot><tr><th class="manage-column" style="width:75px;">'.__('Cache ID', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column">'.__('Unique Call UI', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column" style="width:150px;">'.__('Last Updated', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column" style="width:100px;"></th></tr></tfoot>';
+	echo '<thead><tr><th class="manage-column manage-cache-id" style="width:75px;">'.__('Cache ID', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column manage-call-ui">'.__('Unique Call UI', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column manage-updated" style="width:150px;">'.__('Last Updated', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column manage-last-col" style="width:100px;"></th></tr></thead>';
+	echo '<tfoot><tr><th class="manage-column manage-cache-id" style="width:75px;">'.__('Cache ID', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column manage-call-ui">'.__('Unique Call UI', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column manage-updated" style="width:150px;">'.__('Last Updated', 'amazon-product-in-a-post-plugin').'</th><th class="manage-column manage-last-col" style="width:100px;"></th></tr></tfoot>';
 	if(!empty($result) && is_array($result)){
 		echo '<tbody id="the-list">';
 		$appct = 0;
 		foreach($result as $psxml){
 			if($appct&1){	echo '<tr class="alternate iedit appip-cache-'. $psxml->Cache_id.'-row">';}else{echo '<tr class="iedit appip-cache-'. $psxml->Cache_id.'-row">';}
-			echo '<td>'. $psxml->Cache_id.'</td>';
-			echo '<td>'. $psxml->URL.' ( <a href="#" class="xml-show">show xml cache data</a> )<textarea style="display:none;width:100%;height:150px;">'.htmlspecialchars($psxml->body).'</textarea></td>';
-			echo '<td>'. $psxml->updated.'</td>';
-			echo '<td><a href="#" class="button appip-cache-del" id="appip-cache-'. $psxml->Cache_id.'">'.__('delete cache', 'amazon-product-in-a-post-plugin').'</a></td>';
+			echo '<td class="manage-column manage-cache-id">'. $psxml->Cache_id.'</td>';
+			echo '<td class="manage-column manage-call-ui">'. $psxml->URL.' ( <a href="#" class="xml-show">show xml cache data</a> )<textarea style="display:none;width:100%;height:150px;">'.htmlspecialchars($psxml->body).'</textarea></td>';
+			echo '<td class="manage-column manage-updated">'. $psxml->updated.'</td>';
+			echo '<td class="manage-column manage-last-col"><a href="#" class="button appip-cache-del" id="appip-cache-'. $psxml->Cache_id.'">'.__('delete cache', 'amazon-product-in-a-post-plugin').'</a></td>';
 			echo '</tr>';
 			$appct++;
 		}
@@ -425,6 +461,7 @@ function apipp_cache_page(){
 	}
 	echo '</tbody>';
 	echo '</table>';
+	echo '		<div style="text-align:right;margin:15px"><a href="#" class="button appip-cache-del button-primary" id="appip-cache-0">'.__('Delete Cache For ALL Products', 'amazon-product-in-a-post-plugin').'</a></div>';
 	echo '	</div>';
 	echo '</div>';
 }
@@ -794,7 +831,12 @@ function apipp_options_faq_page(){
 }
 
 	function apipp_templates(){
-		//noting yet
+		echo '<div class="wrap">';
+		echo '<h2>'.__('Amazon Styling Options', 'amazon-product-in-a-post-plugin').'</h2>';
+		echo '<div id="wpcontent-inner">';
+		echo 'This is a future feature.';
+		echo '</div>';
+		echo '</div>';
 	}
 	
 function apipp_add_new_post(){
@@ -853,8 +895,8 @@ function apipp_add_new_post(){
 	$extrasec[] = '&nbsp;&nbsp;<input type="checkbox" name="amazon-product-show-features" value="1" /> <label for="amazon-product-show-features"><strong>' . __("Show Amazon Features?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em><br />';
 	$extrasec[] = '&nbsp;&nbsp;<input type="checkbox" name="amazon-product-show-used-price" value="1" /> <label for="amazon-product-show-used-price"><strong>' . __("Show Amazon Used Price?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em><br />';
 	$extrasec[] = '&nbsp;&nbsp;<input type="checkbox" name="amazon-product-show-list-price" value="1" /> <label for="amazon-product-show-list-price"><strong>' . __("Show Amazon List Price?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em><br />';
-	$extrasec[] = '&nbsp;&nbsp;<input type="checkbox" name="amazon-product-show-saved-amt" value="1" /> <label for="amazon-product-show-saved-amt"><strong>' . __("Show Saved Amount?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em><br />';
-	$extrasec[] = '&nbsp;&nbsp;<input type="checkbox" name="amazon-product-timestamp" value="1" /> <label for="amazon-product-show-timestamp"><strong>' . __("Show Price Timestamp?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('for example:','amazon-product-in-a-post-plugin').'</em>'.__('<div class="appip-em-sample">&nbsp;&nbsp;Amazon.com Price: $32.77 (as of 01/07/2008 14:11 PST - <span class="appip-tos-price-cache-notice-tooltip" title="">Details</span>)<br/>&nbsp;&nbsp;Amazon.com Price: $32.77 (as of 14:11 PST - <span class="appip-tos-price-cache-notice-tooltip" title="">More info</span>)</div>','amazon-product-in-a-post-plugin').'<br />';
+	//$extrasec[] = '&nbsp;&nbsp;<input type="checkbox" name="amazon-product-show-saved-amt" value="1" /> <label for="amazon-product-show-saved-amt"><strong>' . __("Show Saved Amount?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if available. Not all items have this feature.','amazon-product-in-a-post-plugin').'</em><br />';
+	//$extrasec[] = '&nbsp;&nbsp;<input type="checkbox" name="amazon-product-timestamp" value="1" /> <label for="amazon-product-show-timestamp"><strong>' . __("Show Price Timestamp?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('for example:','amazon-product-in-a-post-plugin').'</em>'.__('<div class="appip-em-sample">&nbsp;&nbsp;Amazon.com Price: $32.77 (as of 01/07/2008 14:11 PST - <span class="appip-tos-price-cache-notice-tooltip" title="">Details</span>)<br/>&nbsp;&nbsp;Amazon.com Price: $32.77 (as of 14:11 PST - <span class="appip-tos-price-cache-notice-tooltip" title="">More info</span>)</div>','amazon-product-in-a-post-plugin').'<br />';
 	echo '<form method="post" action="">
 		<input type="hidden" name="amazon-product-isactive" id="amazon-product-isactive" value="1" />
 		<input type="hidden" name="post_save_type_apipp" id="post_save_type_apipp" value="1" />
@@ -901,7 +943,7 @@ function apipp_add_new_post(){
 				</tr>
 				'.$section.'
 			</table>
-			<br/><input type="submit" value="'.__('Create Amazon Product Post & Return Here','amazon-product-in-a-post-plugin').'" name="createpost" class="button-primary" /> <input type="submit" value="'.__('Create Amazon Product Post & Edit NOW','amazon-product-in-a-post-plugin').'" name="createpost" class="button-primary" />
+			<br/><input type="submit" value="'.__('Create Amazon Product Post & Return Here','amazon-product-in-a-post-plugin').'" name="createpost" class="button-primary" /> <!--input type="submit" value="'.__('Create Amazon Product Post & Edit NOW','amazon-product-in-a-post-plugin').'" name="createpost" class="button-primary" /-->
 		</div>
 	</form>
 	</div>';
