@@ -2,7 +2,7 @@
 Contributors: prophecy2040
 Donate link: http://www.fischercreativemedia.com/donations/
 Tags: Amazon, Affiliate, Product, Products, Post, Page, Custom Post Type, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode, FAQs, Store, eCommerce, Kindle
-Requires at least: 4.0
+Requires at least: 3.9
 Tested up to: 4.2.2
 Stable tag: trunk
 License: GPLv2 or later
