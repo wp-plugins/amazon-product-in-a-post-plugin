@@ -117,7 +117,6 @@ global $appipBulidBox;
 			if($amzreq !='')
 				$amzArr = appip_plugin_FormatASINResult($amzreq,0);
 			
-			//echo '<pre>'.print_r($amzArr,true).'</pre>';
 			$tempContentS = isset($amzArr[0]['ItemDesc'][0]['Source']) ? $amzArr[0]['ItemDesc'][0]['Source'] : '';
 			$tempContentT = (isset($amzArr[0]['ItemDesc'][0]['Content']) && $tempContentS == 'Product Description') ? $amzArr[0]['ItemDesc'][0]['Content'] : '';
 			
@@ -150,7 +149,6 @@ global $appipBulidBox;
 				);
 				$createdpostid = wp_insert_post($post_array,'false');
 			}
-			//echo '<pre>'.print_r($post_array,true).'</pre>';
 			if($createdpostid != ''){
 				$newpost = get_post($createdpostid);
 				ini_set('display_errors', 0);
@@ -259,7 +257,7 @@ global $appipBulidBox;
 		$noaffidmsg = '<div style="background-color: rgb(255, 251, 204);" id="message" class="updated fade below-h2"><p><strong>'. __('WARNING:','amazon-product-in-a-post-plugin', 'amazon-product-in-a-post-plugin').'</strong> '.__('You will not get credit for Amazon purchases until you add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page.','amazon-product-in-a-post-plugin').'</p></div>';
 		if($appaffidO == ''){ echo $noaffidmsg;}
 		echo '<p><input type="checkbox" name="amazon-product-isactive" value="1" '.$menuhide.' /> <label for="amazon-product-isactive"><strong>' . __("Product is Active?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('if checked the product will be live','amazon-product-in-a-post-plugin').'</em></p>';
-		echo '<p><label for="amazon-product-single-asin"><strong>'.__("Amazon Product ASIN (ISBN-10)", 'amazon-product-in-a-post-plugin' ).'</strong></label><br /><input type="text" name="amazon-product-single-asin" id="amazon-product-single-asin" size="25" value="'. $appASIN . '" /><em>'. __('You will need to get this from <a href="http://amazon.com/">Amazon.com</a>','amazon-product-in-a-post-plugin').'</em></p>';
+		echo '<p><label for="amazon-product-single-asin"><strong>'.__("Amazon Product ASIN", 'amazon-product-in-a-post-plugin' ).'</strong></label><br /><input type="text" name="amazon-product-single-asin" id="amazon-product-single-asin" size="25" value="'. $appASIN . '" /><em>'. __('You will need to get this from <a href="http://amazon.com/">Amazon.com</a>','amazon-product-in-a-post-plugin').'</em></p>';
 		echo '<p><label for="amazon-product-new-title"><strong>'.__("Replace Amazon Title With Below Title:", 'amazon-product-in-a-post-plugin' ).'</strong></label> <em>'. __('Optional. To hide title all together, type "null". No HTML, plain text only. Use this if you want your own title to show instead of Amazon\'s title.','amazon-product-in-a-post-plugin').'</em><input type="text" class="amazon-product-new-title" name="amazon-product-new-title" id="amazon-product-new-title" size="35" value="'. $appipnewtitle. '" /></p>';
 		echo '<input type="hidden" name="amazonpipp_noncename" id="amazonpipp_noncename" value="' . $appnoonce . '" /><input type="hidden" name="post_save_type_apipp" id="post_save_type_apipp" value="1" />';
 		echo '<p><input type="checkbox" name="amazon-product-content-hook-override" value="2" '.$hookcontent.' /> <label for="amazon-product-content-hook-override"><strong>' . __("Hook into Content?", 'amazon-product-in-a-post-plugin' ) . '</strong></label> <em>'.__('Product will show when full content is used (when <code>the_content()</code> template tag). On by default.','amazon-product-in-a-post-plugin').'</em></p>';
@@ -467,209 +465,199 @@ function apipp_cache_page(){
 }
 
 function apipp_shortcode_help_page(){
-	global $current_user, $wpdb;
 	if (!current_user_can('manage_options'))  {
 		wp_die( __('You do not have sufficient permissions to access this page.', 'amazon-product-in-a-post-plugin') );
 	}
-	echo '<div class="wrap">';
-	echo '<div id="icon-amazon" class="icon32"><br /></div><h2>'.__('Amazon Product In a Post Shortcode Usage', 'amazon-product-in-a-post-plugin').'</h2>';
-	if(isset($_GET['appmsg']) && $_GET['appmsg']=='1'){	echo '<div style="background-color: rgb(255, 251, 204);" id="message" class="updated fade below-h2"><p><b>'.__('Product post has been saved. To edit, use the standard Post Edit options.', 'amazon-product-in-a-post-plugin').'</b></p></div>';}
-	echo '	<div class="wrapper" style="font-size:14px;"><br />
-<p>As of Version 3.5.1, there will be a new shortcode system in place. The new Shortcode will be <code style="font-family:monospace;font-size:14px;">[AMAZONPRODUCTS asin="B0084IG8TM"]</code> (instead of <code style="font-family:monospace;font-size:14px;">[AMAZONPRODUCT=B0084IG8TM]</code>). <br>Note the <code style="font-family:monospace;font-size:14px;">S</code> on <code style="font-family:monospace;font-size:14px;">AMAZONPRODUCTS</code>. The old method is still supported, but has limited functionality so it is recommended that you switch to the new shortcode when you can.<br>
-<br>
-And additional Shortcode has been added to make adding elements of a product into the text of the page easier. The additional shortcode is <code style="font-family:monospace;font-size:14px;">[amazon-elements]</code>. This new shortcode has many parameters and is very useful for adding bits and pieces of a product to the text. </p>
-<p>For more information about <code style="font-family:monospace;font-size:14px;">[amazon-elements]</code>, 
-<a href="#amazonelements">click here</a>.<br>
-<br>
-<h3>[AMAZONPRODUCTS] Shortcode</h3>
-<a name="amazonproducts"></a>The New shortcode should be used as follows:<br>
-<br>
-Usage in the most basic form is simply the Shortcode and the ASIN written as (where the XXXXXXXXX is the Amazon ASIN):<br>
-<code style="font-family:monospace;font-size:14px;">[AMAZONPRODUCTS asin="XXXXXXXXXX"]</code><br>
-<br>
-There are additional parameters that can be added if you need them. The parameters are<br><code style="font-family:monospace;font-size:14px;">locale</code>, <code style="font-family:monospace;font-size:14px;">desc</code>, <code style="font-family:monospace;font-size:14px;">features</code>, <code style="font-family:monospace;font-size:14px;">listprice</code>, <code style="font-family:monospace;font-size:14px;">partner_id</code>, <code style="font-family:monospace;font-size:14px;">private_key</code>, and <code style="font-family:monospace;font-size:14px;">public_key</code><br>
-<br>
-A description of each parameter:</p>
-<ul style="margin-left:25px;list-style-type:disc;">
-	<li><code style="font-family:monospace;font-size:14px;">asin</code> &mdash; this is the ASIN or ASINs up to 10 comma separated</li>
-	<li><code style="font-family:monospace;font-size:14px;">locale</code> &mdash; this is the Amazon locale you want to get the product from, i.e., com, co.uk, fr, etc. default is your plugin setting</li>
-	<li><code style="font-family:monospace;font-size:14px;">desc</code> &mdash; using 1 shows Amazon description (if available) and 0 hides it &mdash; default is 0.</li>
-	<li><code style="font-family:monospace;font-size:14px;">features</code> &mdash; using 1 shows Amazon Features (if available) and 0 hides it - default is 0.</li>
-	<li><code style="font-family:monospace;font-size:14px;">listprice</code> &mdash; using 1 shows the list price and 0 hides it &mdash; default is 1.</li>
-	<li><code style="font-family:monospace;font-size:14px;">partner_id</code> &mdash; allows you to add a different parent ID if different for other locale &mdash; default is ID in settings.</li>
-	<li><code style="font-family:monospace;font-size:14px;">private_key</code> &mdash; allows you to add different private key for locale if different &mdash; default is private key in settings.</li>
-	<li><code style="font-family:monospace;font-size:14px;">public_key</code> &mdash; allows you to add a different private key for locale if different &mdash; default is public key in settings.</li>
-</ul>
-<p>Examples of it&rsquo;s usage:</p>
-<ul style="margin-left:25px;list-style-type:disc;">
-	<li>If you want to add a .com item and you have the same partner id, public key, private key and want the features showing:<br>
-	<code style="font-family:monospace;font-size:14px;">[AMAZONPRODUCTS asin="B0084IG8TM" features="1" locale="com"]</code></li>
-	<li>If you want to add a .com item and you have a different partner id, public key, private key and want the description showing but features not showing:<br>
-	<code style="font-family:monospace;font-size:14px;">[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" locale="com" public_key="AKIAJDRNJ6O997HKGXW" private_key="Nzg499eVysc5yjcZwrIV3bhDti/OGyRHEYOWO005" partner_id="mynewid-20"]</code></li>
-	<li>If you just want to use your same locale but want 2 items with no list price and features showing:<br>
-	<code style="font-family:monospace;font-size:14px;">[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" features="1" listprice="0"]</code></li>
-	<li>If you just want 2 products with regular settings:<br>
-	<code style="font-family:monospace;font-size:14px;">[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE"]</code></li>
-	<li>If you want to add text to a product:<br>
-	<code style="font-family:monospace;font-size:14px;">[AMAZONPRODUCTS asin="B0084IG8TM"]your text can go here![/AMAZONPRODUCTS]</code></li>
-</ul><a name="amazonelements"></a>
-<div style="clear:both;margin-top:55px;">
-<h3>[amazon-elements] Shortcode</h3></div>
-<p>New shortcode implementation for elements only &mdash; for when you may only want specific element(s) like the title, price and image or image and description, or the title and the buy now button, etc.</p>
-<ul style="margin-left:25px;list-style-type:disc;">
-	<li><code style="font-family:monospace;font-size:14px;">asin</code> &mdash; the Amazon ASIN (up to 10 comma sep).<span style="color:#ff0000;"> Required </span></li>
-	<li><code style="font-family:monospace;font-size:14px;">locale</code> &mdash; the amazon locale, i.e., co.uk, es. This is handy of you need a product from a different locale than your default one. Applies to all ASINs in list. (optional)</li>
-	<li><code style="font-family:monospace;font-size:14px;">gallery</code> &mdash; use a value of 1 to show extra photos if a product has them. Applies to all ASINs in list. (optional)</li>
-	<li><code style="font-family:monospace;font-size:14px;">partner_id</code> &mdash; your amazon partner id. default is the one in the options. You can set a different one here if you have a different one for another locale or just want to split them up between multiple ids. Applies to all ASINs in list. (optional)</li>
-	<li><code style="font-family:monospace;font-size:14px;">private_key</code> &mdash; amazon private key. Default is one set in options. You can set a different one if needed for another locale. Applies to all ASINs in list. (optional)</li>
-	<li><code style="font-family:monospace;font-size:14px;">public_key</code> &mdash; amazon public key. Default is one set in options. You can set a different one if needed for another locale. Applies to all ASINs in list. (optional)</li>
-	<li><code style="font-family:monospace;font-size:14px;">showformat</code> &mdash; show or hide the format in the title i.e., &quot;Some Title (DVD)&quot; or &quot;Some Title (BOOK)&quot;. 1 to show 0 to hide. Applies to all ASINs. Default is 1. (optional) </li>
-	<li><code style="font-family:monospace;font-size:14px;">msg_instock</code> &mdash; message to display when an image is in stock. Applies to all ASINs. (optional) </li>
-	<li><code style="font-family:monospace;font-size:14px;">msg_outofstock</code> &mdash; message to display when an image is out of stock. Applies to all ASINs in list. (optional)</li>
-	<li><code style="font-family:monospace;font-size:14px;">target</code> &mdash; default is &quot;_blank&quot;. Applies to all ASINs in list. (optional)</li>
-	<li><code style="font-family:monospace;font-size:14px;">fields</code> &mdash; Fields you want to return. And valid return field form Amazon API (you could see API for list) or common fields of: title, lg-image,md-image,sm-image, large-image-link,description (or desc),ListPrice, new-price,LowestUsedPrice, button. You should have at least one field when using this shortcode, as no field will return a blank result. Applies to all ASINs in list. (optional)</li>
-	<li><code style="font-family:monospace;font-size:14px;">labels</code> &mdash; Labels that correspond to the fields (if you want custom labels). They should match the fields and be comma separated and :: separated for the field name and value i.e., field name::label text,field-two::value 2, etc. These can be ASIN specific. If you have 2 ASINs, the first label field will correspond to the first ASIN, the second to the second one, and so on. (optional).</li>
-	<li><code style="font-family:monospace;font-size:14px;">button_url</code> &mdash; URL for a button image, if you want to use a different image than the default one. ASIN Specific - separate the list of URLs with a comma to correspond with the ASIN. i.e., if you had 3 ASINs and wanted the first and third to have custom buttons, but the second to have the default button, use <code style="font-family:monospace;font-size:14px;">button_url="http://first.com/image1.jpg,,http://first.com/image1.jpg"</code> (optional)</li>
-</ul>
-Example of the new elements shortcode usage:
-<ul style="margin-left:25px;list-style-type:disc;">
-	<li>if you want to have a product with only a large image, the title and 
-	button, you would use:<br>
-	<code style="font-family:monospace;font-size:14px;">[amazon-element asin=&quot;0753515032&quot; fields=&quot;title,lg-image,large-image-link,button&quot;]</code></li>
-	<li>If you want that same product to have the description, you would use:<br>
-	<code style="font-family:monospace;font-size:14px;">[amazon-element asin=&quot;0753515032&quot; fields=&quot;title,lg-image,large-image-link,<font color="#FF0000">desc</font>,button&quot;]</code></li>
-	<li>If you want that same product to have the list price and the new price, 
-	you would use:<br>
-	<code style="font-family:monospace;font-size:14px;">[amazon-element asin=&quot;0753515032&quot; fields=&quot;title,lg-image,large-image-link,desc,<font color="#FF0000">ListPrice,new-price,button&quot; msg_instock=&quot;in 
-	Stock&quot; msg_outofstock=&quot;no more left!&quot;</font>]<br>
-	</code>The msg_instock and msg_outofstock are optional fields.</li>
-	<li>If you want to add som of your own text to a product, and makeit part of 
-	the post, you could do something like this:<code style="font-family:monospace;font-size:14px;"><br>
-	[amazon-element asin=&quot;0753515032&quot; fields=&quot;title,lg-image,large-image-link&quot; labels=&quot;large-image-link::click for larger image:,title-wrap::h2,title::Richard Branson: Business Stripped Bare&quot;]Some normal content text here.[amazon-element asin=&quot;0753515032&quot; fields=&quot;desc,gallery,ListPrice,new-price,LowestUsedPrice,button&quot; labels=&quot;desc::Book Description:,ListPrice::SRP:,new-price::New From:,LowestUsedPrice::Used From:&quot; msg_instock=&quot;Available&quot;]</code></li>
-</ul>
-<p>Available Fields for the shortcode:</p>
-<h4>Common Items</h4>
-These are generally common in all products (if available)
-<ul style="font-family:monospace;margin-left:15px;">
-<li>ASIN</li>
-<li>URL</li>
-<li>Title</li>
-<li>SmallImage</li>
-<li>MediumImage</li>
-<li>LargeImage</li>
-<li>AddlImages</li>
-<li>Feature</li>
-<li>Format</li>
-<li>PartNumber</li>
-<li>ProductGroup</li>
-<li>ProductTypeName</li>
-<li>ISBN</li>
-<li>ItemDesc</li>
-<li>ListPrice</li>
-<li>SKU</li>
-<li>UPC</li>
-<li>CustomerReviews</li>
-</ul>
-<h4>Offer/Pricing Elements</h4>
-These are generally returned for most products. 
-<ul style="font-family:monospace;margin-left:15px;">
-<li>LowestNewPrice</li>
-<li>LowestUsedPrice</li>
-<li>LowestRefurbishedPrice</li>
-<li>LowestCollectiblePrice</li>
-<li>MoreOffersUrl</li>
-<li>NewAmazonPricing</li>
-<li>TotalCollectible</li>
-<li>TotalNew</li>
-<li>TotalOffers</li>
-<li>TotalRefurbished</li>
-<li>TotalUsed</li>
-</ul>
-<h4>Items Attributes</h4>
-Available only to their select product groups and not available in all locales. Try it first 
-to see if it returns a value. <br/>
-For example, the Actor field is not going to be returned if the product is a computer 
-or some form of electronics, but would be returned if the product was a DVD or 
-Blu-ray Movie. 
-<ul style="font-family:monospace;margin-left:15px;">
-<li>Actor</li>
-<li>Artist</li>
-<li>AspectRatio</li>
-<li>AudienceRating</li>
-<li>AudioFormat</li>
-<li>Author</li>
-<li>Binding</li>
-<li>Brand</li>
-<li>CatalogNumberList</li>
-<li>Category</li>
-<li>CEROAgeRating</li>
-<li>ClothingSize</li>
-<li>Color</li>
-<li>Creator</li>
-<li>Department</li>
-<li>Director</li>
-<li>EAN</li>
-<li>EANList</li>
-<li>Edition</li>
-<li>EISBN</li>
-<li>EpisodeSequence</li>
-<li>ESRBAgeRating</li>
-<li>Genre</li>
-<li>HardwarePlatform</li>
-<li>HazardousMaterialType</li>
-<li>IsAdultProduct</li>
-<li>IsAutographed</li>
-<li>IsEligibleForTradeIn</li>
-<li>IsMemorabilia</li>
-<li>IssuesPerYear</li>
-<li>ItemDimensions</li>
-<li>ItemPartNumber</li>
-<li>Label</li>
-<li>Languages</li>
-<li>LegalDisclaimer</li>
-<li>MagazineType</li>
-<li>Manufacturer</li>
-<li>ManufacturerMaximumAge</li>
-<li>ManufacturerMinimumAge</li>
-<li>ManufacturerPartsWarrantyDescription</li>
-<li>MediaType</li>
-<li>Model</li>
-<li>ModelYear</li>
-<li>MPN</li>
-<li>NumberOfDiscs</li>
-<li>NumberOfIssues</li>
-<li>NumberOfItems</li>
-<li>NumberOfPages</li>
-<li>NumberOfTracks</li>
-<li>OperatingSystem</li>
-<li>PackageDimensions</li>
-<li>PackageDimensionsWidth</li>
-<li>PackageDimensionsHeight</li>
-<li>PackageDimensionsLength</li>
-<li>PackageDimensionsWeight</li>
-<li>PackageQuantity</li>
-<li>PictureFormat</li>
-<li>Platform</li>
-<li>ProductTypeSubcategory</li>
-<li>PublicationDate</li>
-<li>Publisher</li>
-<li>RegionCode</li>
-<li>ReleaseDate</li>
-<li>RunningTime</li>
-<li>SeikodoProductCode</li>
-<li>ShoeSize</li>
-<li>Size</li>
-<li>Studio</li>
-<li>SubscriptionLength</li>
-<li>TrackSequence</li>
-<li>TradeInValue</li>
-<li>UPCList</li>
-<li>Warranty</li>
-<li>WEEETaxValue </li>
-</ul>';
-	echo '	</div>';
-	echo '</div>';
-
+	$pageTxtArr = array();
+	$pageTxtArr[] = '<div class="wrap">';
+	$pageTxtArr[] = '	<h2>'.__('Amazon Product In a Post Shortcode Usage', 'amazon-product-in-a-post-plugin').'</h2>';
+	$pageTxtArr[] = '	<div class="wrapper appip_shortcode_help">';
+	$pageTxtArr[] = '		<p>'.__('Since Version 3.5.1, a new shortcode system was put into place. The new Shortcode is ','amazon-product-in-a-post-plugin').'<code>[AMAZONPRODUCTS asin="B0084IG8TM"]</code> (' . __('instead of','amazon-product-in-a-post-plugin').' <code>[AMAZONPRODUCT=B0084IG8TM]</code>). <br>';
+	$pageTxtArr[] = __('			Note the', 'amazon-product-in-a-post-plugin').' <code>S</code> on <code>AMAZONPRODUCTS</code>. '.__('The old method is still supported, but has limited functionality so it is recommended that you switch to the new shortcode when you can.', 'amazon-product-in-a-post-plugin').'</p>';
+	$pageTxtArr[] = '		<p>'.__('And additional Shortcode has been added to make adding elements of a product into the text of the page easier. The additional shortcode is', 'amazon-product-in-a-post-plugin').' <code>[amazon-elements]</code>. '.__('This new shortcode has many parameters and is very useful for adding bits and pieces of a product to the text.', 'amazon-product-in-a-post-plugin').'</p>';
+	$pageTxtArr[] = '		<p>'.__('For more information about ','amazon-product-in-a-post-plugin').'<code>[amazon-elements]</code>, <a href="#amazonelements">'.__('click here','amazon-product-in-a-post-plugin').'</a>.</p>';
+	$pageTxtArr[] = '		<hr/">';
+	$pageTxtArr[] = '		<h2><a name="amazonproducts"></a>[AMAZONPRODUCTS] '.__('Shortcode', 'amazon-product-in-a-post-plugin').'</h2>';
+	$pageTxtArr[] = '		<p>'.__('The shortcode should be used as follows:', 'amazon-product-in-a-post-plugin').'</p>';
+	$pageTxtArr[] = '		<p>'.__('Usage in the most basic form is simply the Shortcode and the ASIN written as (where the XXXXXXXXX is the Amazon ASIN):', 'amazon-product-in-a-post-plugin').'<br>';
+	$pageTxtArr[] = '			<code>[AMAZONPRODUCTS asin="XXXXXXXXXX"]</code>';
+	$pageTxtArr[] = '			<p>'.__('There are additional parameters that can be added if you need them. The parameters are', 'amazon-product-in-a-post-plugin').'<br><code>locale</code>, <code>desc</code>, <code>features</code>, <code>listprice</code>, <code>partner_id</code>, <code>private_key</code>, and <code>public_key</code></p>';
+	$pageTxtArr[] = '			<p>'.__('A description of each parameter:', 'amazon-product-in-a-post-plugin').'</p>';
+	$pageTxtArr[] = '		<ul>';
+	$pageTxtArr[] = '			<li><code>asin</code> &mdash; '. __('this is the ASIN or ASINs up to 10 comma separated.', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			<li><code>locale</code> &mdash; '. __('this is the Amazon locale you want to get the product from, i.e., com, co.uk, fr, etc. default is your plugin setting.', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			<li><code>desc</code> &mdash; '. __('using 1 shows Amazon description (if available) and 0 hides it &mdash; default is 0.', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			<li><code>features</code> &mdash; '. __('using 1 shows Amazon Features (if available) and 0 hides it - default is 0.', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			<li><code>listprice</code> &mdash; '. __('using 1 shows the list price and 0 hides it &mdash; default is 1.', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			<li><code>partner_id</code> &mdash; '. __('allows you to add a different parent ID if different for other locale &mdash; default is ID in settings.', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			<li><code>private_key</code> &mdash; '. __('allows you to add different private key for locale if different &mdash; default is private key in settings.', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			<li><code>public_key</code> &mdash; '. __('allows you to add a different private key for locale if different &mdash; default is public key in settings.', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '		</ul>';
+	$pageTxtArr[] = '			<p>'.__('Examples of it&rsquo;s usage:', 'amazon-product-in-a-post-plugin').'</p>';
+	$pageTxtArr[] = '		<ul>';
+	$pageTxtArr[] = '			<li>'.__('If you want to add a .com item and you have the same partner id, public key, private key and want the features showing:<br>', 'amazon-product-in-a-post-plugin');
+	$pageTxtArr[] = '				<code>[AMAZONPRODUCTS asin="B0084IG8TM" features="1" locale="com"]</code></li>';
+	$pageTxtArr[] = '			<li>'.__('If you want to add a .com item and you have a different partner id, public key, private key and want the description showing but features not showing:<br>', 'amazon-product-in-a-post-plugin');
+	$pageTxtArr[] = '				<code>[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" locale="com" public_key="AKIAJDRNJ6O997HKGXW" private_key="Nzg499eVysc5yjcZwrIV3bhDti/OGyRHEYOWO005" partner_id="mynewid-20"]</code></li>';
+	$pageTxtArr[] = '			<li>'.__('If you just want to use your same locale but want 2 items with no list price and features showing:<br>', 'amazon-product-in-a-post-plugin');
+	$pageTxtArr[] = '				<code>[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE" features="1" listprice="0"]</code></li>';
+	$pageTxtArr[] = '			<li>'.__('If you just want 2 products with regular settings:<br>', 'amazon-product-in-a-post-plugin');
+	$pageTxtArr[] = '				<code>[AMAZONPRODUCTS asin="B0084IG8TM,B005LAIHPE"]</code></li>';
+	$pageTxtArr[] = '			<li>'.__('If you want to add text to a product:<br>', 'amazon-product-in-a-post-plugin');
+	$pageTxtArr[] = '				<code>[AMAZONPRODUCTS asin="B0084IG8TM"]your text can go here![/AMAZONPRODUCTS]</code></li>';
+	$pageTxtArr[] = '		</ul>';
+	$pageTxtArr[] = '		<hr/>';
+	$pageTxtArr[] = '		<div class="appip_elements_code"><a name="amazonelements"></a>';
+	$pageTxtArr[] = '<h2>[amazon-elements] '.__('Shortcode', 'amazon-product-in-a-post-plugin').'</h2>';
+	$pageTxtArr[] = '			<p>'.__('shortcode implementation for elements only &mdash; for when you may only want specific element(s) like the title, price and image or image and description, or the title and the buy now button, etc.', 'amazon-product-in-a-post-plugin').'</p>';
+	$pageTxtArr[] = '			<ul>';
+	$pageTxtArr[] = '				<li><code>asin</code> &mdash; '.__('the Amazon ASIN (up to 10 comma sep).<span style="color:#ff0000;"> Required </span>', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>locale</code> &mdash; '.__('the amazon locale, i.e., co.uk, es. This is handy of you need a product from a different locale than your default one. Applies to all ASINs in list. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>gallery</code> &mdash; '.__('use a value of 1 to show extra photos if a product has them. Applies to all ASINs in list. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>partner_id</code> &mdash; '.__('your amazon partner id. default is the one in the options. You can set a different one here if you have a different one for another locale or just want to split them up between multiple ids. Applies to all ASINs in list. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>private_key</code> &mdash; '.__('amazon private key. Default is one set in options. You can set a different one if needed for another locale. Applies to all ASINs in list. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>public_key</code> &mdash; '.__('amazon public key. Default is one set in options. You can set a different one if needed for another locale. Applies to all ASINs in list. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>showformat</code> &mdash; '.__('show or hide the format in the title i.e., &quot;Some Title (DVD)&quot; or &quot;Some Title (BOOK)&quot;. 1 to show 0 to hide. Applies to all ASINs. Default is 1. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>msg_instock</code> &mdash; '.__('message to display when an image is in stock. Applies to all ASINs. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>msg_outofstock</code> &mdash; '.__('message to display when an image is out of stock. Applies to all ASINs in list. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>target</code> &mdash; '.__('default is &quot;_blank&quot;. Applies to all ASINs in list. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>fields</code> &mdash; '.__('Fields you want to return. And valid return field form Amazon API (you could see API for list) or common fields of: title, lg-image,md-image,sm-image, large-image-link,description (or desc),ListPrice, new-price,LowestUsedPrice, button. You should have at least one field when using this shortcode, as no field will return a blank result. Applies to all ASINs in list. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>labels</code> &mdash; '.__('Labels that correspond to the fields (if you want custom labels). They should match the fields and be comma separated and :: separated for the field name and value i.e., field name::label text,field-two::value 2, etc. These can be ASIN specific. If you have 2 ASINs, the first label field will correspond to the first ASIN, the second to the second one, and so on. (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li><code>button_url</code> &mdash; '.__('URL for a button image, if you want to use a different image than the default one. ASIN Specific - separate the list of URLs with a comma to correspond with the ASIN. i.e., if you had 3 ASINs and wanted the first and third to have custom buttons, but the second to have the default button, use <code>button_url="http://first.com/image1.jpg,,http://first.com/image1.jpg"</code> (optional)', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			</ul>';
+	$pageTxtArr[] = '			<p>'.__('Example of the new elements shortcode usage:', 'amazon-product-in-a-post-plugin').'</p>';
+	$pageTxtArr[] = '			<ul>';
+	$pageTxtArr[] = '				<li>'.__('if you want to have a product with only a large image, the title and button, you would use:', 'amazon-product-in-a-post-plugin').'<br>';
+	$pageTxtArr[] = '					<code>[amazon-element asin=&quot;0753515032&quot; fields=&quot;title,lg-image,large-image-link,button&quot;]</code></li>';
+	$pageTxtArr[] = '				<li>'.__('If you want that same product to have the description, you would use:', 'amazon-product-in-a-post-plugin').'<br>';
+	$pageTxtArr[] = '					<code>[amazon-element asin=&quot;0753515032&quot; fields=&quot;title,lg-image,large-image-link,<span style="color:#FF0000;">desc</span>,button&quot;]</code></li>';
+	$pageTxtArr[] = '				<li>'.__('If you want that same product to have the list price and the new price, you would use:', 'amazon-product-in-a-post-plugin').'<br>';
+	$pageTxtArr[] = '					<code>[amazon-element asin=&quot;0753515032&quot; fields=&quot;title,lg-image,large-image-link,desc,<span style="color:#FF0000;">ListPrice,new-price,button&quot; msg_instock=&quot;in Stock&quot; msg_outofstock=&quot;no more left!&quot;</span>]</code><br>';
+	$pageTxtArr[] = __('					The msg_instock and msg_outofstock are optional fields.', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('If you want to add som of your own text to a product, and makeit part of the post, you could do something like this:<br>', 'amazon-product-in-a-post-plugin');
+	$pageTxtArr[] = '					<code>[amazon-element asin=&quot;0753515032&quot; fields=&quot;title,lg-image,large-image-link&quot; labels=&quot;large-image-link::click for larger image:,title-wrap::h2,title::Richard Branson: Business Stripped Bare&quot;]Some normal content text here.[amazon-element asin=&quot;0753515032&quot; fields=&quot;desc,gallery,ListPrice,new-price,LowestUsedPrice,button&quot; labels=&quot;desc::Book Description:,ListPrice::SRP:,new-price::New From:,LowestUsedPrice::Used From:&quot; msg_instock=&quot;Available&quot;]</code></li>';
+	$pageTxtArr[] = '			</ul>';
+	$pageTxtArr[] = '			<h4>'.__('Available Fields for the shortcode:', 'amazon-product-in-a-post-plugin').'</h4>';
+	$pageTxtArr[] = '			<h3>'.__('Common Items', 'amazon-product-in-a-post-plugin').'</h3>';
+	$pageTxtArr[] = __('			These are generally common in all products (if available)', 'amazon-product-in-a-post-plugin');
+	$pageTxtArr[] = '			<ul class="as_code">';
+	$pageTxtArr[] = '				<li>'.__('ASIN', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('URL', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Title', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('SmallImage', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('MediumImage', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('LargeImage', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('AddlImages', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Feature', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Format', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('PartNumber', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ProductGroup', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ProductTypeName', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ISBN', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ItemDesc', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ListPrice', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('SKU', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('UPC', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('CustomerReviews', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			</ul>';
+	$pageTxtArr[] = '			<h3>'.__('Offer/Pricing Elements', 'amazon-product-in-a-post-plugin').'</h3>';
+	$pageTxtArr[] = __('			These are generally returned for most products.', 'amazon-product-in-a-post-plugin');
+	$pageTxtArr[] = '			<ul class="as_code">';
+	$pageTxtArr[] = '				<li>'.__('LowestNewPrice', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('LowestUsedPrice', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('LowestRefurbishedPrice', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('LowestCollectiblePrice', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('MoreOffersUrl', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('NewAmazonPricing', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('TotalCollectible', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('TotalNew', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('TotalOffers', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('TotalRefurbished', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('TotalUsed', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			</ul>';
+	$pageTxtArr[] = '			<h3>'.__('Items Attributes', 'amazon-product-in-a-post-plugin').'</h3>';
+	$pageTxtArr[] = __('			Available only to their select product groups and not available in all locales. Try it first to see if it returns a value. For example, the Actor field is not going to be returned if the product is a computer or some form of electronics, but would be returned if the product was a DVD or Blu-ray Movie.', 'amazon-product-in-a-post-plugin');
+	$pageTxtArr[] = '			<ul class="as_code">';
+	$pageTxtArr[] = '				<li>'.__('Actor', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Artist', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('AspectRatio', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('AudienceRating', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('AudioFormat', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Author', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Binding', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Brand', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('CatalogNumberList', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Category', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('CEROAgeRating', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ClothingSize', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Color', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Creator', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Department', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Director', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('EAN', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('EANList', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Edition', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('EISBN', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('EpisodeSequence', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ESRBAgeRating', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Genre', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('HardwarePlatform', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('HazardousMaterialType', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('IsAdultProduct', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('IsAutographed', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('IsEligibleForTradeIn', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('IsMemorabilia', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('IssuesPerYear', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ItemDimensions', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ItemPartNumber', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Label', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Languages', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('LegalDisclaimer', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('MagazineType', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Manufacturer', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ManufacturerMaximumAge', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ManufacturerMinimumAge', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ManufacturerPartsWarrantyDescription', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('MediaType', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Model', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ModelYear', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('MPN', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('NumberOfDiscs', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('NumberOfIssues', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('NumberOfItems', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('NumberOfPages', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('NumberOfTracks', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('OperatingSystem', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('PackageDimensions', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('PackageDimensionsWidth', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('PackageDimensionsHeight', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('PackageDimensionsLength', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('PackageDimensionsWeight', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('PackageQuantity', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('PictureFormat', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Platform', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ProductTypeSubcategory', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('PublicationDate', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Publisher', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('RegionCode', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ReleaseDate', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('RunningTime', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('SeikodoProductCode', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('ShoeSize', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Size', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Studio', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('SubscriptionLength', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('TrackSequence', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('TradeInValue', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('UPCList', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('Warranty', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '				<li>'.__('WEEETaxValue ', 'amazon-product-in-a-post-plugin').'</li>';
+	$pageTxtArr[] = '			</ul>';
+	$pageTxtArr[] = '		</div>';
+	$pageTxtArr[] = '	</div>';
+	$pageTxtArr[] = '</div>';
+	echo implode("\n",$pageTxtArr);
+	unset($pageTxtArr);
 }	
 function apipp_main_page(){
 	global $current_user, $wpdb;
@@ -679,8 +667,8 @@ function apipp_main_page(){
 	}
 	echo '<div class="wrap">';
 	echo'<style type="text/css">small{font-size:13px;color:#777;line-height: 19px;}.steps-wrapper div{margin-left:15px;}.steps-wrapper div p{margin-left:25px;}.steps-wrapper div img{margin:20px 10px 20px 10px;}.steps-wrapper ul{margin-left: 25px;list-style-type: none;margin: 25px 0 25px 28px;border-left: 10px solid #eaeaea;padding-left: 16px;}</style>';
-	echo '<div id="icon-amazon" class="icon32"><br /></div><h2>'.__('Amazon Product In A Post - GETTING STARTED', 'amazon-product-in-a-post-plugin').'</h2>';
-	echo '	<div class="wrapper"><br /><br/>';?>
+	echo '<h2>'.__('Amazon Product In A Post - GETTING STARTED', 'amazon-product-in-a-post-plugin').'</h2>';
+	echo '	<div class="wrapper">';?>
 <div class="steps-wrapper">
 <p>There are 2 steps to using this plug-in to make additional income as an Amazon Affiliate. The first is to sign up for an Amazon Affiliate Account. The second is to get a set of Product Advertising API keys so the plug-in can access the product API and return the correct products. Both of these steps are a little intense, but if you have about 15-20 minutes, you can set up everything you need to start making money.</p>
 <div>
@@ -844,7 +832,7 @@ function apipp_add_new_post(){
 	global $current_user;
 	get_currentuserinfo();
     $myuserpost = $current_user->ID;
-	echo '<div class="wrap"><div id="icon-amazon" class="icon32"><br /></div><h2>'.__('Add New Amazon Product Post', 'amazon-product-in-a-post-plugin').'</h2>';
+	echo '<div class="wrap"><h2>'.__('Add New Amazon Product Post', 'amazon-product-in-a-post-plugin').'</h2>';
 	if(isset($_GET['appmsg']) && $_GET['appmsg']=='1'){	echo '<div style="background-color: rgb(255, 251, 204);" id="message" class="updated fade below-h2"><p><b>'.__('Product post has been saved. To edit, use the standard Post Edit options.', 'amazon-product-in-a-post-plugin').'</b></p></div>';}
 	echo '<p>'.__('This function will allow you to add a new post for an Amazon Product - no need to create a post then add the ASIN. Once you add a Product Post, you can edit the information with the normal Post Edit options.', 'amazon-product-in-a-post-plugin').'</p>';
 	$ptypes = get_post_types(array('public' => true));

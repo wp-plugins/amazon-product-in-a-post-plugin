@@ -83,7 +83,7 @@
 	    		"type" => "checkbox"),
 		
 		array(	"name" => __('Hook plugin into Content?', 'amazon-product-in-a-post-plugin'),
-				"desc" => __('If you want to have the product displayed when the <code>the_content()</code> function is called, select this box. NOTE: This is the standard call - if you disable both Excerpt and Content, the only way you can add products to a page/post is to add the shortcode (<code>[AMAZONPRODUCT=XXXXXX]</code> where XXXXXX is the ASIN or ISBN 10). You can override this on each individual page/post.', 'amazon-product-in-a-post-plugin')."<br /><br />",
+				"desc" => __('If you want to have the product displayed when the <code>the_content()</code> function is called, select this box. NOTE: This is the standard call - if you disable both Excerpt and Content, the only way you can add products to a page/post is to add the shortcode (<code>[AMAZONPRODUCT=XXXXXX]</code> where XXXXXX is the ASIN). You can override this on each individual page/post.', 'amazon-product-in-a-post-plugin')."<br /><br />",
 	    		"id" => $shortname_apipp."_hook_content",
 	    		"type" => "checkbox"),
 		
@@ -126,7 +126,7 @@
 	    		"id" => $shortname_apipp."_product_styles_mine",
 	    		"type" => "checkbox"),
 		array(	"name" => __('Product Styles', 'amazon-product-in-a-post-plugin'),
-				"desc" => __('Your Custom styles can go here.', 'amazon-product-in-a-post-plugin')."<br /><br />",
+				"desc" => __('Your Custom styles can go here. To reset the styles, remove all styles from textarea and then save the options - the default styles will be loaded.', 'amazon-product-in-a-post-plugin')."<br /><br />",
 	    		"id" => $shortname_apipp."_product_styles",
 	    		"type" => "textareabig"),
 	);
@@ -239,8 +239,7 @@
 	<form method="post" action="">
 	<input type="hidden" name="<?php echo $shortname; ?>_option" id="<?php echo $shortname; ?>_option" value="<?php echo $shortname; ?>" />
 	<table class="optiontable">
-	<?php foreach ($options as $value) { 
-		
+	<?php foreach ($options as $key => $value) { 
 		switch ( $value['type'] ) {
 			case 'text':
 			apipp_option_wrapper_header($value);
@@ -271,7 +270,7 @@
 			?>
 		            <select style="width:240px;" name="<?php echo $value['id']; ?>" id="<?php echo $value['id']; ?>">
 		                <?php foreach ($value['options'] as $option) { ?>
-		                <option<?php if ( get_option( $value['id'] ) == $option["value"]) { echo ' selected="selected"'; } elseif ($option["value"] == $value['std']) { echo ' selected="selected"'; } ?> value="<?php echo $option["value"]; ?>"><?php echo $option["text"]; ?></option>
+		                <option<?php if ( get_option( $value['id'] ) == $option["value"]) { echo ' selected="selected"'; } elseif (isset($value['std']) && $option["value"] == $value['std']) { echo ' selected="selected"'; } ?> value="<?php echo $option["value"]; ?>"><?php echo $option["text"]; ?></option>
 		                <?php } ?>
 		            </select>
 			<?php
@@ -420,176 +419,108 @@
 		</tr>
 		<?php 
 	}
-$thedefaultapippstyle=' /*version 1.9*/
-	.amazon-product-table {
-		border-collapse : collapse;
-		border : 0 none !important ;
-		width : 100%;
-	}
-	.amazon-product-table td {
-		border : 0 none !important ;
-		padding : 0 !important ;
-	}
-	div.amazon-image-wrapper {
-		text-align : center;
-		width : 170px;
-		float : left;
-		padding : 0 10px 0 10px;
-	}
-	.amazon-product-table hr {
-		display : block;
-	}
-	span.amazon-tiny {
-		font-size : 10px;
-	}
-	div.amazon-buying {
-		text-align : left;
-	}
-	h2.amazon-asin-title {
-		margin : 0 0 5px 0;
-		line-height : 1.25;
-		font-size : 10pt;
-	}
-	span.asin-title {
-		text-align : left;
-	}
-	span.amazon-author {
-		color : #666;
-		font-size : 12px;
-	}
-	span.amazon-starring-label {
-		color : #999;
-		font-size : 10px;
-	}
-	span.amazon-director-label {
-		color : #999;
-		font-size : 10px;
-	}
-	span.amazon-rating-label {
-		color : #999;
-		font-size : 10px;
-	}
-	span.amazon-starring {
-		color : #666;
-		font-size : 12px;
-	}
-	.amazon-manufacturer{
-		color : #666;
-		font-size : 12px;
-	}
-	.amazon-ESRB{
-		color : #666;
-		font-size : 12px;
-	}
-	.amazon-feature{
-		color : #666;
-		font-size : 12px;
-	}
-	.amazon-platform{
-		color : #666;
-		font-size : 12px;
-	}
-	.amazon-system{
-		color : #666;
-		font-size : 12px;
-	}
-	span.amazon-starring {
-		color : #666;
-		font-size : 12px;
-	}
-	span.amazon-director {
-		color : #666;
-		font-size : 12px;
-	}
-	span.amazon-rating {
-		color : #666;
-		font-size : 12px;
-	}
-	.amazon-product-price {
-		border-collapse : collapse;
-		border : 0 none;
-		/*width : auto;*/
-		padding : 0 !important ;
-	}
-	.amazon-product-price a img.amazon-image {
-		background-color : transparent !important ;
-		border : 0 none !important ;
-	}
-	.amazon-post-text {
-		text-align : left;
-		padding : 0 !important ;
-	}
-	.appip-label{
-		color : #666;
-	}
-	.amazon-list-price-label {
-		font-size : 10px;
-		color : #666;
-		text-align : left;
-		width : auto;
-	}
-	.amazon-list-price {
-		width : auto;
-		text-decoration : line-through;
-		text-align : left;
-	}
-	.amazon-price-label {
-		font-size : 10px;
-		color : #666;
-		text-align : left;
-		width : auto;
-	}
-	.amazon-price {
-		font-size : 14px;
-		color : #800000;
-		font-weight : bold;
-		text-align : left;
-	}
-	.amazon-new-label {
-		font-size : 10px;
-		color : #666;
-		text-align : left;
-		width : auto;
-	}
-	.amazon-new {
-		font-size : 14px;
-		color : #800000;
-		text-align : left;
-		font-weight : bold;
-	}
-	.amazon-used-label {
-		font-size : 10px;
-		color : #666;
-		text-align : left;
-		width : auto;
-	}
-	.amazon-used {
-		color : #666;
-		text-align : left;
-	}
-	div.amazon-dates {
-		padding : 0 !important ;
-		text-align : left;
-	}
-	div.amazon-dates span.amazon-preorder {
-		font-weight : bold;
-		color : #d16601;
-		text-align : left;
-	}
-	div.amazon-dates span.amazon-release-date {
-		font-size : 10px;
-		color : #666;
-		text-align : left;
-	}
-	span.instock {
-		font-size:8pt;
-		color:#008000;
-	}
-	span.outofstock {
-		font-size:8pt;
-		color:#800000;
-	}
-	div.appip-multi-divider {
-		margin:10px 0;
-	}
+$thedefaultapippstyle='/*version 2.0*/
+a[target="amazonwin"] {margin: 0 !important;}
+a[rel^="appiplightbox"] { display: inline-block; font-size: .75rem; text-align: center; max-width: 100%; }
+.amazon-product-table { border-collapse: collapse; border: 0 none !important; width: 100%; }
+.amazon-product-table td, table.amazon-product-table td { border: 0 none ; padding: 0; }
+.amazon-image-wrapper { padding: 0 1%; text-align: center;float: left; margin: 0 2% 0 0;-webkit-box-sizing: border-box;-moz-box-sizing: border-box; box-sizing: border-box; max-width: 25%; width: 100%; }
+.amazon-image-wrapper a { border-bottom: none; display: block; font-size: 12px; text-align: center; }
+.amazon-image-wrapper br {display: none;}
+.amazon-product-table hr {display: block;}
+span.amazon-tiny {font-size: 10px;}
+div.amazon-buying {text-align: left;}
+h2.amazon-asin-title {margin: 0 0 5px 0; }
+span.asin-title {text-align: left;  font-size: inherit;}
+span.amazon-author { color: #666; }
+span.amazon-starring-label { color: #999; }
+span.amazon-director-label { color: #999; }
+span.amazon-rating-label { color: #999; }
+span.amazon-starring { color: #666; }
+.amazon-manufacturer { color: #666; }
+.amazon-ESRB { color: #666; font-size : 12px;}
+.amazon-feature { color: #666; font-size : 12px;}
+.amazon-platform { color: #666; font-size : 12px;}
+.amazon-system { color: #666; font-size : 12px;}
+span.amazon-starring { color: #666; }
+span.amazon-director { color: #666; }
+span.amazon-rating { color: #666; }
+.amazon-product-price { border-collapse: collapse; border: 0 none; padding: 0 !important; }
+.amazon-product-price a img.amazon-image { background-color: transparent; border: 0 none; }
+.amazon-post-text { padding: 0 !important; text-align: left; }
+.appip-label {color: #666; font-size: inherit;font-weight: bold;text-transform: uppercase;}
+.amazon-list-price-label { color: #666; text-align: left; }
+.amazon-list-price { text-align: left; text-decoration: line-through; }
+.amazon-price-label { color: #666; text-align: left;  }
+.amazon-price { color: #800000; font-weight: bold; text-align: left; }
+.amazon-new-label { color: #666; text-align: left;}
+.amazon-new { color: #800000; font-weight: bold; text-align: left; }
+.amazon-used-label { color: #666; text-align: left; }
+.amazon-used { color: #666; text-align: left; }
+div.amazon-dates { padding: 0 !important; text-align: left; }
+div.amazon-dates span.amazon-preorder { color: #d16601; font-weight: bold; text-align: left; }
+div.amazon-dates span.amazon-release-date { color: #666; font-size: 10px; text-align: left; }
+span.instock { color: #008000; font-size: .85em; }
+span.outofstock { color: #800000; font-size: .85em; }
+div.appip-multi-divider {margin: 10px 0;}
+.amazon-product-table .amazon-buying h2.amazon-asin-title { border-bottom: 0 none; font-size: 1rem; line-height: 1.25em; margin: 0; }
+.amazon-product-table hr { height: 0px; margin: 6px 0; }
+.amazon-list-price-label, .amazon-new, .amazon-new-label, .amazon-used-label, .amazon-list-price {}
+.amazon-dates {height: auto;}
+.amazon-dates br {display: none;}
+.amazon-list-price-label, .amazon-new-label, .amazon-used-label { font-weight: bold; min-width: 7em;width: auto;}
+.amazon-product-table:after {clear: both;}
+.amazon-tiny {text-align: center;}
+#content table.amazon-product-table { clear: both; margin-bottom: 10px; }
+#content table.amazon-product-price { -moz-border-radius: 0; -webkit-border-radius: 0; border-collapse: collapse; border-radius: 0; border: 0 none; margin: 0; max-width: 100%; width: auto; }
+#content table.amazon-product-price td { border: 0 none !important; padding: .25em 0; }
+#content table.amazon-product-table > tbody > tr > td {padding: .5rem !important;}
+.amazon-buying { box-sizing: border-box; float: left; max-width: 73%; width: 100%; }
+table.amazon-product-table hr {display:inline-block;max-width:100%;  width: 100%;  border-top: 1px solid #e2e5e7;}
+table.amazon-product-price { float: left; margin: 0; width: 100%; }
+.amazon-product-table a { border-bottom: 0 none; text-decoration: none; }
+table.amazon-product-price td { padding: 1%; width: auto; }
+table.amazon-product-price tr:first-child td {width:7em;}
+.amazon-additional-images-text { display: block; font-size: x-small; font-weight: bold; }
+.amazon-dates br {display: none;}
+.amazon-element-imagesets { border: 1px solid #ccc; display: inline-block; margin: 5px; overflow: hidden; padding: 10px; }
+.amazon-element-imagesets br {display: none;}
+.amazon-element-imagesets a { float: left; margin: 3px; }
+.amazon-element-imagesets a img {border: 1px solid #fff;}
+.amazon-additional-images-wrapper { border: 1px solid #ccc; box-sizing: border-box; display: inline-block; margin: 1%; overflow: hidden; padding: 2%; }
+.amazon-additional-images-wrapper a { float: left; margin: 3px; }
+.amazon-additional-images-wrapper a img {border: 1px solid #fff;width:25px;}
+.amazon-additional-images-wrapper br {display: none;}
+img.amazon-varient-image {max-width: 50px;margin: 1%;padding: 1px;background-color: #999;}
+img.amazon-varient-image:hover {background-color: #3A9AD9;}
+.amazon_variations_wrapper{}
+.amazon_varients{}
+.amazon-varient-type-link {display: inline-block;font-weight: bold;}
+.amazon-varient-type-price {display: inline-block;color: #EA0202;font-weight: bold;}
+.amazon-price-button{margin-top:2%;display:block;}
+.amazon-price-button > a{display:block;margin-top:8px;margin-bottom:5px;width:165px;}
+.amazon-price-button > a img.amazon-price-button-img{border:0 none;margin:0px;background:transparent;}
+.amazon-product-table td.amazon-list-variants {border-top: 1px solid #CCC;border-bottom: 1px solid #ccc;padding: 2%;margin-top:2%;}
+.amazon-variant-price-text{color:initial;}
+span.amazon-variant-price-text {font-weight: normal;}
+@media only screen and (max-width : 1200px) {}
+@media only screen and (max-width : 992px) {}
+@media only screen and (max-width : 768px) {}
+@media only screen and (max-width : 550px) {
+	.amazon-image-wrapper { padding: 0; text-align: center; float: none; margin: 0 auto 2%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; max-width: 75%; width: 100%; }
+	.amazon-buying { box-sizing: border-box; float: none; max-width: 100%; width: 100%; }
+	.amazon-product-price,table.amazon-product-price { float: none; margin: 0; max-width: 100%; width: 100%; }
+	.amazon-product-pricing-wrap { display: block; clear: both; }
+	.amazon-dates { text-align: center; }
+	.amazon-dates a { margin: 0 auto !important; width: 50% !important; }
+	.amazon-dates a img { margin: 5% auto 0 !important; width: 95% !important; }
+	span.amazon-tiny {margin-top: 2px;background: #ccc;padding:1%;display: block;font-size: 1.25em;color: #000;text-transform: uppercase;border: 1px solid #999;line-height: 1.25em;}
+	span.amazon-tiny:active {background: #EDEDED;}
+	.amazon-product-table .amazon-buying h2.amazon-asin-title {margin-top: 3%;display: block;line-height: 1.5em;}
+	.amazon-additional-images-wrapper { max-width: 100%; width: 100%; margin: 1% 0; text-align: center; }
+	.amazon-additional-images-wrapper a { float: none; display: inline-block; width: 18%; margin: 0; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }
+	.amazon-additional-images-wrapper a img { width: 75%; }
+	td.amazon-list-price-label, td.amazon-new-label, td.amazon-used-label, td.amazon-used-price, td.amazon-new, td.amazon-list-price { display: inline-block; }
+}
+@media only screen and (max-width : 320px) {}
 ';

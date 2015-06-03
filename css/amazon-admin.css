@@ -65,4 +65,10 @@ div#icon-amazon{background:url(../images/aicon.png) no-repeat !important;}
 .apip-extra-pad-bot td{padding-bottom:15px;}
 .apip-extra-pad-top td{padding-top:15px;}
 .taxonomy_blocks{display:none;background: #efefef;}
-
+.appip_shortcode_help{}
+.appip_shortcode_help code{font-family:monospace;color: #053A85;padding: 1px 5px;background:#FFFFFF;}
+.appip_shortcode_help ul{margin-left:25px;list-style-type:disc;list-style-position: inside;}
+.appip_shortcode_help .appip_elements_code{clear:both;margin-top:0;}
+.appip_shortcode_help h3{margin-bottom:5px;}
+.appip_shortcode_help ul.as_code li{font-family:monospace;color: #053A85;padding: 1px 5px;display:block;}
+.appip_shortcode_help hr{height:0px;border-top:1px solid #CCC;background:transparent;margin: 2% 0;}

@@ -13,7 +13,7 @@ Add formatted Amazon Products to any page or post by using Amazon ASIN. Great fo
 == Description ==
 Amazon's Product Advertising API Terms of Use requires you have an AWS Access Key ID and Secret Access Key of your own to use. See Plugin FAQs for links to sign up.
 
-Amazon Product In a Post Plugin is used to to quickly add a formatted Amazon Product/Item to a post or page by using just the Amazon product ASIN (also known as the ISBN-10).
+Amazon Product In a Post Plugin is used to to quickly add a formatted Amazon Product/Item to a post or page by using just the Amazon product ASIN.
 
 What can you use it for? With this plugin you can:
 
@@ -77,7 +77,7 @@ No additional adjustments are needed unless you want to configure your own CSS s
 * You can add products to the sidebar widgets using the shortcode method.
 
 = To Add a product Via Shortcode: =
-* In the Content editor, add **[AMAZONPRODUCTS asin="XXXXXXXXXX"]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number.
+* In the Content editor, add **[AMAZONPRODUCTS asin="XXXXXXXXXX"]** where XXXXXXXXXX is the Amazon ASIN number.
 * To add many products at a time, Separate the ASINs with a comma, like so (up to 10 per shortcode): **[AMAZONPRODUCTS asin="XXXXXXXXXX,XXXXXXXXXX,XXXXXXXXXX,XXXXXXXXXX"]**
 * Update the Page/Post. You can add as many products this way as you like. Just keep in mind that there is a call made to the Amazon API for each shortcode added, so adding too separate shortcodes many could cause a noticeable increase in page loading time.
 * Some settings in the individual page/post options will affect the shortcodes.
@@ -114,7 +114,7 @@ More detailed FAQs will come as questions/solutions arise.
 * Yes. with 3.5.1+ you can use your own buttons -- but, note that you must be using the amazon-elements shortcode to do so. Install the plugin if you have not yet, and then look at the plugin SHORTCODE USAGE page for details on how to use that feature.  
 
 = How do I use the Shortcode? =
-* To Add a product Via Shortcode, go to the Content editor for an existing page/post (or create a new post/page), add **[AMAZONPRODUCTS asin="XXXXXXXXXX"]** where XXXXXXXXXX is the Amazon ASIN/ISBN10 number. Then update or save the Page/Post. You can add as many products this way as you like (up to 10 per shortcode). Just keep in mind that there is a call made to the Amazon API for each shortcode added, so adding too many products could cause a noticeable increase in page loading time.
+* To Add a product Via Shortcode, go to the Content editor for an existing page/post (or create a new post/page), add **[AMAZONPRODUCTS asin="XXXXXXXXXX"]** where XXXXXXXXXX is the Amazon ASIN number. Then update or save the Page/Post. You can add as many products this way as you like (up to 10 per shortcode). Just keep in mind that there is a call made to the Amazon API for each shortcode added, so adding too many products could cause a noticeable increase in page loading time.
 * See the SHORTCODE USAGE page in the plugin menu for more complete details.
 
 = My Products are coming up blank - what do I do? =
@@ -133,6 +133,15 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Excellent question! The plugin is provided free to the public - you can use it however you like - where ever you like - you can even change it however you like. Should you decide that the plugin has been a great help and want to donate to our plugin development fund, you may do so [here](http://fischercreativemedia.com/wordpress-plugins/donate/ "here").
 
 == Changelog ==
+= 3.5.5 =
+* Fix Styles not loading (dynamic styles did not have correct content type).
+* Added additional Shortcode parameter aliases (show_used, show_list, etc.)
+* Fixed 'used_price' shortcode parameter (was not working when used)
+* Fixed 'container' and 'container_class' parameters to have default values [for amazon-elements shortcode only] (makes styling easier)
+* Added better support for Products with Variant products linked to parent ASIN.
+* Updated styles to version 2.0 (from 1.9) to add better styles for responsiveness.
+* Added new API KEY Signup instructions - old ones were outdated.
+
 = 3.5.4 =
 * Fix "New Amazon Post" functionality dues to mis-named functions between versions.
 * Added Options to turn certain features on and off in the MetaBox options.
@@ -247,6 +256,5 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Plugin Release (9/12/2009)
 
 == Upgrade Notice ==
-= 3.5.4 =
-* Minor Bug Fixes for "New Amazon" Post feature and ajax, plus added some metabox features and several more filters.
-
+= 3.5.5 =
+* Bug Fixes for Styles. Adds support for Products with linked variant products.

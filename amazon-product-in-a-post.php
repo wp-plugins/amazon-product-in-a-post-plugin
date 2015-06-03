@@ -2,10 +2,10 @@
 /*
 Plugin Name: Amazon Product In a Post Plugin
 Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-product-in-a-post/
-Description: Quickly add a formatted Amazon Product (image, pricing and buy button, etc.) to a post, page, custom post type or text widget by using just the Amazon product ASIN (ISBN-10). Great for writing product reviews or descriptions to help monetize your posts and add content that is relevant to your site. You can also customize the styles for the product data. Remember to add your Amazon Affiliate ID on the <a href="admin.php?page=apipp_plugin_admin">options</a> page or you will not get credit for product sales. Requires signup for an Amazon Affiliate Account and Product Advertising API Keys which are currently FREE from Amazon.
+Description: Quickly add stylized Amazon Products to your site. Requires signup for an Amazon Affiliate Account and Product Advertising API Keys which are currently FREE from Amazon.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 3.5.4
+Version: 3.5.5
     Copyright (C) 2009-2015 Donald J. Fischer
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -182,10 +182,10 @@ Version: 3.5.4
 	if($awspagequery>1){ //future item for search results
 		$awsPageRequest = $awspagequery;
 	}
-	if(trim(get_option("apipp_product_styles")) == ''){ //reset to default styles if user deletes styles in admin
+	if(trim(get_option("apipp_product_styles",'')) == ''){ //reset to default styles if user deletes styles in admin
 		update_option("apipp_product_styles",$thedefaultapippstyle);
 	}
-	if(trim(get_option("apipp_amazon_debugkey")) == ''){ //generate debug key
+	if(trim(get_option("apipp_amazon_debugkey",'')) == ''){ //generate debug key
 		$randomkey = md5(uniqid(get_bloginfo('url').time(), true));
 		update_option("apipp_amazon_debugkey",$randomkey);
 	}
@@ -198,7 +198,6 @@ Version: 3.5.4
 	add_filter( 'plugin_row_meta',  'apipp_filter_plugin_links', 10, 2 );
 	
 	add_action( 'wp','add_appip_jquery'); //enqueue scripts
-	add_action( 'admin_head','aws_prodinpost_addadminhead',10); //add admin styles to admin head
 	add_action( 'plugin_action_links_' . plugin_basename(__FILE__),'apipp_filter_plugin_actions' );
 
 	function apipp_filter_plugin_actions($links){$new_links = array();$new_links[] = '<a href="admin.php?page=apipp-main-menu">Getting Started</a>';return array_merge($links,$new_links );}
@@ -221,33 +220,102 @@ Version: 3.5.4
 	require_once("inc/amazon-product-in-a-post-styles-product.php"); 	//styles for plugin
 	require_once("inc/amazon-product-in-a-post-shortcodes.php"); 		//shortcodes for plugin
 
-
-	$thisstyleversion	=	get_option('apipp_product_styles_default_version');
-	//upgrade check. Lets me add/change the default style etc to fix/add new items during updrages.
-	if($thisstyleversion != "1.9" || get_option("apipp_product_styles_default") == ''){
-		if(get_option("apipp_product_styles_default")==''){update_option("apipp_product_styles_default",$thedefaultapippstyle);}
-		update_option("apipp_product_styles_default_version","1.9");
-		//add the new element style to their custom ones - so at least it has the default functionality. They can change it after if they like
-		$apipp_product_styles_cust_temp = get_option("apipp_product_styles");
- 		if($apipp_product_styles_cust_temp!=''){update_option("apipp_product_styles",$apipp_product_styles_cust_temp."\n".".amazon-manufacturer{color : #666;font-size : 12px;}"."\n".".amazon-ESRB{color : #666;font-size : 12px;}"."\n".".amazon-feature{color : #666;font-size : 12px;}"."\n".".amazon-platform{color : #666;font-size : 12px;}"."\n".".amazon-system{color : #666;font-size : 12px;}"."\n");}
-		if( get_option("apipp_amazon_notavailable_message") == ''){update_option("apipp_amazon_notavailable_message","This item is may not be available in your area. Please click the image or title of product to check pricing & availability.");} //default message
-		if( get_option("apipp_amazon_hiddenprice_message") == ''){update_option("apipp_amazon_hiddenprice_message","Price Not Listed");} //default message - done
-		if( get_option("apipp_hook_content") == ''){update_option("apipp_hook_content","1");} //default is yes - done
-		if( get_option("apipp_hook_excerpt") == ''){update_option("apipp_hook_excerpt","0");}//default is no - done
-		if( get_option("apipp_open_new_window") == ''){update_option('apipp_open_new_window',"0");} //default is no - newoption added at 1.6 - done
+	if ( is_admin() && !( defined('DOING_AJAX') && DOING_AJAX )){
+		//upgrade check. Lets me add/change the default style etc to fix/add new items during updrages.
+		if(get_option("apipp_product_styles_default",'') == ''){
+			update_option("apipp_product_styles_default",$thedefaultapippstyle);
+		}
+		$thisstyleversion	=	get_option('apipp_product_styles_default_version','0');
+		
+		if($thisstyleversion != "2.0"){
+			update_option("apipp_product_styles_default_version","2.0");
+			//add the new element style to their custom ones - so at least it has the default functionality. They can change it after if they like
+			$apipp_product_styles_cust_temp = get_option("apipp_product_styles",'');
+			$apipp_product_styles_cust_temp = $apipp_product_styles_cust_temp;
+			if($apipp_product_styles_cust_temp != ''){
+				update_option("apipp_product_styles",'/*version 2.0 Modified*/'."\n".$apipp_product_styles_cust_temp."
+a[target=\"amazonwin\"] {margin: 0 !important;}
+a[rel^=\"appiplightbox\"] { display: inline-block; font-size: .75rem; text-align: center; max-width: 100%; }
+table.amazon-product-table td { border: 0 none ; padding: 0; }
+.amazon-image-wrapper { padding: 0 1%; text-align: center;float: left; margin: 0 2% 0 0;-webkit-box-sizing: border-box;-moz-box-sizing: border-box; box-sizing: border-box; max-width: 25%; width: 100%; }
+.amazon-image-wrapper a { border-bottom: none; display: block; font-size: 12px; text-align: center; }
+.amazon-image-wrapper br {display: none;}
+.appip-label {font-size: inherit;font-weight: bold;text-transform: uppercase;}
+.amazon-product-table .amazon-buying h2.amazon-asin-title { border-bottom: 0 none; font-size: 1rem; line-height: 1.25em; margin: 0; }
+.amazon-product-table hr { height: 0px; margin: 6px 0; }
+.amazon-list-price-label, .amazon-new, .amazon-new-label, .amazon-used-label, .amazon-list-price {}
+.amazon-dates {height: auto;}
+.amazon-dates br {display: none;}
+.amazon-list-price-label, .amazon-new-label, .amazon-used-label { font-weight: bold; min-width: 7em;width: auto;}
+.amazon-product-table:after {clear: both;}
+.amazon-tiny {text-align: center;}
+#content table.amazon-product-table { clear: both; margin-bottom: 10px; }
+#content table.amazon-product-price { -moz-border-radius: 0; -webkit-border-radius: 0; border-collapse: collapse; border-radius: 0; border: 0 none; margin: 0; max-width: 100%; width: auto; }
+#content table.amazon-product-price td { border: 0 none !important; padding: .25em 0; }
+#content table.amazon-product-table > tbody > tr > td {padding: .5rem !important;}
+.amazon-buying { box-sizing: border-box; float: left; max-width: 73%; width: 100%; }
+table.amazon-product-table hr {display:inline-block;max-width:100%;  width: 100%;  border-top: 1px solid #e2e5e7;}
+table.amazon-product-price { float: left; margin: 0; width: 100%; }
+.amazon-product-table a { border-bottom: 0 none; text-decoration: none; }
+table.amazon-product-price td { padding: 1%; width: auto; }
+table.amazon-product-price tr:first-child td {width:7em;}
+.amazon-additional-images-text { display: block; font-size: x-small; font-weight: bold; }
+.amazon-dates br {display: none;}
+.amazon-element-imagesets { border: 1px solid #ccc; display: inline-block; margin: 5px; overflow: hidden; padding: 10px; }
+.amazon-element-imagesets br {display: none;}
+.amazon-element-imagesets a { float: left; margin: 3px; }
+.amazon-element-imagesets a img {border: 1px solid #fff;}
+.amazon-additional-images-wrapper { border: 1px solid #ccc; box-sizing: border-box; display: inline-block; margin: 1%; overflow: hidden; padding: 2%; }
+.amazon-additional-images-wrapper a { float: left; margin: 3px; }
+.amazon-additional-images-wrapper a img {border: 1px solid #fff;width:25px;}
+.amazon-additional-images-wrapper br {display: none;}
+img.amazon-varient-image {max-width: 50px;margin: 1%;padding: 1px;background-color: #999;}
+img.amazon-varient-image:hover {background-color: #3A9AD9;}
+.amazon_variations_wrapper{}
+.amazon_varients{}
+.amazon-varient-type-link {display: inline-block;font-weight: bold;}
+.amazon-varient-type-price {display: inline-block;color: #EA0202;font-weight: bold;}
+.amazon-price-button{margin-top:2%;display:block;}
+.amazon-price-button > a{display:block;margin-top:8px;margin-bottom:5px;width:165px;}
+.amazon-price-button > a img.amazon-price-button-img{border:0 none;margin:0px;background:transparent;}
+.amazon-product-table td.amazon-list-variants {border-top: 1px solid #CCC;border-bottom: 1px solid #ccc;padding: 2%;margin-top:2%;}
+.amazon-variant-price-text{color:initial;}
+span.amazon-variant-price-text {font-weight: normal;}
+@media only screen and (max-width : 1200px) {}
+@media only screen and (max-width : 992px) {}
+@media only screen and (max-width : 768px) {}
+@media only screen and (max-width : 550px) {
+	.amazon-image-wrapper { padding: 0; text-align: center; float: none; margin: 0 auto 2%; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; max-width: 75%; width: 100%; }
+	.amazon-buying { box-sizing: border-box; float: none; max-width: 100%; width: 100%; }
+	.amazon-product-price,table.amazon-product-price { float: none; margin: 0; max-width: 100%; width: 100%; }
+	.amazon-product-pricing-wrap { display: block; clear: both; }
+	.amazon-dates { text-align: center; }
+	.amazon-dates a { margin: 0 auto !important; width: 50% !important; }
+	.amazon-dates a img { margin: 5% auto 0 !important; width: 95% !important; }
+	span.amazon-tiny {margin-top: 2px;background: #ccc;padding:1%;display: block;font-size: 1.25em;color: #000;text-transform: uppercase;border: 1px solid #999;line-height: 1.25em;}
+	span.amazon-tiny:active {background: #EDEDED;}
+	.amazon-product-table .amazon-buying h2.amazon-asin-title {margin-top: 3%;display: block;line-height: 1.5em;}
+	.amazon-additional-images-wrapper { max-width: 100%; width: 100%; margin: 1% 0; text-align: center; }
+	.amazon-additional-images-wrapper a { float: none; display: inline-block; width: 18%; margin: 0; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }
+	.amazon-additional-images-wrapper a img { width: 75%; }
+	td.amazon-list-price-label, td.amazon-new-label, td.amazon-used-label, td.amazon-used-price, td.amazon-new, td.amazon-list-price { display: inline-block; }
+}
+@media only screen and (max-width : 320px) {}");
+			}
+			if( get_option("apipp_amazon_notavailable_message",'') == ''){update_option("apipp_amazon_notavailable_message","This item is may not be available in your area. Please click the image or title of product to check pricing & availability.");} //default message
+			if( get_option("apipp_amazon_hiddenprice_message",'') == ''){update_option("apipp_amazon_hiddenprice_message","Price Not Listed");} //default message - done
+			if( get_option("apipp_hook_content",'') == ''){update_option("apipp_hook_content","1");} 		//default is yes - done
+			if( get_option("apipp_hook_excerpt",'') == ''){update_option("apipp_hook_excerpt","0");}		//default is no - done
+			if( get_option("apipp_open_new_window",'') == ''){update_option('apipp_open_new_window',"0");} 	//default is no - newoption added at 1.6 - done
+		}
 	}
-
 function appip_admin_scripts($hook) {
-	if(is_admin()){
-		wp_enqueue_style( 'amazon-plugin-admin-styles',plugins_url('/css/amazon-admin.css',__FILE__),null,'13-08-24');
-	}
+	wp_enqueue_style( 'amazon-plugin-admin-styles',plugins_url('/css/amazon-admin.css',__FILE__),null,'13-08-24');
 	if ( $hook == "amazon-product_page_appip-layout-styles" ) {
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('jquery-ui-core');
 		wp_enqueue_script('jquery-ui-sortable');
-	}elseif("amazon-product_page_apipp-add-new" == $hook){
-		wp_enqueue_script('amazon-plugin-admin',plugins_url('/js/amazon-admin.js',__FILE__),array('jquery-ui-tooltip'),'13-08-24');
-	}elseif( $hook == "post.php" || $hook == "post-new.php" || $hook == "edit.php"  ){
+	}elseif("amazon-product_page_apipp-add-new" == $hook || $hook == "post.php" || $hook == "post-new.php" || $hook == "edit.php"){
 		wp_enqueue_script('amazon-plugin-admin',plugins_url('/js/amazon-admin.js',__FILE__),array('jquery-ui-tooltip'),'13-08-24');
 	}
 }

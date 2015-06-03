@@ -21,8 +21,8 @@ function appiplightbox() {
 			var itemapp = jQuery(this);
 			itemapp.click(function(c) {
 				c.preventDefault();
+				jQuery('a[target="amazonwin"]').removeClass('selected');
 				open(jQuery(this).attr('href'));
-				jQuery(itemtext).filter('.selected').removeClass('selected');
 				jQuery(this).addClass('selected');
 			});
 			itemapp.attr({'lb-position': index});
@@ -103,10 +103,8 @@ function appiplightbox() {
     var img = new Image();
     img.onload = function() {
       img.style.display = 'none';
-      
       var maxWidth = (jQuery(window).width() - parseInt(container.css('padding-left'),10) - parseInt(container.css('padding-right'), 10)) - 100;
       var maxHeight = ((jQuery(window).height() > window.innerHeight ? window.innerHeight : jQuery(window).height()) - parseInt(container.css('padding-top'),10) - parseInt(container.css('padding-bottom'), 10)) - 100;
-      
       if(img.width > maxWidth || img.height > maxHeight) { // One of these is larger than the window
         var ratio = img.width / img.height;
         if(img.height >= maxHeight) {
@@ -117,7 +115,6 @@ function appiplightbox() {
           img.height = maxWidth * ratio;
         }
       }
-      
       container.animate({'width': img.width,'height': img.height, 'top': Math.round(((jQuery(window).height() > window.innerHeight ? window.innerHeight : jQuery(window).height()) - img.height - parseInt(container.css('padding-top'),10) - parseInt(container.css('padding-bottom'),10)) / 2) + 'px', 'left': Math.round((jQuery(window).width() - img.width - parseInt(container.css('padding-left'),10) - parseInt(container.css('padding-right'),10)) / 2) + 'px'},'normal', function(){
         target.append(img);
         jQuery(img).fadeIn('normal', function() {

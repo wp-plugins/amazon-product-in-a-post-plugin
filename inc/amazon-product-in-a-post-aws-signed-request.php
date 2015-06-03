@@ -72,7 +72,6 @@ if(!function_exists('appip_get_XML_structure_new')){
 		}
 		ini_set ('track_errors', '0');
 		$result['CachedAPPIP'] = $cached;
-		//echo '<pre>'.print_r($result,true).'</pre>';
 		return $result;
 	}
 }
@@ -103,7 +102,6 @@ if(!function_exists('appip_get_XML_structure')){
 		ini_set ('track_errors', '0');
 		$result['RequestType'] = '1';
 		$result['CachedAPPIP'] = $cached;
-	echo '<pre>'.print_r($result,true).'</pre>';
 		return $result;
 	}
 }
@@ -232,6 +230,7 @@ if(!function_exists('appip_plugin_FormatASINResult')){
 		return $RetValNew;  
 	}
 }
+/*
 function appip_blowoffarr2($Item,$key="",$blowoffArr = array()){
 	$dontuse = apply_filters('amazon_product_in_a_post_blowoffarr_dontuse',array('BrowseNodes','SimilarProducts'));
 	foreach($Item as $var => $val){
@@ -241,21 +240,41 @@ function appip_blowoffarr2($Item,$key="",$blowoffArr = array()){
     }
 	return $blowoffArr;
 }
-
+*/
 function appip_blowoffarr($Item,$key="",$blowoffArr = array()){
 	$dontuse = apply_filters('amazon_product_in_a_post_blowoffarr_dontuse',array('BrowseNodes','SimilarProducts'));
 	foreach($Item as $var => $val){
 		if(!in_array($var,$dontuse)){
 			if($key==""){
 				if(is_array($val)){
-					$blowoffArr = appip_blowoffarr($val,$var,$blowoffArr);
+					$blowoffArr = appip_blowoffarr2($val,$var,$blowoffArr);
 				}else{
 					$blowoffArr[$var] = $val;
 				}
 			}else{
-				//echo $key.'<br>';
 				if(is_array($val)){
-					$blowoffArr = appip_blowoffarr($val,$key.'_'.$var,$blowoffArr);
+					$blowoffArr = appip_blowoffarr2($val,$key.'_'.$var,$blowoffArr);
+				}else{
+					$blowoffArr[$key.'_'.$var] = $val;
+				}
+			}
+		}
+    }
+	return $blowoffArr;
+}
+function appip_blowoffarr2($Item,$key="",$blowoffArr = array()){
+	$dontuse = apply_filters('amazon_product_in_a_post_blowoffarr_dontuse',array('BrowseNodes','SimilarProducts'));
+	foreach($Item as $var => $val){
+		if(!in_array($var,$dontuse)){
+			if($key==""){
+				if(is_array($val)){
+					$blowoffArr = appip_blowoffarr2($val,$var,$blowoffArr);
+				}else{
+					$blowoffArr[$var] = $val;
+				}
+			}else{
+				if(is_array($val)){
+					$blowoffArr = appip_blowoffarr2($val,$key.'_'.$var,$blowoffArr);
 				}else{
 					$blowoffArr[$key.'_'.$var] = $val;
 				}
@@ -326,6 +345,13 @@ function appip_setup_nodes($node='',$val = array()){
 			return $val;
 			break;
 	}	
+}
+function get_appipCurrCode($field=''){
+	$allowed = array('USD','GBP');
+	if(isset($field) && $field != '' && in_array($field,$allowed)){
+		return ' '.$field;
+	}	
+	return '';
 }
 function GetAPPIPReturnValArray($Item,$Errors){
  	//processor function for product created by Don Fischer http://www.fischercreativemedia.com
@@ -410,7 +436,7 @@ $ItemAmazVarSummary			= isset($Item['VariationSummary']) ? $Item['VariationSumma
 	$appLabel 									= isset($ItemAttr['Label']) ? ( is_array( $ItemAttr["Label"] ) ? checkImplodeValues( $ItemAttr["Label"] ) : $ItemAttr["Label"] ) : '';
 	$appLanguages 								= isset($ItemAttr['Languages']["Language"]) ? $ItemAttr["Languages"]["Language"] : '';
 	$appLegalDisclaimer 						= isset($ItemAttr['LegalDisclaimer']) ? ( is_array( $ItemAttr["LegalDisclaimer"] ) ? checkImplodeValues( $ItemAttr["LegalDisclaimer"] ) : $ItemAttr["LegalDisclaimer"] ) : '';
-	$appListPrice 								= isset($ItemAttr['ListPrice']) ? ( $ItemAttr["ListPrice"]["FormattedPrice"] . ' ' . $ItemAttr["ListPrice"]["CurrencyCode"] ) : 0;
+	$appListPrice 								= isset($ItemAttr['ListPrice']) ? ( $ItemAttr["ListPrice"]["FormattedPrice"] . get_appipCurrCode($ItemAttr["ListPrice"]["CurrencyCode"] )) : 0;
 	$appMagazineType 							= isset($ItemAttr['MagazineType']) ? ( is_array( $ItemAttr["MagazineType"] ) ? checkImplodeValues( $ItemAttr["MagazineType"] ) : $ItemAttr["MagazineType"] ) : '';
 	$appManufacturer 							= isset($ItemAttr['Manufacturer']) ? ( is_array( $ItemAttr["Manufacturer"] ) ? checkImplodeValues( $ItemAttr["Manufacturer"] ) : $ItemAttr["Manufacturer"] ) : '';
 	$appManufacturerMaximumAge 					= isset($ItemAttr['ManufacturerMaximumAge']) ? ( is_array( $ItemAttr["ManufacturerMaximumAge"] ) ? checkImplodeValues( $ItemAttr["ManufacturerMaximumAge"] ) : $ItemAttr["ManufacturerMaximumAge"] ) : '';
@@ -463,10 +489,14 @@ $ItemAmazVarSummary			= isset($Item['VariationSummary']) ? $Item['VariationSumma
 	$appTotalUsed 								= isset($ItemOffSum['TotalUsed']) ? ( is_array( $ItemOffSum["TotalUsed"] ) ? checkImplodeValues( $ItemOffSum["TotalUsed"] ) : $ItemOffSum["TotalUsed"] ) : '';
 	$appTotalRefurbished 						= isset($ItemOffSum['TotalRefurbished']) ? ( is_array( $ItemOffSum["TotalRefurbished"] ) ? checkImplodeValues( $ItemOffSum["TotalRefurbished"] ) : $ItemOffSum["TotalRefurbished"] ) : '';
 	$appTotalCollectible 						= isset($ItemOffSum['TotalCollectible']) ? ( is_array( $ItemOffSum["TotalCollectible"] ) ? checkImplodeValues( $ItemOffSum["TotalCollectible"] ) : $ItemOffSum["TotalCollectible"] ) : '';
-	$appLowestNewPrice 							= isset($ItemOffSum['LowestNewPrice']['FormattedPrice']) ?  $ItemOffSum["LowestNewPrice"]['FormattedPrice'] .' '.$ItemOffSum["LowestNewPrice"]["CurrencyCode"] : 0;
-	$appLowestUsedPrice							= isset($ItemOffSum['LowestUsedPrice']['FormattedPrice']) ?  $ItemOffSum["LowestUsedPrice"]['FormattedPrice'] .' '.$ItemOffSum["LowestUsedPrice"]["CurrencyCode"] : 0;
-	$appLowestRefurbishedPrice 					= isset($ItemOffSum['LowestRefurbishedPrice']['FormattedPrice']) ?  $ItemOffSum["LowestRefurbishedPrice"]['FormattedPrice'] .' '.$ItemOffSum["LowestRefurbishedPrice"]["CurrencyCode"] : 0;
-	$appLowestCollectiblePrice 					= isset($ItemOffSum['LowestCollectiblePrice']['FormattedPrice']) ?  $ItemOffSum["LowestCollectiblePrice"]['FormattedPrice'] .' '.$ItemOffSum["LowestCollectiblePrice"]["CurrencyCode"] : 0;
+	$appLowestNewCurrCode 						= isset($ItemOffSum["LowestNewPrice"]["CurrencyCode"]) ? get_appipCurrCode($ItemOffSum["LowestNewPrice"]["CurrencyCode"]) : '';
+	$appLowestNewPrice 							= isset($ItemOffSum['LowestNewPrice']['FormattedPrice']) ?  $ItemOffSum["LowestNewPrice"]['FormattedPrice'] .$appLowestNewCurrCode: 0;
+	$appLowestUsedCurrCode 						= isset($ItemOffSum["LowestUsedPrice"]["CurrencyCode"]) ? get_appipCurrCode($ItemOffSum["LowestUsedPrice"]["CurrencyCode"]) : '';
+	$appLowestUsedPrice							= isset($ItemOffSum['LowestUsedPrice']['FormattedPrice']) ?  $ItemOffSum["LowestUsedPrice"]['FormattedPrice'] .$appLowestUsedCurrCode : 0;
+	$appLowestRefCurrCode 						= isset($ItemOffSum["LowestRefurbishedPrice"]["CurrencyCode"]) ? get_appipCurrCode($ItemOffSum["LowestRefurbishedPrice"]["CurrencyCode"]) : '';
+	$appLowestRefurbishedPrice 					= isset($ItemOffSum['LowestRefurbishedPrice']['FormattedPrice']) ?  $ItemOffSum["LowestRefurbishedPrice"]['FormattedPrice'] .$appLowestRefCurrCode : 0;
+	$appLowestCollCurrCode 						= isset($ItemOffSum["LowestCollectiblePrice"]["CurrencyCode"]) ? get_appipCurrCode($ItemOffSum["LowestCollectiblePrice"]["CurrencyCode"]) : '';
+	$appLowestCollectiblePrice 					= isset($ItemOffSum['LowestCollectiblePrice']['FormattedPrice']) ?  $ItemOffSum["LowestCollectiblePrice"]['FormattedPrice'] .$appLowestCollCurrCode : 0;
 
 // VARIATION SUMMARY
 	$appvLowestPrice		= isset($ItemAmazVarSummary['LowestPrice']) ? $ItemAmazVarSummary['LowestPrice']['FormattedPrice'] : '';
@@ -479,9 +509,7 @@ $ItemAmazVarSummary			= isset($Item['VariationSummary']) ? $Item['VariationSumma
 	$appMoreOffersUrl 							= isset($ItemOffers['MoreOffersUrl']) ? $ItemOffers["MoreOffersUrl"]  : '';		
 	$appTotalOfferPages							= isset($ItemOffers['TotalOfferPages']) ? ( is_array( $ItemOffers["TotalOfferPages"] ) ? checkImplodeValues( $ItemOffers["TotalOfferPages"] ) : $ItemOffers["TotalOfferPages"] ) : '';
 	$isPriceHidden 								= ($appLowestNewPrice == 'Too low to display') ? 1 : 0;
-	
-	//echo '<pre>'.print_r($ItemAttr['UPCList'],true).'</pre>';
-
+	$newAmzPricing 								= array();
 	if(!isset($ItemAmazOffers['Offers'][0])){
 		$ItemAmazOfftemp = isset($ItemAmazOffers['Offer']) ? $ItemAmazOffers['Offer'] :'';
 		unset($ItemAmazOffers['Offer']);
@@ -591,16 +619,16 @@ $ItemAmazVarSummary			= isset($Item['VariationSummary']) ? $Item['VariationSumma
 	if(isset($ImageSets[0])){
 		foreach($ImageSets as $imgset){
 			if(isset($imgset['LargeImage']['URL']) && $imgset['LargeImage']['URL'] != $ImageLG){
-				$ImageSetsArray[] = '<a rel="appiplightbox-'.$ASIN.'" href="'.$imgset['LargeImage']['URL'] .'"><img src="'.$imgset['SwatchImage']['URL'].'" class="apipp-additional-image"/></a>'."\n";
+				$ImageSetsArray[] = '<a rel="appiplightbox-'.$ASIN.'" href="'.$imgset['LargeImage']['URL'] .'"><img src="'.$imgset['SmallImage']['URL'].'" class="apipp-additional-image"/></a>'."\n";
 			}
 		}
-	}elseif(isset($ImageSets['SwatchImage'])){
+	}elseif(isset($ImageSets['SmallImage']['URL'])){
 		if(isset($ImageSets['LargeImage']['URL']) && $ImageSets['LargeImage']['URL'] != $ImageLG){
-			$ImageSetsArray[] = '<a rel="appiplightbox-'.$ASIN.'" href="'.$ImageSets['LargeImage']['URL'] .'"><img src="'.$ImageSets['SwatchImage']['URL'].'" class="apipp-additional-image"/></a>'."\n";
+			$ImageSetsArray[] = '<a rel="appiplightbox-'.$ASIN.'" href="'.$ImageSets['LargeImage']['URL'] .'"><img src="'.$ImageSets['SmallImage']['URL'].'" class="apipp-additional-image"/></a>'."\n";
 		}
 	}
 
-if($appLowestSalePrice	 == '0' && $appvLowestSalePrice	!= ''){$appLowestSalePrice	= $appvLowestSalePrice;}
+if(isset($appLowestSalePrice) && $appLowestSalePrice	 == '0' && $appvLowestSalePrice	!= ''){$appLowestSalePrice	= $appvLowestSalePrice;}
 if($appTotalNew == '0' && ($appvLowestSalePrice!='' || $appvHighestSalePrice !='') ) {$appTotalNew = 'unknown';}
 if($appListPrice == '0' && $appvHighestPrice != ''){$appListPrice = $appvHighestPrice;}
 

@@ -1,5 +1,13 @@
 Version info:
-3.5.4	Fix "New Amazon Post" functionality dues to mis-named functions between versions.
+3.5.5	Fix Styles not loading (dynamic styles did not have correct content type).
+	Added additional Shortcode parameter aliases (show_used, show_list, etc.)
+	Fixed 'used_price' shortcode parameter (was not working when used)
+	Fixed 'container' and 'container_class' parameters to have default values [for amazon-elements shortcode only] (makes styling easier)
+	Added better support for Products with Variant products linked to parent ASIN.
+	Updated styles to version 2.0 (from 1.9) to add better styles for responsiveness.
+	Added new API KEY Signup instructions - old ones were outdated.
+
+3.5.4	Fix "New Amazon Post" functionality due to mis-named functions between versions.
 	Added Options to turn certain features on and off in the MetaBox options.
 	Fixed jQuery for admin - add "New Amazon Post" functionality.
 	

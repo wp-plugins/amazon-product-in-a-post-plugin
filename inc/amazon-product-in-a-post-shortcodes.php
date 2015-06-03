@@ -8,27 +8,39 @@ add_filter( 'the_excerpt', 'do_shortcode');
 function amazon_product_shortcode_mini_function($atts, $content = ''){
 	global $appip_text_lgimage,$showformat,$public_key,$private_key,$aws_partner_id,$aws_partner_locale,$amazonhiddenmsg,$amazonerrormsg,$apippopennewwindow,$apippnewwindowhtml,$buyamzonbutton,$addestrabuybutton,$post,$validEncModes,$appip_text_lgimage;
 	$defaults = array(
-		'asin'=> '',
-		'locale' => $aws_partner_locale,
-		'partner_id' => $aws_partner_id,
-		'private_key' => $private_key,
-		'public_key' => $public_key, 
-		'fields'=> '',
-		'field'=> '',
-		'showformat' => 1,
-		'listprice' => 1, 
+		'asin'			=> '',
+		'locale' 		=> $aws_partner_locale,
+		'partner_id' 	=> $aws_partner_id,
+		'private_key' 	=> $private_key,
+		'public_key' 	=> $public_key, 
+		'fields'		=> '',
+		'field'			=> '',
+		'showformat' 	=> 1,
+		'listprice' 	=> 1, 
+		'used_price' 	=> 1,
 		'replace_title' => '', 
-		'template' => 'default',
-		'msg_instock' => 'In Stock',
-		'msg_outofstock' => 'Out of Stock',
-		'target' => '_blank',
-		'button_url' => '',
-		'container' => '',
-		'container_class' => 'amazon-element-wrapper',
-		'labels' => '',
+		'template' 		=> 'default',
+		'msg_instock' 	=> 'In Stock',
+		'msg_outofstock'=> 'Out of Stock',
+		'target' 		=> '_blank',
+		'button_url' 	=> '',
+		'container' 	=> apply_filters('amazon-elements-container','div'),
+		'container_class' => apply_filters('amazon-elements-container-class','amazon-element-wrapper'),
+		'labels' 		=> '',
+		'show_format' 	=> null,		//added only as a secondary use of showformat
+		'list_price' 	=> null, 		//added only as a secondary use of $listprice
+		'show_list' 	=> null,		//added only as a secondary use of $listprice 
+		'show_used'		=> null,		//added only as a secondary use of $used_price
+		'usedprice' 	=> null,		//added only as a secondary use of $used_price
 	);
-	
 	extract(shortcode_atts($defaults, $atts));
+
+	$listprice 		= (isset($list_price) && $list_price != null ) ? $list_price : $listprice;
+	$listprice 		= (isset($show_list)  && $show_list != null ) ? $show_list : $listprice;
+	$used_price		= (isset($usedprice)  && $usedprice != null ) ? $usedprice : $used_price; 
+	$used_price		= (isset($show_used)  && $show_used != null ) ? $show_used : $used_price;
+	$showformat		= (isset($show_format)&& $show_format != null ) ? $show_format : $showformat;
+
 	if($labels != ''){
 		$labelstemp = explode(',',$labels);
 		unset($labels);
@@ -220,7 +232,7 @@ function amazon_product_shortcode_mini_function($atts, $content = ''){
 					$wrap = str_replace(array('<','>'), array('',''),$container);
 					if($wrap != ''){
 						$thenewret[] = "<{$wrap} class='{$container_class}'>";
-					}	
+					}
 					foreach($retarr[$currasin] as $key=>$val){
 						if($key!=''){
 							$thenewret[] =  '<div class="amazon-element-'.$key.'">'.$val.'</div>';
@@ -228,7 +240,7 @@ function amazon_product_shortcode_mini_function($atts, $content = ''){
 					}
 					if($wrap != ''){
 						$thenewret[] = "</{$wrap}>";
-					}	
+					}
 					$arr_position++;
 				endforeach;
 				if(is_array($thenewret)){
@@ -251,17 +263,24 @@ function amazon_product_shortcode_function($atts, $content = '') {
 	$defaults = array(
 		'asin'=> '',
 		'locale' => $aws_partner_locale,
-		'gallery' => 0, //set to 1 to show ectra photos
+		'gallery' => 0, 			//set to 1 to show ectra photos
 		'partner_id' => $aws_partner_id,
 		'private_key' => $private_key,
 		'public_key' => $public_key, 
-		'showformat' => 1,
-		'desc' => 0, //set to 1 to show or 0 to hide description if avail
-		'features' => 0, //set to 1 to show or 0 to hide features if avail
-		'listprice' => 1, //set to 0 to hide list price
-		'replace_title' => '', //replace with your own title
-		'template' => 'default' //future feature
+		'showformat' => 1,			//set to 1 to show or 0 to hide product formats if avail
+		'show_format' => null,		//added only as a secondary use of showformat
+		'desc' => 0, 				//set to 1 to show or 0 to hide description if avail
+		'features' => 0, 			//set to 1 to show or 0 to hide features if avail
+		'listprice' => 1, 			//set to 0 to hide list price
+		'list_price' => null, 		//added only as a secondary use of $listprice
+		'show_list' => null,		//added only as a secondary use of $listprice 
+		'used_price' => 1, 			//set to 0 to hide used price
+		'show_used' => null,		//added only as a secondary use of $used_price
+		'usedprice' => null,		//added only as a secondary use of $used_price
+		'replace_title' => '', 		//replace with your own title
+		'template' => 'default' 	//future feature
 	);
+	
 	if(array_key_exists('0',$atts)){
 		extract(shortcode_atts($defaults, $atts));
 		$asin = str_replace('=','',$atts[0]);
@@ -271,19 +290,26 @@ function amazon_product_shortcode_function($atts, $content = '') {
 	if(strpos($asin,',')!== false){
 		$asin = explode(',', str_replace(' ','',$asin));
 	}
-	$product_array = $asin;	 /*$product_array can be array, comma separated string or single ASIN*/
-	$amazon_array = array(
-		'locale' => $locale,
-		'partner_id' => $partner_id,
-		'private_key' => $private_key,
-		'public_key' => $public_key, 
-		'gallery'	=> $gallery,
-		'features' => $features,
-		'listprice' => $listprice,
-		'showformat' => $showformat,
-		'desc' => $desc,
+	$listprice 		= (isset($list_price) && $list_price != null ) ? $list_price : $listprice;
+	$listprice 		= (isset($show_list)  && $show_list != null ) ? $show_list : $listprice;
+	$used_price		= (isset($usedprice)  && $usedprice != null ) ? $usedprice : $used_price; 
+	$used_price		= (isset($show_used)  && $show_used != null ) ? $show_used : $used_price;
+	$showformat		= (isset($show_format)&& $show_format != null ) ? $show_format : $showformat;
+	
+	$product_array 	= $asin;	 /*$product_array can be array, comma separated string or single ASIN*/
+	$amazon_array 	= array(
+		'locale' 		=> $locale,
+		'partner_id' 	=> $partner_id,
+		'private_key' 	=> $private_key,
+		'public_key' 	=> $public_key, 
+		'gallery'		=> $gallery,
+		'features' 		=> $features,
+		'listprice' 	=> $listprice,
+		'used_price' 	=> $used_price,
+		'showformat' 	=> $showformat,
+		'desc' 			=> $desc,
 		'replace_title' => $replace_title,
-		'template' => $template
+		'template' 		=> $template
 	);
 	$amazon_array = apply_filters('appip_shortcode_atts_array',$amazon_array);
 	return getSingleAmazonProduct($product_array,$content,0,$amazon_array,$desc);
