@@ -83,6 +83,8 @@ function appip_product_array_processed_add_variants($resultarr,$newWin=''){
 
 					//Make Image Set from the first image for each varient
 					if(!empty($ImageSetsArray)){
+						if( count( $ImageSetsArray) > 10)
+							$ImageSetsArray = array_slice($ImageSetsArray, 0, 10);
 						$val['AddlImages'] = implode("\n",$ImageSetsArray);
 					}
 					
@@ -122,6 +124,8 @@ function appip_product_array_processed_add_variants($resultarr,$newWin=''){
 	
 					//Make Image Set from the first image for each varient
 					if(!empty($ImageSetsArray)){
+						if( count( $ImageSetsArray) > 10)
+							$ImageSetsArray = array_slice($ImageSetsArray, 0, 10);
 						$val['AddlImages'] = implode("\n",$ImageSetsArray);
 					}
 				}
@@ -882,12 +886,34 @@ function appip_dynaminc_css_custom() {
 add_action('wp_ajax_appip_dynaminc_css_custom', 'appip_dynaminc_css_custom');
 add_action('wp_ajax_nopriv_appip_dynaminc_css_custom', 'appip_dynaminc_css_custom');
 
+function appip_delete_cache_ajax(){
+	check_ajax_referer( 'appip_cache_delete_nonce_ji9osdjfkjl', 'appip_nonce', true );
+	if( !isset( $_POST['appip-cache-id'] ) ){
+		echo 'error';
+		exit;
+	}
+	$cacheid = isset( $_POST['appip-cache-id'] ) ? (int) $_POST['appip-cache-id'] : 0;
+	global $wpdb;
+	if($cacheid == 0){
+		$tempswe = $wpdb->query("DELETE FROM {$wpdb->prefix}amazoncache;");
+	}else{
+		$tempswe = $wpdb->query("DELETE FROM {$wpdb->prefix}amazoncache WHERE Cache_id ='{$cacheid}' LIMIT 1;");
+	}
+	if($tempswe){
+		echo 'deleted';
+	}else{
+		echo 'error';
+	}
+	exit;
+}
+add_action('wp_ajax_appip-cache-del', 'appip_delete_cache_ajax');
+
 function add_appip_jquery(){
 	wp_register_script('appip-amazonlightbox', plugins_url('/js/amazon-lightbox.js',dirname(__FILE__)));
 	wp_enqueue_script('jquery'); 
 	wp_enqueue_script('appip-amazonlightbox'); 
 	if(!is_admin()){
 		wp_enqueue_style( 'amazon-plugin-frontend-styles',plugins_url('/css/amazon-frontend.css',dirname(__FILE__)),null,'13-08-24');
-		wp_enqueue_script('amazon-plugin-frontend-script',plugins_url('/js/amazon-frontend.js',dirname(__FILE__)),array('jquery-ui-tooltip'),'13-08-24');
+		wp_enqueue_script('amazon-plugin-frontend-script',plugins_url('/js/amazon-frontend.js',dirname(__FILE__)),array('jquery-ui-tooltip'),'15-07-11');
 	}
 }

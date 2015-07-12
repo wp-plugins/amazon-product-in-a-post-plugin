@@ -60,7 +60,8 @@
 	    		"options" => array(
 	    			"0" => array("value" => "en","text" => __('English (default)', 'amazon-product-in-a-post-plugin')),
 	    			"1" => array("value" => "fr","text" => __('French', 'amazon-product-in-a-post-plugin')),
-	    			"2" => array("value" => "sp","text" => __('Spanish', 'amazon-product-in-a-post-plugin'))
+	    			"2" => array("value" => "sp","text" => __('Spanish', 'amazon-product-in-a-post-plugin')),
+	    			"3" => array("value" => "de","text" => __('German', 'amazon-product-in-a-post-plugin'))
 	    		 )),
 		array(	"name" => __('Not Available Error Message', 'amazon-product-in-a-post-plugin'),
 				"desc" => __('The message to display if the item is not available for some reason, i.e., your locale or no longer available.', 'amazon-product-in-a-post-plugin')."<br /><br />",
@@ -140,9 +141,19 @@
 	function apipp_options_add_admin_page($themename,$shortname,$options) {
 	$up_opt='';
 	    if ( basename(__FILE__) == 'amazon-product-in-a-post-options.php' ) {
-	    	if(isset($_REQUEST['action'])){$req_action=$_REQUEST['action'];}else{$req_action='';}
-		    if(isset($_REQUEST[$shortname.'_option'])){$req_option=$_REQUEST[$shortname.'_option'];}else{$req_option='';}
-	        if ( 'save' == $req_action && $req_option== $shortname ) {
+	    	if(isset($_REQUEST['action'])){
+				$req_action = sanitize_text_field( $_REQUEST['action'] );
+			}else{
+				$req_action = '';
+			}
+		    if( isset($_REQUEST[$shortname.'_option']) ){
+				$req_option = sanitize_text_field( $_REQUEST[$shortname.'_option'] );
+			}else{
+				$req_option = '';
+			}
+	        if ( 'save' == $req_action && $req_option == $shortname ) {
+				check_ajax_referer( 'appip_options_nonce_ji9osdjfkjl', 'appip_nonce', true );
+				
 	                foreach ($options as $value) {
 						if($value['type'] == 'multicheck'){
 							foreach($value['options'] as $mc_key => $mc_value){
@@ -156,7 +167,7 @@
 								} 
 							}
 						}elseif($value['type'] == 'select'){
-							foreach($value['options'] as $mc_key => $mc_value){
+							foreach( $value['options'] as $mc_key => $mc_value ){
 								$up_opt = $value['id'];	
 								if( isset( $_REQUEST[ $up_opt ] ) && ($_REQUEST[ $up_opt ] == $mc_value['value']) ) { 
 									update_option( $value['id'], $mc_value['value']); 
@@ -165,7 +176,7 @@
 						}else{
 	                    	if( isset( $_REQUEST[ $value['id'] ] ) ) { 
 								if( $value['id'] == 'apipp_API_call_method' ){
-									if($_REQUEST[ $value['id'] ] == '0'){
+									if( $_REQUEST[ $value['id'] ] == '0'){
 										update_option('appip_amazon_usefilegetcontents',1);
 										update_option('appip_amazon_usecurl',0);
 									}else{
@@ -183,8 +194,8 @@
 	                wp_redirect("admin.php?page=".$shortname."_plugin_admin&saved=true",302);
 	                die;
 	
-	        } else if( isset($_REQUEST['action']) && isset($_REQUEST[$shortname.'_option']) && 'reset' == $_REQUEST['action'] && $_REQUEST[$shortname.'_option']== $shortname ) {
-	
+	        } else if( 'reset' == $req_action && $req_option == $shortname ) {
+				check_ajax_referer( 'appip_options_nonce_ji9osdjfkjl', 'appip_nonce', true );
 	            foreach ($options as $value) {
 					if($value['type'] != 'multicheck'){
 	                	delete_option( $value['id'] ); 
@@ -207,7 +218,7 @@
 		global $appuninstall;
 		global $thedefaultapippstyle;
 		global $appuninstallall;
-		if ( get_option('apipp_product_styles') == ''){update_option('apipp_product_styles',$thedefaultapippstyle);}
+		if ( get_option('apipp_product_styles') == ''){ update_option('apipp_product_styles',$thedefaultapippstyle); }
 		if (isset($_REQUEST['dismissmsg']) && $_REQUEST['dismissmsg'] == '1'){update_option('appip_dismiss_msg',1);echo '<div id="message" class="updated fade"><p><strong>'.$themename.' message dismissed.</strong></p></div>';}
 	    if (isset($_REQUEST['saved']) && $_REQUEST['saved'] ) echo '<div id="message" class="updated fade"><p><strong>'.$themename.' settings saved.</strong></p></div>';
 	    if (isset($_REQUEST['reset']) &&  $_REQUEST['reset'] ) echo '<div id="message" class="updated fade"><p><strong>'.$themename.' settings reset.</strong></p></div>';
@@ -238,6 +249,7 @@
 
 	<form method="post" action="">
 	<input type="hidden" name="<?php echo $shortname; ?>_option" id="<?php echo $shortname; ?>_option" value="<?php echo $shortname; ?>" />
+	<?php wp_nonce_field( 'appip_options_nonce_ji9osdjfkjl', 'appip_nonce' ); ?>
 	<table class="optiontable">
 	<?php foreach ($options as $key => $value) { 
 		switch ( $value['type'] ) {

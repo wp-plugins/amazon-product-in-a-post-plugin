@@ -70,6 +70,7 @@
 		$appip_text_platform	 = apply_filters('appip_text_platform', "Plate-forme");
 		$appip_text_genre		 = apply_filters('appip_text_genre', "Genre");
 		break;
+	case "es": //Spanish
 	case "sp": //Spanish
 		$appip_text_lgimage 	 = apply_filters('appip_text_lgimage', "Ver imagen m&aacute;s grande");
 		$appip_text_listprice 	 = apply_filters('appip_text_listprice', "Lista de precios");
@@ -90,6 +91,7 @@
 		$appip_text_platform	 = apply_filters('appip_text_platform', "Plataforma");
 		$appip_text_genre		 = apply_filters('appip_text_genre', "G&eacute;nre");
 		break;
+	case "de": //German
 	case "ge": //German
 		$appip_text_lgimage 	 = apply_filters('appip_text_lgimage', "Gr&ouml;&szlig;eres Bild");
 		$appip_text_listprice 	 = apply_filters('appip_text_listprice', "Preis");

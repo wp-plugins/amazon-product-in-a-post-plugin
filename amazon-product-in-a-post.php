@@ -5,7 +5,7 @@ Plugin URI: http://fischercreativemedia.com/wordpress-plugins/amazon-affiliate-p
 Description: Quickly add stylized Amazon Products to your site. Requires signup for an Amazon Affiliate Account and Product Advertising API Keys which are currently FREE from Amazon.
 Author: Don Fischer
 Author URI: http://www.fischercreativemedia.com/
-Version: 3.5.5
+Version: 3.6.0
     Copyright (C) 2009-2015 Donald J. Fischer
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -60,6 +60,7 @@ Version: 3.5.5
 	global $appuninstall;
 	global $appuninstallall;
 	global $validEncModes;
+	global $degunningAPPIP;
 	
 	register_activation_hook(__FILE__,'appip_install');
 	register_deactivation_hook(__FILE__,'appip_deinstall');
@@ -79,6 +80,7 @@ Version: 3.5.5
 		update_option('apipp_API_call_method','1');
 	}
 	
+	$degunningAPPIP		= false;
 	$appipitemnumber	= 0;
 	$awspagequery		= '';
 	$public_key 		= get_option('apipp_amazon_publickey'); //Developer Public AWS Key Removed
@@ -87,8 +89,8 @@ Version: 3.5.5
 	$appuninstallall	= get_option('apipp_uninstall_all'); //Uninstall shortcodes in pages an posts
 	$aws_partner_id		= get_option('apipp_amazon_associateid'); //Amazon Partner ID 
 	$awsPageRequest 	= 1;
-	$aws_plugin_version = "3.5.4";
-	$aws_plugin_dbversion = '3.5.4';
+	$aws_plugin_version = "3.6.0";
+	$aws_plugin_dbversion = '3.6.0';
 	$amazonhiddenmsg 	= get_option('apipp_amazon_hiddenprice_message'); //Amazon Hidden Price Message
 	$amazonerrormsg 	= get_option('apipp_amazon_notavailable_message'); //Amazon Error No Product Message
 	$apipphookexcerpt 	= get_option('apipp_hook_excerpt'); //Hook the excerpt?
@@ -114,13 +116,11 @@ Version: 3.5.5
 	if($apip_getmethod==''){
 		$apip_usefileget = '1'; //set default if not set
 	}
-	
 	//Encode Mode
 	if(get_option('appip_encodemode')==''){
 		update_option('appip_encodemode','UTF-8'); //set default to UTF-8
 		$encodemode="UTF-8";
 	}
-	
 	//backward compat.
 	if(!function_exists('mb_convert_encoding')){
 		function mb_convert_encoding($etext='', $encodemode='', $encis=''){
@@ -139,48 +139,29 @@ Version: 3.5.5
 	}	
 	
 	// Change encoding if needed via GET -  use http://yoursite.com/?resetenc=UTF-8 or http://yoursite.com/?resetenc=ISO-8859-1 - this will be the mode you want the text OUTPUT as.
-	if(isset($_GET['resetenc'])){
-		if(in_array(strtoupper($_GET['resetenc']),$validEncModes)){
-			update_option('appip_encodemode',strtoupper(esc_attr($_GET['resetenc'])));
+	if( isset( $_GET['resetenc'] ) && ( is_user_logged_in() && current_user_can( 'manage_options' ) ) || can_set_debug() ){
+		if( in_array( strtoupper( $_GET['resetenc'] ), $validEncModes ) ){
+			update_option( 'appip_encodemode', strtoupper( esc_attr( $_GET['resetenc'] ) ) );
 			$encodemode = strtoupper(esc_attr($_GET['resetenc']));
 		}
 	}
 	if($apippopennewwindow==true){
 		$apippnewwindowhtml=' target="amazonwin" ';
 	}
-	if($amazonerrormsg==''){
-		$amazonerrormsg='Product Unavailable.';
+	if($amazonerrormsg == ''){
+		$amazonerrormsg = 'Product Unavailable.';
 	}
-	if($amazonhiddenmsg==''){
-		$amazonhiddenmsg='Visit Amazon for Price.';
+	if($amazonhiddenmsg == ''){
+		$amazonhiddenmsg = 'Visit Amazon for Price.';
 	}
-	if($aws_partner_locale==''){
-		//update_option('apipp_amazon_locale','com'); //set default to US
-		//$aws_partner_locale='com';
+	if($aws_partner_id == ''){
+		$aws_partner_id = ""; 	//Amazon Partner ID - if one is not set up, plugin will not output product!!
 	}
-	if($aws_partner_id==''){
-		$aws_partner_id = ""; //Amazon Partner ID - if one is not set up, plugin will not output product!!
+	if($public_key == ''){
+		$public_key = "";  		//Developer Public AWS Key Removed 3.5.1
 	}
-	if($public_key==''){
-		$public_key = "";  //Developer Public AWS Key Removed 3.5.1
-	}
-	if($private_key==''){
-		$private_key = ""; //Developer Secret AWS Key Removed 3.5.1
-	}
-	if(isset($_GET['awspage'])){ //future item for search results
-		if(is_numeric($_GET['awspage'])){
-			$awspagequery = (int)$wpdb->escape($_GET['awspage']);
-		}
-	}
-	if(isset($_GET['awsclearcache'])){ //future item for search results
-		if(is_numeric($_GET['awsclearcache'])&& $_GET['awsclearcache'] == '1'){
-			global $wpdb;
-			$checksql= "DELETE FROM ".$wpdb->prefix."amazoncache;";
-			$result = $wpdb->query($checksql);
-		}
-	}
-	if($awspagequery>1){ //future item for search results
-		$awsPageRequest = $awspagequery;
+	if($private_key == ''){
+		$private_key = ""; 		//Developer Secret AWS Key Removed 3.5.1
 	}
 	if(trim(get_option("apipp_product_styles",'')) == ''){ //reset to default styles if user deletes styles in admin
 		update_option("apipp_product_styles",$thedefaultapippstyle);
@@ -196,13 +177,10 @@ Version: 3.5.5
 	add_filter( 'the_content', 'aws_prodinpost_filter_content', 10); //hook content - we will filter the override after
 	add_filter( 'the_excerpt', 'aws_prodinpost_filter_excerpt', 10); //hook excerpt - we will filter the override after 
 	add_filter( 'plugin_row_meta',  'apipp_filter_plugin_links', 10, 2 );
-	
 	add_action( 'wp','add_appip_jquery'); //enqueue scripts
 	add_action( 'plugin_action_links_' . plugin_basename(__FILE__),'apipp_filter_plugin_actions' );
-
 	function apipp_filter_plugin_actions($links){$new_links = array();$new_links[] = '<a href="admin.php?page=apipp-main-menu">Getting Started</a>';return array_merge($links,$new_links );}
 	function apipp_filter_plugin_links($links, $file){if ( $file == plugin_basename(__FILE__) ){$links[] = '<a href="admin.php?page=apipp-main-menu">Getting Started</a>';$links[] = '<a href="admin.php?page=apipp_plugin-shortcode">Shortcode Usage</a>';$links[] = '<a href="admin.php?page=apipp_plugin-faqs">FAQs</a>';$links[] = '<a target="_blank" href="http://fischercreativemedia.com/donations/">Donate</a>';}return $links;}
-
 	
 // Warnings Quickfix
 	if(get_option('apipp_hide_warnings_quickfix') == true){
@@ -217,7 +195,7 @@ Version: 3.5.5
 	require_once("inc/amazon-product-in-a-post-tools.php"); 			//edit box for plugin
 	require_once("inc/amazon-product-in-a-post-options.php"); 			//admin options for plugin
 	require_once("inc/amazon-product-in-a-post-translations.php"); 		//translations for plugin
-	require_once("inc/amazon-product-in-a-post-styles-product.php"); 	//styles for plugin
+	//require_once("inc/amazon-product-in-a-post-styles-product.php"); 	//styles for plugin - REMOVED 3.6.0
 	require_once("inc/amazon-product-in-a-post-shortcodes.php"); 		//shortcodes for plugin
 
 	if ( is_admin() && !( defined('DOING_AJAX') && DOING_AJAX )){
@@ -309,14 +287,21 @@ span.amazon-variant-price-text {font-weight: normal;}
 			if( get_option("apipp_open_new_window",'') == ''){update_option('apipp_open_new_window',"0");} 	//default is no - newoption added at 1.6 - done
 		}
 	}
+function can_set_debug(){
+	global $degunningAPPIP;
+	if( $degunningAPPIP )
+		return true;
+	return false;
+}
 function appip_admin_scripts($hook) {
-	wp_enqueue_style( 'amazon-plugin-admin-styles',plugins_url('/css/amazon-admin.css',__FILE__),null,'13-08-24');
+	wp_enqueue_style( 'amazon-plugin-admin-styles',plugins_url('/css/amazon-admin.css',__FILE__),null,'15-07-12');
 	if ( $hook == "amazon-product_page_appip-layout-styles" ) {
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('jquery-ui-core');
 		wp_enqueue_script('jquery-ui-sortable');
-	}elseif("amazon-product_page_apipp-add-new" == $hook || $hook == "post.php" || $hook == "post-new.php" || $hook == "edit.php"){
-		wp_enqueue_script('amazon-plugin-admin',plugins_url('/js/amazon-admin.js',__FILE__),array('jquery-ui-tooltip'),'13-08-24');
+	}elseif("amazon-product_page_apipp-cache-page" == $hook || "amazon-product_page_apipp-add-new" == $hook || $hook == "post.php" || $hook == "post-new.php" || $hook == "edit.php"){
+		wp_enqueue_script('amazon-plugin-admin',plugins_url('/js/amazon-admin.js',__FILE__),array('jquery-ui-tooltip'),'15-07-12');
+		wp_localize_script('amazon-plugin-admin','appipData',array( 'ajaxURL' => admin_url('admin-ajax.php'), 'appip_nonce' => wp_create_nonce( 'appip_cache_delete_nonce_ji9osdjfkjl' ), 'confirmDel' => __('Are you sure you want to delete this cache?', 'amazon-product-in-a-post-plugin'),'noCacheMsg' => __('no cached products at this time', 'amazon-product-in-a-post-plugin'), 'deleteMsgErr' => __('there was an error - the cache could not be deleted', 'amazon-product-in-a-post-plugin') ) );
 	}
 }
 add_action( 'admin_enqueue_scripts', 'appip_admin_scripts' );

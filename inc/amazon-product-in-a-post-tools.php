@@ -162,7 +162,8 @@ global $appipBulidBox;
 		}else{
 			add_action('save_post', 'amazonProductInAPostSavePostdata', 1, 2); // save the custom fields
 		}
-		if(isset($_GET['appip_debug']) && ($_GET['appip_debug'] == get_option('apipp_amazon_debugkey') && get_option('apipp_amazon_debugkey') !='')){
+		if( isset( $_GET['appip_debug'] ) && ( $_GET['appip_debug'] == get_option('apipp_amazon_debugkey') && get_option('apipp_amazon_debugkey') !='')){
+			global $degunningAPPIP;
 			global $wpdb;
 			global $aws_plugin_version;
 			$debugkey = get_option('apipp_amazon_debugkey');
@@ -176,6 +177,7 @@ global $appipBulidBox;
 				wp_die('No Permission','You do not have permission to access this page.');	
 				exit;
 			}
+			$degunningAPPIP = true;
 			echo '<h1>Amazon Plugin Debug</h1>';
 			$checksql= "SELECT Body, ( NOW() - Updated ) as Age FROM ".$wpdb->prefix."amazoncache ORDER BY Updated DESC;";
 			$result = $wpdb->get_results($checksql);
@@ -377,62 +379,11 @@ function apipp_cache_page(){
 	if (!current_user_can('manage_options'))  {
 		wp_die( __('You do not have sufficient permissions to access this page.', 'amazon-product-in-a-post-plugin') );
 	}
-	echo '
-		<script type="text/javascript">
-			jQuery(function() {
-				jQuery(\'.xml-show\').live(\'click\',function(a){
-					var $showhidexml = jQuery(this);
-					if($showhidexml.hasClass(\'xml-hide\')){
-						$showhidexml.next(\'textarea\').css({\'display\':\'none\'});
-						$showhidexml.removeClass(\'xml-hide\').html(\'show xml cache data\');
-					}else{
-						$showhidexml.next(\'textarea\').css({\'display\':\'block\'});
-						$showhidexml.addClass(\'xml-hide\').html(\'hide xml cache data\');
-					}
-					a.preventDefault();
-					return;
-				});
-				jQuery(\'.appip-cache-del\').live(\'click\',function(eventa){
-					var r=confirm("'.__('Are you sure you want to delete this cache?', 'amazon-product-in-a-post-plugin').'");
-					if (r==true){
-						var buttonid = jQuery(this).attr(\'id\');
-						var appbtnid = buttonid.replace("appip-cache-","");
-						jQuery.ajax({
-							url: "'.get_bloginfo('url').'/",
-							beforeSend: function ( xhr ) {
-								xhr.overrideMimeType("text/plain; charset=x-user-defined");
-							},
-							data:{"appip-cache-id":appbtnid,"appip-cache-del":"dodel"}
-						}).done(function ( data ) {
-							if( console && console.log ) {
-								console.log("cache ", data);
-							}
-							if(data == "deleted"){
-								if(appbtnid == \'0\'){
-									jQuery(".iedit").remove();
-								}else{
-									jQuery("."+buttonid+"-row").remove();
-								}
-							}else{
-								alert("'.__('there was an error - the cache could not be delete', 'amazon-product-in-a-post-plugin').'");
-							}
-							if(jQuery("#the-list tr").length == 0){
-								jQuery("#the-list").html(\'<tr class="alternate iedit appip-cache--row"><td colspan="4">'.__('no cached products at this time', 'amazon-product-in-a-post-plugin').'</td></tr>\');
-							}
-						});
-						eventa.preventDefault();
-						return;
-					}else{
-						eventa.preventDefault();
-						return;
-					}
-				});
-			});
-		</script>
-	';
 	echo '<div class="wrap">';
 	echo '<h2>'.__('Amazon Product In A Post CACHE', 'amazon-product-in-a-post-plugin').'</h2>';
-		if(isset($_GET['appmsg']) && $_GET['appmsg']=='1'){	echo '<div style="background-color: rgb(255, 251, 204);" id="message" class="updated fade below-h2"><p><b>'.__('Product post has been saved. To edit, use the standard Post Edit options.', 'amazon-product-in-a-post-plugin').'</b></p></div>';}
+	if( isset( $_GET['appmsg'] ) && (int) $_GET['appmsg'] == 1 ){
+		echo '<div style="background-color: rgb(255, 251, 204);" id="message" class="updated fade below-h2"><p><b>'.__('Product post has been saved. To edit, use the standard Post Edit options.', 'amazon-product-in-a-post-plugin').'</b></p></div>';
+	}
 	echo '	<div class="wrapper">';
 	$checksql= "SELECT body,Cache_id,URL,updated,( NOW() - Updated )as Age FROM ".$wpdb->prefix."amazoncache ORDER BY Updated DESC;";
 	$result = $wpdb->get_results($checksql);

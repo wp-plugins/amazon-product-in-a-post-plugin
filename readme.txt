@@ -3,10 +3,10 @@ Contributors: prophecy2040
 Donate link: http://www.fischercreativemedia.com/donations/
 Tags: Amazon, Affiliate, Product, Products, Post, Page, Custom Post Type, Quick Post, Amazon Associate, Monetize, ASIN, Amazon.com, Shortcode, FAQs, Store, eCommerce, Kindle
 Requires at least: 3.9
-Tested up to: 4.2.2
-Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tested up to: 4.2.2
+Stable tag: trunk
 
 Add formatted Amazon Products to any page or post by using Amazon ASIN. Great for monetizing your site. Uses Amazon Product Advertising Keys (FREE)
 
@@ -22,7 +22,7 @@ What can you use it for? With this plugin you can:
 * Easily add only the items that are right for your site.
 * Add the product to the TOP of the post content, the BOTTOM of the post content, or make the post content become part of the product layout (see screenshots for examples)
 * You can now add as many products as you want to any existing page/post content using a Shortcode - see Installation or FAQ page for details.
-* Limited French, German and Spanish language support for text labels in displayed product.
+* Limited French, German and Spanish language support for text labels in displayed product (a future version will use Localization).
 
 If you have an Amazon Affiliate account and you don't think the available Amazon widgets are that great or are what you need, then this plugin might be for you.
 
@@ -133,6 +133,10 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Excellent question! The plugin is provided free to the public - you can use it however you like - where ever you like - you can even change it however you like. Should you decide that the plugin has been a great help and want to donate to our plugin development fund, you may do so [here](http://fischercreativemedia.com/wordpress-plugins/donate/ "here").
 
 == Changelog ==
+= 3.6.0 =
+* Security Vulnerability Fix (for deleting cache and updating Options)
+* Set limit on number of images for image set on Variants to 10.
+
 = 3.5.5 =
 * Fix Styles not loading (dynamic styles did not have correct content type).
 * Added additional Shortcode parameter aliases (show_used, show_list, etc.)
@@ -256,5 +260,5 @@ You can tweak the look yourself if you have experience with CSS styles. The opti
 * Plugin Release (9/12/2009)
 
 == Upgrade Notice ==
-= 3.5.5 =
-* Bug Fixes for Styles. Adds support for Products with linked variant products.
+= 3.6.0 =
+* Security Vulnerability Fix (for deleting cache and updating Options).
